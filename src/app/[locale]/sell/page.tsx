@@ -284,27 +284,6 @@ export default function SellPage() {
 
   /* ================================================================ JSX */
   return (
-    <>
-    {/* Full-screen login overlay for guests */}
-    {isGuest && (
-      <div className="sell-login-overlay active" id="sellLoginOverlay">
-        <div className="sell-login">
-          <div className="sell-login__accent"></div>
-          <div className="sell-login__body">
-            <div className="sell-login__icon">
-              <svg width="30" height="30" viewBox="0 0 496 512" fill="currentColor"><path d="M496 256c0 137-111.2 248-248.4 248-113.3 0-209-76.6-237-180.2l95.2 39.3c6.4 32.1 34.9 56.4 68.9 56.4 39.2 0 71.1-32.2 70.5-71.4l84.9-60.6c50.6.3 91.9-41.1 91.9-91.9 0-50.8-41.3-92-92-92s-92 41.2-92 92v2.1l-60.1 85.4c-13.2-.5-25.8 3.2-36.5 10L48.9 256H0C0 119 111 8 248 8s248 111 248 248z"/></svg>
-            </div>
-            <h2 className="sell-login__title">Sign In to Sell Skins</h2>
-            <p className="sell-login__desc">Connect your Steam account to access your inventory and start selling skins instantly.</p>
-            <a href="/api/auth/steam" className="sell-login__btn" id="sellSignInBtn">
-              <svg width="18" height="18" viewBox="0 0 496 512" fill="currentColor"><path d="M496 256c0 137-111.2 248-248.4 248-113.3 0-209-76.6-237-180.2l95.2 39.3c6.4 32.1 34.9 56.4 68.9 56.4 39.2 0 71.1-32.2 70.5-71.4l84.9-60.6c50.6.3 91.9-41.1 91.9-91.9 0-50.8-41.3-92-92-92s-92 41.2-92 92v2.1l-60.1 85.4c-13.2-.5-25.8 3.2-36.5 10L48.9 256H0C0 119 111 8 248 8s248 111 248 248z"/></svg>
-              <span>Sign In via Steam</span>
-            </a>
-            <span className="sell-login__note">We never see or store your Steam password</span>
-          </div>
-        </div>
-      </div>
-    )}
     <div className="sell-page-wrap">
 
       {/* ═══ TOP ROW: Offer + Steps ═══ */}
@@ -592,7 +571,7 @@ export default function SellPage() {
           {/* Scrollable inventory area */}
           <div className="sell-inventory__scroll" id="inventoryScroll">
 
-            {/* Guest overlay — inline, inside scroll area */}
+            {/* Guest overlay */}
             {isGuest && (
               <div className="sell-guest-overlay" id="guestOverlay">
                 <div className="sell-guest-overlay__content">
@@ -818,6 +797,5 @@ export default function SellPage() {
       </div>
 
     </div>
-    </>
   );
 }

@@ -21,9 +21,6 @@ export function Header() {
 
   const currencyRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
-  const burgerRef = useRef<HTMLButtonElement>(null);
-  const navRef = useRef<HTMLElement>(null);
-  const avatarToggleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -34,36 +31,11 @@ export function Header() {
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (currencyRef.current && !currencyRef.current.contains(target)) setCurrencyOpen(false);
-      if (langRef.current && !langRef.current.contains(target)) setLangOpen(false);
-      if (
-        mobileOpen &&
-        burgerRef.current && !burgerRef.current.contains(target) &&
-        navRef.current && !navRef.current.contains(target)
-      ) {
-        setMobileOpen(false);
-      }
-      if (
-        avatarMenuOpen &&
-        avatarToggleRef.current && !avatarToggleRef.current.contains(target)
-      ) {
-        setAvatarMenuOpen(false);
-      }
+      if (currencyRef.current && !currencyRef.current.contains(e.target as Node)) setCurrencyOpen(false);
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
     };
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
-  }, [mobileOpen, avatarMenuOpen]);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setAvatarMenuOpen(false);
-        setMobileOpen(false);
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
   }, []);
 
   useEffect(() => {
@@ -95,8 +67,6 @@ export function Header() {
     router.replace(pathname || "/", { locale });
   };
 
-  const closeMenu = () => setMobileOpen(false);
-
   return (
     <>
       <header className={`header${scrolled ? " is-scrolled" : ""}`}>
@@ -107,14 +77,14 @@ export function Header() {
             </Link>
           </div>
 
-          <nav className={`header__nav${mobileOpen ? " open" : ""}`} ref={navRef}>
-            <Link href="/sell" className={isActive("/sell") ? "active" : ""} onClick={closeMenu}>
+          <nav className={`header__nav${mobileOpen ? " open" : ""}`}>
+            <Link href="/sell" className={isActive("/sell") ? "active" : ""}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> Sell Skins
             </Link>
-            <Link href="/#reviews" onClick={closeMenu}>
+            <Link href="/#reviews">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Reviews
             </Link>
-            <Link href="/faq" className={isActive("/faq") ? "active" : ""} onClick={closeMenu}>
+            <Link href="/faq" className={isActive("/faq") ? "active" : ""}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg> FAQ
             </Link>
           </nav>
@@ -152,67 +122,65 @@ export function Header() {
             )}
 
             {!loading && user && (
-              <div className="header__user" ref={avatarToggleRef}>
-                <Link href="/balance" className="header__balance">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
-                  {" "}{Number(user.balance ?? 0).toFixed(2)}$
-                </Link>
-                <div className={`header__avatar-wrap${avatarMenuOpen ? " menu-open" : ""}`} onClick={(e) => { e.stopPropagation(); setAvatarMenuOpen(!avatarMenuOpen); }} style={{ cursor: "pointer" }}>
+              <div className="header__user">
+                <Link href="/balance" className="header__balance">{Number(user.balance ?? 0).toFixed(2)}$</Link>
+                <div className="header__avatar-wrap" onClick={() => setAvatarMenuOpen(!avatarMenuOpen)} style={{ cursor: "pointer" }}>
                   <div className="header__avatar">
                     {user.steamAvatar ? <img src={user.steamAvatar} alt="Avatar" /> : <span>{(user.steamLogin || "U")[0].toUpperCase()}</span>}
                   </div>
                   <span className="header__avatar-dot"></span>
-                  <svg className="header__avatar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                 </div>
-                <div className={`avatar-menu${avatarMenuOpen ? " active" : ""}`}>
-                  <div className="avatar-menu__head">
-                    <div className="avatar-menu__ava">
-                      {user.steamAvatar ? <img src={user.steamAvatar} alt="Avatar" /> : <span>{(user.steamLogin || "U")[0].toUpperCase()}</span>}
+                {avatarMenuOpen && (
+                  <div className="avatar-menu">
+                    <div className="avatar-menu__head">
+                      <div className="avatar-menu__ava">
+                        {user.steamAvatar ? <img src={user.steamAvatar} alt="Avatar" /> : <span>{(user.steamLogin || "U")[0].toUpperCase()}</span>}
+                      </div>
+                      <div className="avatar-menu__info">
+                        <span className="avatar-menu__name">{user.steamLogin || "User"}</span>
+                        <span className="avatar-menu__id">steamcommunity.com/id/{user.steamLogin || "user"}</span>
+                      </div>
                     </div>
-                    <div className="avatar-menu__info">
-                      <span className="avatar-menu__name">{user.steamLogin || "User"}</span>
-                      <span className="avatar-menu__id">steamcommunity.com/id/{user.steamLogin || "user"}</span>
-                    </div>
-                  </div>
-                  <div className="avatar-menu__sep"></div>
-                  <Link href="/orders" className="avatar-menu__item" onClick={() => setAvatarMenuOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                    <span>My Orders</span>
-                  </Link>
-                  <Link href="/balance" className="avatar-menu__item" onClick={() => setAvatarMenuOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
-                    <span>Balance</span>
-                  </Link>
-                  <NextLink href="/referral" className="avatar-menu__item" onClick={() => setAvatarMenuOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    <span>Referral</span>
-                  </NextLink>
-                  <Link href="/faq" className="avatar-menu__item" onClick={() => setAvatarMenuOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
-                    <span>Support</span>
-                  </Link>
-                  <div className="avatar-menu__sep"></div>
-                  {user.isAdmin && (
-                    <NextLink href="/admin" className="avatar-menu__item" onClick={() => setAvatarMenuOpen(false)}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                      <span>Admin Panel</span>
+                    <div className="avatar-menu__sep"></div>
+                    <Link href="/orders" className="avatar-menu__item" onClick={() => setAvatarMenuOpen(false)}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                      <span>My Orders</span>
+                    </Link>
+                    <Link href="/balance" className="avatar-menu__item" onClick={() => setAvatarMenuOpen(false)}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                      <span>Balance</span>
+                    </Link>
+                    <NextLink href="/referral" className="avatar-menu__item" onClick={() => setAvatarMenuOpen(false)}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                      <span>Referral</span>
                     </NextLink>
-                  )}
-                  <button className="avatar-menu__item avatar-menu__item--logout" onClick={(e) => { e.preventDefault(); fetch("/api/auth/logout", { method: "POST" }).then(() => window.location.href = "/"); }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    <span>Log Out</span>
-                  </button>
-                </div>
+                    <Link href="/faq" className="avatar-menu__item" onClick={() => setAvatarMenuOpen(false)}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+                      <span>Support</span>
+                    </Link>
+                    <div className="avatar-menu__sep"></div>
+                    {user.isAdmin && (
+                      <NextLink href="/admin" className="avatar-menu__item" onClick={() => setAvatarMenuOpen(false)}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>Admin Panel</span>
+                      </NextLink>
+                    )}
+                    <a href="/api/auth/logout" className="avatar-menu__item avatar-menu__item--logout">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                      <span>Log Out</span>
+                    </a>
+                  </div>
+                )}
               </div>
             )}
 
-            <button className="header__burger" ref={burgerRef} aria-label="Menu" onClick={(e) => { e.stopPropagation(); setMobileOpen(!mobileOpen); }}>
+            <button className="header__burger" aria-label="Menu" onClick={() => setMobileOpen(!mobileOpen)}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
             </button>
           </div>
         </div>
       </header>
-      <div className={`avatar-menu-backdrop${avatarMenuOpen ? " active" : ""}`} onClick={() => setAvatarMenuOpen(false)} />
+      {avatarMenuOpen && <div className="avatar-menu-backdrop" onClick={() => setAvatarMenuOpen(false)} />}
     </>
   );
 }

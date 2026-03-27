@@ -6,7 +6,6 @@ import { routing } from "@/i18n/routing";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { Providers } from "@/components/providers";
-import { ScrollTop } from "@/components/scroll-top";
 
 export default async function LocaleLayout({
   children,
@@ -29,8 +28,6 @@ export default async function LocaleLayout({
         <Header />
         <main>{children}</main>
         <Footer />
-        <ScrollTop />
-        <div id="toastContainer" className="toast-container" />
       </Providers>
     </NextIntlClientProvider>
   );

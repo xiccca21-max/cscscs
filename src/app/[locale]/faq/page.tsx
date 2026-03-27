@@ -6,73 +6,49 @@ import { Link } from "@/i18n/navigation";
 type Category = "all" | "general" | "payments" | "security" | "trading" | "cs2";
 
 interface FaqItem {
-  cat: Exclude<Category, "all">;
+  cat: Category;
   q: string;
   a: string;
 }
 
 const FAQ_DATA: FaqItem[] = [
-  // General
-  { cat: "general", q: "What is SKINWAVE?", a: "SKINWAVE is an instant skin buyout service. We buy your CS2, Dota 2, TF2 and Rust skins directly for real money — no waiting for buyers, no auctions, no marketplace. Get paid via card, crypto, bank transfer or site balance." },
+  { cat: "general", q: "What is SKINWAVE?", a: "SKINWAVE is an instant CS2 skin buyout service. We buy your Counter-Strike 2 skins directly for real money — no waiting for buyers, no auctions. Get paid via card, crypto, bank transfer or site balance." },
   { cat: "general", q: "Is SKINWAVE legit?", a: "Yes. We use Steam's official OpenID authentication — we never ask for your password. All trades go through Steam's trading system. Your order status is tracked in real time and all operations are logged." },
   { cat: "general", q: "How do I log in?", a: "Click \"Sign In\" in the top right corner. You'll be redirected to Steam's official login page. After logging in, you'll be returned to SKINWAVE with your account connected. We never see or store your Steam password." },
-  { cat: "general", q: "Which games are supported?", a: "We currently support Counter-Strike 2 (CS2), Dota 2, Team Fortress 2 (TF2) and Rust. You can switch between games on the Sell page to browse your inventory for each title." },
-  { cat: "general", q: "How does SKINWAVE price skins?", a: "Prices are based on current market data from TM Market API with our buyout modifier applied. You typically receive up to 95% of market value. Prices are displayed in your chosen currency and updated regularly." },
-  { cat: "general", q: "Our Official Bot List", a: "Always verify that trade offers come from our official bots listed on your order page. If a trade offer comes from an account not on our bot list, do not accept it. Contact support if you are unsure." },
-  // Payments
-  { cat: "payments", q: "What payout methods are available?", a: "We offer Balance (0% fee), Debit Card (Visa/Mastercard), Cryptocurrency (BTC, USDT, ETH, LTC, SOL, TRX), and Bank Transfer. Available methods and commissions are configured by our team and may vary." },
-  { cat: "payments", q: "How does the SKINWAVE balance work?", a: "When you sell skins, you can choose \"Balance\" as your payout method (0% fee). The funds are credited to your internal balance after the items are received. You can later withdraw your balance to a card, crypto wallet, or bank account." },
-  { cat: "payments", q: "How can I withdraw my balance?", a: "Go to your Balance page, click \"Cash Out\", choose a withdrawal method (card, crypto, bank), enter the amount and your payout details. The withdrawal request will be reviewed and processed by our team. The requested amount is reserved until approved or rejected." },
-  { cat: "payments", q: "How do Card payouts work?", a: "Card payouts are sent directly to your Visa or Mastercard. Enter your card details when choosing this method. Processing time is usually 1–3 business days depending on your bank." },
-  { cat: "payments", q: "How do Bank payouts work?", a: "Bank transfer payouts are sent directly to your bank account. Provide your bank details (IBAN or account number). Processing takes 2–5 business days." },
-  { cat: "payments", q: "How do crypto payouts work?", a: "Choose crypto as your payout method and select a cryptocurrency (BTC, USDT, ETH, LTC, SOL, TRX). Enter your wallet address. Payment is sent after we receive your items. Crypto transactions typically process within 10–30 minutes." },
-  { cat: "payments", q: "Are there any fees?", a: "Each payout method has its own commission. Balance has 0% fee. The exact fee for each method is always shown before you confirm your order. Commissions are managed and may be adjusted by our team." },
-  // Security
+  { cat: "general", q: "How does selling skins work?", a: "Select your skins on the Sell page, choose a payout method, and confirm. We send you a trade offer via Steam. Once you accept, payment is processed instantly (or after trade hold ends). No marketplace listing, no waiting for buyers." },
+  { cat: "general", q: "How does SKINWAVE price skins?", a: "Prices are based on current market data with our buyout modifier applied. You typically receive up to 95% of market value. Prices are displayed in your chosen currency and updated regularly." },
+  { cat: "general", q: "Our Official Bot List", a: "Always verify that trade offers come from our official bots. If a trade offer comes from an account not on our bot list, do not accept it. Contact support if you are unsure." },
+  { cat: "payments", q: "How can I deposit funds?", a: "You can deposit funds to your SKINWAVE balance by selling skins. Choose \"Balance\" as your payout method when selling — this has 0% commission. The funds are instantly available in your account." },
+  { cat: "payments", q: "How can I withdraw my balance?", a: "Go to your Balance page, click \"Cash Out\", choose a withdrawal method (card, crypto, bank), enter the amount and your details. Your withdrawal request will be processed by our team." },
+  { cat: "payments", q: "How do Card payouts work?", a: "Card payouts are sent directly to your Visa or Mastercard. Enter your card details when choosing this method. Processing time is usually 1–3 business days depending on your bank. Fee: ~3%." },
+  { cat: "payments", q: "How do Bank payouts work?", a: "Bank transfer payouts are sent directly to your bank account. Provide your bank details (IBAN or account number). Processing takes 2–5 business days. Fee: ~2%." },
+  { cat: "payments", q: "How do crypto payouts work?", a: "Choose crypto as your payout method and enter your wallet address (Bitcoin or USDT). Payment is sent after we receive your items. Crypto transactions typically process within 10–30 minutes. Fee: ~1%." },
+  { cat: "payments", q: "What payout methods are available?", a: "We offer Balance (0% fee), Debit Card (Visa/Mastercard), Cryptocurrency (Bitcoin, USDT), and Bank Transfer. Available methods may vary by region." },
+  { cat: "payments", q: "Are there any fees?", a: "Each method has its own commission: Balance 0%, Crypto ~1%, Bank ~2%, Card ~3%. The exact fee is always shown before you confirm your order." },
   { cat: "security", q: "How can I secure my account?", a: "Enable Steam Guard Mobile Authenticator. Never share your Trade URL publicly and regenerate it if compromised. We will never ask for your Steam password or login credentials." },
   { cat: "security", q: "How do I avoid scams when selling skins?", a: "Always verify trade offers come from our official bots. Never click suspicious links or share your API key. SKINWAVE will never ask you to send items without a proper trade offer through Steam." },
-  // Selling Process
-  { cat: "trading", q: "How do I sell my skins?", a: "Sign in via Steam, go to the Sell page. Select your game (CS2, Dota 2, TF2 or Rust), pick items from your inventory, enter your Trade URL, choose a payout method and confirm. Accept the trade offer from our bot in Steam and receive your payment after we get the items." },
-  { cat: "trading", q: "What is a Trade URL?", a: "A Trade URL is a unique link that allows us to send you a Steam trade offer. You must provide it before selling. Find yours at: Steam → Settings → Privacy → Trade Offers → Copy your Trade URL." },
-  { cat: "trading", q: "What happens after I create an order?", a: "After you confirm a sale, an order is created with a unique Order ID. Our operator assigns a Steam bot and sends you a trade offer. You can track the order status on your Orders page: Created → Trade Sent → Trade Completed → Payment Pending → Paid." },
-  { cat: "trading", q: "Can I cancel or repeat a trade?", a: "If you don't accept the trade offer or cancel it, the order is marked as cancelled. You will see a clear message and a button to create a new order or retry the sale. You can start the process again at any time." },
+  { cat: "trading", q: "What is a Trade URL?", a: "A Trade URL is a unique link that allows us to send you a Steam trade offer. You need to provide it before selling. Find yours at: Steam → Settings → Privacy → Trade Offers → Copy your Trade URL." },
   { cat: "trading", q: "Why are items missing from my inventory?", a: "Make sure your Steam inventory is set to Public. Go to Steam → Profile → Edit Profile → Privacy Settings → set \"Inventory\" to \"Public\". Also check that items are not on trade hold or listed on another marketplace." },
-  { cat: "trading", q: "Items are missing after I sold them?", a: "If items disappeared from your inventory after selling, the trade was completed successfully. Check your order status on the Orders page. Payment is processed after we receive the items. Contact support with your Order ID if the issue persists." },
-  // CS2
+  { cat: "trading", q: "Items are missing after I sold them?", a: "If items disappeared from your inventory after selling, the trade was completed successfully. Check your order status on the Orders page. If payment hasn't arrived, wait a few minutes — some methods take time to process. Contact support with your Order ID if the issue persists." },
+  { cat: "trading", q: "What is a reversal hold?", a: "A reversal hold occurs when Steam reverses a trade due to a dispute or suspected fraud. If this happens, the items are returned and any associated payout may be reversed. Contact support for assistance." },
   { cat: "cs2", q: "What are CS2 Skins?", a: "CS2 skins are virtual cosmetic items for weapons in Counter-Strike 2. They come in various rarities and wear conditions (Factory New, Minimal Wear, Field-Tested, Well-Worn, Battle-Scarred). You can sell them on SKINWAVE for real money." },
   { cat: "cs2", q: "How do I sell CS2 Skins?", a: "Sign in via Steam, go to the Sell page. Pick your CS2 skins, enter your Trade URL, choose a payout method and confirm. Accept the trade offer from our bot in Steam and receive your payout instantly." },
   { cat: "cs2", q: "What is the CS2 trade hold?", a: "CS2 items may have a 7-day Steam trade hold. Payment for items under trade hold is processed after the hold period ends and the items are received by our system. Enable Steam Guard Mobile Authenticator to reduce or remove the hold." },
   { cat: "cs2", q: "How does selling CS2 Skins work on SKINWAVE?", a: "You sell your CS2 skins by accepting a trade offer from our bot. Make sure Steam Guard is enabled, your inventory is set to public, and your Trade URL is up to date. We buy your skins directly — no marketplace, no waiting for other buyers." },
 ];
 
-const SECTIONS: { key: Exclude<Category, "all">; label: string; count: string }[] = [
-  { key: "general", label: "General", count: "6" },
-  { key: "payments", label: "Payments", count: "7" },
-  { key: "security", label: "Security", count: "2" },
-  { key: "trading", label: "Selling Process", count: "6" },
-  { key: "cs2", label: "CS2", count: "4" },
+const SECTIONS: { key: Exclude<Category, "all">; label: string; count: number }[] = [
+  { key: "general", label: "General", count: 6 },
+  { key: "payments", label: "Payments", count: 7 },
+  { key: "security", label: "Security", count: 2 },
+  { key: "trading", label: "Selling Process", count: 4 },
+  { key: "cs2", label: "CS2", count: 4 },
 ];
-
-function SectionIcon({ section }: { section: string }) {
-  switch (section) {
-    case "general":
-      return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>;
-    case "payments":
-      return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>;
-    case "security":
-      return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
-    case "trading":
-      return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>;
-    case "cs2":
-      return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><line x1="12" y1="3" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="21" /><line x1="3" y1="12" x2="7" y2="12" /><line x1="17" y1="12" x2="21" y2="12" /><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" /></svg>;
-    default:
-      return null;
-  }
-}
 
 export default function FaqPage() {
   const [search, setSearch] = useState("");
   const [activeCat, setActiveCat] = useState<Category>("all");
-  const [openItems, setOpenItems] = useState<Record<string, string | null>>({});
+  const [openItem, setOpenItem] = useState<string | null>(null);
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -100,11 +76,8 @@ export default function FaqPage() {
     filteredItems.some((item) => item.cat === sec.key)
   );
 
-  const toggleItem = (sectionKey: string, itemKey: string) => {
-    setOpenItems((prev) => ({
-      ...prev,
-      [sectionKey]: prev[sectionKey] === itemKey ? null : itemKey,
-    }));
+  const toggleItem = (key: string) => {
+    setOpenItem((prev) => (prev === key ? null : key));
   };
 
   return (
@@ -114,7 +87,7 @@ export default function FaqPage() {
         <div className="fq-hero__bg" />
         <div className="fq-hero__content">
           <span className="fq-hero__label">Help Center</span>
-          <h1 className="fq-hero__title"><span>How can we</span> <span>help you?</span></h1>
+          <h1 className="fq-hero__title">How can we <span>help you?</span></h1>
           <p className="fq-hero__sub">Browse our knowledge base or search for a topic below.</p>
           <div className="fq-search">
             <svg className="fq-search__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
@@ -136,10 +109,9 @@ export default function FaqPage() {
           {/* Sidebar / Category filters */}
           <aside className="fq-sidebar">
             <h3 className="fq-sidebar__title">Frequently Asked Questions</h3>
-            <nav className="fq-cats" id="faqCats">
+            <nav className="fq-cats">
               <button
                 className={`fq-cat${activeCat === "all" ? " active" : ""}`}
-                data-faq-cat="all"
                 onClick={() => setActiveCat("all")}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>
@@ -147,7 +119,6 @@ export default function FaqPage() {
               </button>
               <button
                 className={`fq-cat${activeCat === "general" ? " active" : ""}`}
-                data-faq-cat="general"
                 onClick={() => setActiveCat("general")}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
@@ -156,7 +127,6 @@ export default function FaqPage() {
               </button>
               <button
                 className={`fq-cat${activeCat === "payments" ? " active" : ""}`}
-                data-faq-cat="payments"
                 onClick={() => setActiveCat("payments")}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
@@ -165,7 +135,6 @@ export default function FaqPage() {
               </button>
               <button
                 className={`fq-cat${activeCat === "security" ? " active" : ""}`}
-                data-faq-cat="security"
                 onClick={() => setActiveCat("security")}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
@@ -174,16 +143,14 @@ export default function FaqPage() {
               </button>
               <button
                 className={`fq-cat${activeCat === "trading" ? " active" : ""}`}
-                data-faq-cat="trading"
                 onClick={() => setActiveCat("trading")}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
                 <span className="fq-cat__text">Selling Process</span>
-                <span className="fq-cat__count">6</span>
+                <span className="fq-cat__count">4</span>
               </button>
               <button
                 className={`fq-cat${activeCat === "cs2" ? " active" : ""}`}
-                data-faq-cat="cs2"
                 onClick={() => setActiveCat("cs2")}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><line x1="12" y1="3" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="21" /><line x1="3" y1="12" x2="7" y2="12" /><line x1="17" y1="12" x2="21" y2="12" /><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" /></svg>
@@ -200,29 +167,43 @@ export default function FaqPage() {
               const sectionItems = filteredItems.filter((item) => item.cat === sec.key);
               if (sectionItems.length === 0) return null;
 
+              const sectionIcon = (() => {
+                switch (sec.key) {
+                  case "general":
+                    return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>;
+                  case "payments":
+                    return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>;
+                  case "security":
+                    return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>;
+                  case "trading":
+                    return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>;
+                  case "cs2":
+                    return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><line x1="12" y1="3" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="21" /><line x1="3" y1="12" x2="7" y2="12" /><line x1="17" y1="12" x2="21" y2="12" /><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" /></svg>;
+                }
+              })();
+
               return (
                 <div className="fq-section" data-section={sec.key} key={sec.key}>
                   <div className="fq-section__head">
-                    <SectionIcon section={sec.key} />
+                    {sectionIcon}
                     <h2>{sec.label}</h2>
                     <span className="fq-section__count">{sec.count} questions</span>
                   </div>
                   <div className="fq-section__items">
                     {sectionItems.map((item) => {
-                      const itemKey = `${item.cat}-${item.q}`;
-                      const isOpen = openItems[sec.key] === itemKey;
+                      const key = `${item.cat}-${item.q}`;
+                      const isOpen = openItem === key;
                       return (
-                        <div className={`fq-item${isOpen ? " open" : ""}`} data-cat={item.cat} key={itemKey}>
+                        <div className="fq-item" data-cat={item.cat} key={key}>
                           <button
-                            type="button"
                             className="fq-item__q"
                             aria-expanded={isOpen}
-                            onClick={() => toggleItem(sec.key, itemKey)}
+                            onClick={() => toggleItem(key)}
                           >
                             <span>{item.q}</span>
                             <svg className="fq-item__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9" /></svg>
                           </button>
-                          <div className="fq-item__a">
+                          <div className="fq-item__a" style={{ display: isOpen ? "block" : "none" }}>
                             <p>{item.a}</p>
                           </div>
                         </div>
@@ -237,12 +218,12 @@ export default function FaqPage() {
             <div className="fq-cta">
               <div className="fq-cta__inner">
                 <h2>Ready to Sell Your <span>Skins?</span></h2>
-                <p>Instant payouts via card, crypto, bank transfer and more. Sell your CS2, Dota 2, TF2 and Rust skins for real money.</p>
+                <p>Instant payouts via card, Bitcoin, bank transfer and more. Join 10K+ registered users already being paid.</p>
                 <div className="fq-cta__cards fq-cta__cards--single">
                   <div className="fq-cta__card">
-                    <h3>Sell Your Skins Now</h3>
-                    <p>We buy your skins directly — no marketplace, no waiting. Choose your game, pick items and get paid instantly.</p>
-                    <Link href="/sell" className="fq-cta__btn">Start Selling</Link>
+                    <h3>Sell CS2 Skins</h3>
+                    <p>Skip the 7-day trade hold. Sell your CS2 skins for real money instantly. Multiple payout methods available.</p>
+                    <Link href="/sell" className="fq-cta__btn">Sell CS2 Skins</Link>
                   </div>
                 </div>
               </div>

@@ -53,6 +53,7 @@ export default function HomePage() {
 
   const startAuto = useCallback(() => {
     stopAuto();
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     autoRef.current = setInterval(() => {
       setCurrent((c) => (c + 1) % SLIDE_COUNT);
     }, 5000);
@@ -471,6 +472,10 @@ export default function HomePage() {
           onMouseUp={(e) => handleDragEnd(e.clientX)}
           onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
           onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft") { e.preventDefault(); goPrev(); startAuto(); }
+            if (e.key === "ArrowRight") { e.preventDefault(); goNext(); startAuto(); }
+          }}
         >
           <div className="carousel__viewport">
 
@@ -613,7 +618,7 @@ export default function HomePage() {
             {Array.from({ length: SLIDE_COUNT }, (_, i) => (
               <button
                 key={i}
-                className={`carousel__dot${i === current ? " is-active" : ""}`}
+                className={`carousel__dot${i === current ? " active" : ""}`}
                 role="tab"
                 aria-label={`Review ${i + 1}`}
                 aria-selected={i === current ? "true" : "false"}
@@ -696,47 +701,47 @@ export default function HomePage() {
           <p className="section-sub fade-up">Can&apos;t find the answer? <Link href="/faq">Visit our full FAQ</Link></p>
 
           <div className="faq-list">
-            <div className={`faq-item${openFaqIdx === 0 ? " open" : ""}`} style={{"--fi":0} as React.CSSProperties}>
-              <button className="faq-item__q" aria-expanded={openFaqIdx === 0 ? "true" : "false"} onClick={() => toggleFaq(0)}>
-                <span className="faq-item__num">01</span>
-                <svg className="faq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+            <div className={`fq-item${openFaqIdx === 0 ? " open" : ""}`} style={{"--fi":0} as React.CSSProperties}>
+              <button className="fq-item__q" aria-expanded={openFaqIdx === 0 ? "true" : "false"} onClick={() => toggleFaq(0)}>
+                <span className="fq-item__num">01</span>
+                <svg className="fq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
                 <span>How do I sell my skins on SKINWAVE?</span>
-                <svg className="faq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+                <svg className="fq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
               </button>
-              <div className="faq-item__a">
+              <div className="fq-item__a">
                 <p>Sign in with your Steam account, go to the Sell page, select items from your inventory, enter your Trade URL, choose a payout method and click &ldquo;Get Payment&rdquo;. Our operator will send you a trade offer — once you accept it and we receive the items, your payout is processed.</p>
               </div>
             </div>
-            <div className={`faq-item${openFaqIdx === 1 ? " open" : ""}`} style={{"--fi":1} as React.CSSProperties}>
-              <button className="faq-item__q" aria-expanded={openFaqIdx === 1 ? "true" : "false"} onClick={() => toggleFaq(1)}>
-                <span className="faq-item__num">02</span>
-                <svg className="faq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><line x1="12" y1="3" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="21" /><line x1="3" y1="12" x2="7" y2="12" /><line x1="17" y1="12" x2="21" y2="12" /></svg>
+            <div className={`fq-item${openFaqIdx === 1 ? " open" : ""}`} style={{"--fi":1} as React.CSSProperties}>
+              <button className="fq-item__q" aria-expanded={openFaqIdx === 1 ? "true" : "false"} onClick={() => toggleFaq(1)}>
+                <span className="fq-item__num">02</span>
+                <svg className="fq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><line x1="12" y1="3" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="21" /><line x1="3" y1="12" x2="7" y2="12" /><line x1="17" y1="12" x2="21" y2="12" /></svg>
                 <span>What games are supported?</span>
-                <svg className="faq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+                <svg className="fq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
               </button>
-              <div className="faq-item__a">
+              <div className="fq-item__a">
                 <p>We currently buy skins from Counter-Strike 2, Dota 2, Team Fortress 2 and Rust. More games may be added in the future.</p>
               </div>
             </div>
-            <div className={`faq-item${openFaqIdx === 2 ? " open" : ""}`} style={{"--fi":2} as React.CSSProperties}>
-              <button className="faq-item__q" aria-expanded={openFaqIdx === 2 ? "true" : "false"} onClick={() => toggleFaq(2)}>
-                <span className="faq-item__num">03</span>
-                <svg className="faq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+            <div className={`fq-item${openFaqIdx === 2 ? " open" : ""}`} style={{"--fi":2} as React.CSSProperties}>
+              <button className="fq-item__q" aria-expanded={openFaqIdx === 2 ? "true" : "false"} onClick={() => toggleFaq(2)}>
+                <span className="fq-item__num">03</span>
+                <svg className="fq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                 <span>How long does it take to get paid?</span>
-                <svg className="faq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+                <svg className="fq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
               </button>
-              <div className="faq-item__a">
+              <div className="fq-item__a">
                 <p>For Dota 2, TF2 and Rust skins — payout is processed shortly after we receive your items. For CS2 skins, there may be a Steam trade hold period. Payment is processed after the hold ends and items are received by our system.</p>
               </div>
             </div>
-            <div className={`faq-item${openFaqIdx === 3 ? " open" : ""}`} style={{"--fi":3} as React.CSSProperties}>
-              <button className="faq-item__q" aria-expanded={openFaqIdx === 3 ? "true" : "false"} onClick={() => toggleFaq(3)}>
-                <span className="faq-item__num">04</span>
-                <svg className="faq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /><path d="M6 16h4" /></svg>
+            <div className={`fq-item${openFaqIdx === 3 ? " open" : ""}`} style={{"--fi":3} as React.CSSProperties}>
+              <button className="fq-item__q" aria-expanded={openFaqIdx === 3 ? "true" : "false"} onClick={() => toggleFaq(3)}>
+                <span className="fq-item__num">04</span>
+                <svg className="fq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /><path d="M6 16h4" /></svg>
                 <span>What is the site balance?</span>
-                <svg className="faq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+                <svg className="fq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
               </button>
-              <div className="faq-item__a">
+              <div className="fq-item__a">
                 <p>Instead of receiving immediate payout, you can choose to credit your sale proceeds to your internal SKINWAVE balance. You can then withdraw from this balance at any time using your preferred payout method — card, crypto or bank transfer.</p>
               </div>
             </div>

@@ -1,0 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+@import "../styles/skinwave-base.css";
+@import "../styles/skinwave-home.css";
+@import "../styles/skinwave-sell.css";
+@import "../styles/skinwave-balance.css";
+@import "../styles/skinwave-order.css";
+@import "../styles/skinwave-orders.css";
+@import "../styles/skinwave-faq.css";
+@import "../styles/skinwave-admin.css";
+@import "../styles/skinwave-referral.css";

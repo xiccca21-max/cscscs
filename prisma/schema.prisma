@@ -1,0 +1,252 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+}
+
+model User {
+  id          String     @id @default(cuid())
+  steamId     String     @unique
+  steamLogin  String
+  steamAvatar String?
+  tradeUrl    String?
+  balance     Decimal    @default(0) @db.Decimal(12, 2)
+  status      UserStatus @default(ACTIVE)
+  locale      String     @default("en")
+  blockReason String?
+  blockedAt   DateTime?
+  referralId  String?
+  referral    Referral?  @relation(fields: [referralId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  orders              Order[]
+  balanceTransactions BalanceTransaction[]
+  cashoutRequests     CashoutRequest[]
+
+  @@index([steamId])
+  @@index([referralId])
+}
+
+enum OrderStatus {
+  CREATED
+  TRADE_SENT
+  TRADE_COMPLETED
+  TRADE_CANCELLED
+  PAYMENT_PENDING
+  PAID
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  steamId         String
+  steamProfileUrl String
+  tradeUrl        String
+  totalAmount     Decimal     @db.Decimal(12, 2)
+  currency        String
+  paymentMethodId String
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  paymentDetails  Json
+  botAccountId    String?
+  botAccount      BotAccount? @relation(fields: [botAccountId], references: [id])
+  status          OrderStatus @default(CREATED)
+  adminComment    String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  tradeSentAt     DateTime?
+  tradeCompletedAt DateTime?
+  paidAt          DateTime?
+  cancelledAt     DateTime?
+
+  items               OrderItem[]
+  balanceTransactions  BalanceTransaction[]
+  statusHistory        OrderStatusHistory[]
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@index([status])
+  @@index([steamId])
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  game        Game
+  name        String
+  externalId  String
+  classId     String?
+  instanceId  String?
+  condition   String?
+  quality     String?
+  imageUrl    String?
+  basePrice   Decimal @db.Decimal(12, 2)
+  buyoutPrice Decimal @db.Decimal(12, 2)
+  currency    String
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  oldStatus OrderStatus
+  newStatus OrderStatus
+  changedBy String
+  comment   String?
+  createdAt DateTime    @default(now())
+
+  @@index([orderId])
+}
+
+enum Game {
+  CS2
+  DOTA2
+  TF2
+  RUST
+}
+
+model PaymentMethod {
+  id             String   @id @default(cuid())
+  name           String
+  type           String
+  isActive       Boolean  @default(true)
+  commission     Decimal  @db.Decimal(5, 2)
+  minAmount      Decimal  @db.Decimal(12, 2)
+  currencies     String[]
+  requiredFields Json
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  orders Order[]
+}
+
+model BotAccount {
+  id              String   @id @default(cuid())
+  steamId         String   @unique
+  steamProfileUrl String
+  name            String
+  isActive        Boolean  @default(true)
+  comment         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  orders Order[]
+}
+
+enum BalanceTransactionType {
+  CREDIT
+  DEBIT
+  FREEZE
+  UNFREEZE
+}
+
+model BalanceTransaction {
+  id               String                 @id @default(cuid())
+  userId           String
+  user             User                   @relation(fields: [userId], references: [id])
+  type             BalanceTransactionType
+  amount           Decimal                @db.Decimal(12, 2)
+  balanceAfter     Decimal                @db.Decimal(12, 2)
+  comment          String?
+  orderId          String?
+  order            Order?                 @relation(fields: [orderId], references: [id])
+  cashoutRequestId String?
+  cashoutRequest   CashoutRequest?        @relation(fields: [cashoutRequestId], references: [id])
+  createdBy        String?
+  createdAt        DateTime               @default(now())
+
+  @@index([userId])
+  @@index([orderId])
+}
+
+enum CashoutStatus {
+  CREATED
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+model CashoutRequest {
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id])
+  amount         Decimal       @db.Decimal(12, 2)
+  commission     Decimal       @db.Decimal(12, 2)
+  totalAmount    Decimal       @db.Decimal(12, 2)
+  paymentMethod  String
+  currency       String
+  paymentDetails Json
+  status         CashoutStatus @default(CREATED)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  processedAt    DateTime?
+
+  balanceTransactions BalanceTransaction[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Referral {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  password  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+
+  @@index([code])
+}
+
+model PricingRule {
+  id              String   @id @default(cuid())
+  game            Game?
+  itemExternalId  String?
+  itemName        String?
+  adjustmentType  String
+  adjustmentValue Decimal  @db.Decimal(12, 4)
+  isExcluded      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([game])
+  @@index([itemExternalId])
+}
+
+model SiteSettings {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  actorRole String
+  entity    String
+  entityId  String
+  action    String
+  oldValue  Json?
+  newValue  Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([actorId])
+  @@index([createdAt])
+}

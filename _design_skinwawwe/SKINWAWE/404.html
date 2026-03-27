@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <title>SKINWAVE — Page Not Found</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .e404 {
+      min-height: calc(100vh - var(--header-h));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(180deg, #f8f9fb 0%, #eeeef4 100%);
+    }
+    .e404__inner { max-width: 480px; }
+    .e404__code {
+      font-size: 120px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #4338ca, #6366f1, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .e404__title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 12px;
+    }
+    .e404__desc {
+      font-size: 15px;
+      color: #64748b;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .e404__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+    }
+    .e404__btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(99,102,241,0.4);
+    }
+    .e404__links {
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+    }
+    .e404__links a {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6366f1;
+      text-decoration: none;
+    }
+    .e404__links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header__inner">
+    <div class="header__left">
+      <a href="index.html" class="header__logo">
+        <span class="header__logo-text">SKINWAVE</span>
+      </a>
+    </div>
+    <nav class="header__nav">
+      <a href="sell.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> <span data-i18n="nav.sell">Sell Skins</span></a>
+      <a href="index.html#reviews"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> <span data-i18n="nav.reviews">Reviews</span></a>
+      <a href="faq.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg> <span data-i18n="nav.faq">FAQ</span></a>
+    </nav>
+    <div class="header__right">
+      <a href="index.html" class="header__login-btn" id="signInBtn"><span data-i18n="header.signin">SIGN IN</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="e404">
+  <div class="e404__inner">
+    <div class="e404__code">404</div>
+    <h1 class="e404__title">Page Not Found</h1>
+    <p class="e404__desc">The page you're looking for doesn't exist or has been moved. Let's get you back on track.</p>
+    <a href="index.html" class="e404__btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Back to Home
+    </a>
+    <div class="e404__links">
+      <a href="sell.html">Sell Skins</a>
+      <a href="faq.html">FAQ</a>
+    </div>
+  </div>
+</main>
+
+<div id="toastContainer" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;"></div>
+<script src="i18n.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

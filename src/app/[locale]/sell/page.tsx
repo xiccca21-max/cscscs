@@ -815,33 +815,37 @@ export default function SellPage() {
                       key={pm.id}
                       className={`pay-btn${paymentMethod === pm.type ? " active" : ""}`}
                       data-method={pm.type}
-                      data-tooltip={`${t("feeLabel")}: ${commPct}%`}
                       onClick={() => setPaymentMethod(pm.type)}
                     >
                       {isFirst && commPct === 0 && <span className="pay-btn__badge">{t("bestRate")}</span>}
                       <span className={wrapCls}>
                         <img src={icon.src} alt={pm.name} className={icon.cls} />
                       </span>
-                      <span>{pm.name}</span>
+                      <span className="pay-btn__name">{pm.name}</span>
+                      <span className="pay-btn__fee">{t("feeLabel")}: {commPct}%</span>
                     </button>
                   );
                 }) : <>
-                  <button className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`} data-method="balance" data-tooltip={t("fee0")} onClick={() => setPaymentMethod("balance")}>
+                  <button className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`} onClick={() => setPaymentMethod("balance")}>
                     <span className="pay-btn__badge">{t("bestRate")}</span>
                     <span className="pay-btn__icon"><img src="/icons/pay-balance.png" alt="Balance" className="pay-btn__img pay-btn__img--circle" /></span>
-                    <span>{t("payBalance")}</span>
+                    <span className="pay-btn__name">{t("payBalance")}</span>
+                    <span className="pay-btn__fee">{t("fee0")}</span>
                   </button>
-                  <button className={`pay-btn${paymentMethod === "card" ? " active" : ""}`} data-method="card" data-tooltip={t("fee25")} onClick={() => setPaymentMethod("card")}>
+                  <button className={`pay-btn${paymentMethod === "card" ? " active" : ""}`} onClick={() => setPaymentMethod("card")}>
                     <span className="pay-btn__icon pay-btn__icon--card"><img src="/icons/pay-card.png" alt="Card" className="pay-btn__img" /></span>
-                    <span>{t("payCard")}</span>
+                    <span className="pay-btn__name">{t("payCard")}</span>
+                    <span className="pay-btn__fee">{t("fee25")}</span>
                   </button>
-                  <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" data-tooltip={t("fee1")} onClick={() => setPaymentMethod("crypto")}>
+                  <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} onClick={() => setPaymentMethod("crypto")}>
                     <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
-                    <span>{t("payCrypto")}</span>
+                    <span className="pay-btn__name">{t("payCrypto")}</span>
+                    <span className="pay-btn__fee">{t("fee1")}</span>
                   </button>
-                  <button className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`} data-method="bank" data-tooltip={t("fee3")} onClick={() => setPaymentMethod("bank")}>
+                  <button className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`} onClick={() => setPaymentMethod("bank")}>
                     <span className="pay-btn__icon pay-btn__icon--bank"><img src="/icons/pay-bank.png" alt="Bank" className="pay-btn__img" /></span>
-                    <span>{t("payBank")}</span>
+                    <span className="pay-btn__name">{t("payBank")}</span>
+                    <span className="pay-btn__fee">{t("fee3")}</span>
                   </button>
                 </>}
               </div>

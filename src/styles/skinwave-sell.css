@@ -1991,40 +1991,23 @@
   100% { transform: scale(1); }
 }
 
-/* Tooltip on hover */
-.pay-btn[data-tooltip] {
-  position: relative;
-}
-.pay-btn[data-tooltip]::before {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  background: #1a1a2e;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  padding: 4px 10px;
-  white-space: nowrap;
-  border-radius: 6px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s, transform 0.2s;
-  z-index: 10;
-}
-.pay-btn[data-tooltip]:hover::before {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.pay-btn > span:last-child {
+.pay-btn__name {
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+}
+.pay-btn__fee {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-top: -2px;
+}
+.pay-btn.active .pay-btn__fee {
+  color: rgba(255,255,255,0.7);
 }
 .pay-btn__icon {
   width: 42px;

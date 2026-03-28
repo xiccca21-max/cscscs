@@ -146,6 +146,7 @@ export default function SellPage() {
           if (cancelled) break;
           allItems = [...allItems, ...items];
           setInventory([...allItems]);
+          if (allItems.length > 0 && !cancelled) setLoadingInventory(false);
         } catch {
           // skip failed game
         }
@@ -654,9 +655,9 @@ export default function SellPage() {
               </div>
             )}
 
-            <div className="sell-inventory__scroll-shadow" id="scrollShadow" />
+            {!loadingInventory && <div className="sell-inventory__scroll-shadow" id="scrollShadow" />}
 
-            <div className={`sell-inventory__grid${viewMode === "list" ? " list-view" : ""}`} id="inventoryGrid">
+            <div className={`sell-inventory__grid${viewMode === "list" ? " list-view" : ""}`} id="inventoryGrid" style={loadingInventory ? { display: "none" } : undefined}>
               {filteredItems.map((item) => {
                 const wearShort = getWearShort(item);
                 const floatPct = item.float != null ? (item.float * 100).toFixed(2) : null;

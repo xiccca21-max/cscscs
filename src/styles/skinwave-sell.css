@@ -1793,6 +1793,17 @@
   box-shadow: 0 4px 12px rgba(99,102,241,0.35);
   transform: translateY(-1px);
 }
+.sidebar-tradeurl__paste--save {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  box-shadow: 0 2px 6px rgba(34,197,94,0.25);
+}
+.sidebar-tradeurl__paste--save:hover {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  box-shadow: 0 4px 12px rgba(34,197,94,0.35);
+}
+.sidebar-tradeurl__paste--save.saved {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+}
 .sidebar-tradeurl__hint {
   margin-top: 6px;
   font-size: 10px;
@@ -2179,6 +2190,7 @@
   transform: translateX(-50%) translateY(0);
 }
 
+.pay-btn__name,
 .pay-btn > span:last-child {
   font-size: 11px;
   font-weight: 600;
@@ -2200,6 +2212,16 @@
 }
 .pay-btn.active .pay-btn__fee {
   color: var(--text-sec);
+}
+.pay-btn__fee {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-top: -2px;
+}
+.pay-btn.active .pay-btn__fee {
+  color: rgba(255,255,255,0.7);
 }
 .pay-btn__icon {
   width: 46px;
@@ -2549,6 +2571,29 @@
 .sell-empty p {
   font-size: 13px;
   color: var(--text-muted);
+  max-width: 340px;
+}
+.sell-empty__reload {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.sell-empty__reload:hover {
+  background: var(--accent-h);
+  transform: translateY(-1px);
+}
+.sell-empty__reload:active {
+  transform: scale(0.97);
 }
 
 /* Skeleton loader */

@@ -55,6 +55,9 @@ export default function AdminPage() {
   const [pmEditModal, setPmEditModal] = useState<any>(null);
   const [pmEditForm, setPmEditForm] = useState({ name: "", commission: "", minAmount: "" });
 
+  const [priceModal, setPriceModal] = useState<any | null>(null);
+  const [priceForm, setPriceForm] = useState({ game: "", itemExternalId: "", adjustmentType: "percentage", adjustmentValue: "", isExcluded: false });
+
   const addToast = useCallback((msg: string) => setToasts((p) => [...p, msg]), []);
   const removeToast = useCallback((i: number) => setToasts((p) => p.filter((_, idx) => idx !== i)), []);
 
@@ -75,6 +78,7 @@ export default function AdminPage() {
   const fetchCashouts = useCallback(async () => { const d = await safeFetch("/api/admin/cashouts"); if (d) setCashouts(d.data?.cashouts ?? []); }, [safeFetch]);
   const fetchAuditLogs = useCallback(async () => { const d = await safeFetch("/api/admin/audit"); if (d) setAuditLogs(d.data?.logs ?? []); }, [safeFetch]);
   const fetchPayments = useCallback(async () => { const d = await safeFetch("/api/admin/payments"); if (d) setPaymentMethods(d.data ?? []); }, [safeFetch]);
+  const fetchPrices = useCallback(async () => { const d = await safeFetch("/api/admin/prices"); if (d) setPricingRules(Array.isArray(d.data) ? d.data : []); }, [safeFetch]);
 
   useEffect(() => {
     const init = async () => {
@@ -85,7 +89,7 @@ export default function AdminPage() {
       if (!u.isAdmin) { setAuthError(`Нет прав. Steam ID: ${u.steamId}. Добавьте в ADMIN_STEAM_IDS.`); setAdminReady(true); return; }
       setAdminReady(true);
       fetchOrders(); fetchUsers(); fetchPayments();
-      safeFetch("/api/admin/prices").then((d) => { if (d) setPricingRules(Array.isArray(d.data) ? d.data : []); });
+      fetchPrices();
       fetchCashouts();
       safeFetch("/api/admin/bots").then((d) => { if (d) setBots(d.data ?? []); });
       safeFetch("/api/admin/referrals").then((d) => { if (d) setReferrals(d.data ?? []); });
@@ -99,7 +103,7 @@ export default function AdminPage() {
       });
     };
     init();
-  }, [fetchOrders, fetchUsers, fetchCashouts, fetchAuditLogs, fetchPayments, safeFetch]);
+  }, [fetchOrders, fetchUsers, fetchCashouts, fetchAuditLogs, fetchPayments, fetchPrices, safeFetch]);
 
   const handleAction = async (method: string, url: string, body?: any, successMsg?: string, onSuccess?: () => void) => {
     try {
@@ -178,6 +182,43 @@ export default function AdminPage() {
   const handleDeletePayment = async (id: string) => {
     if (!confirm("Удалить метод оплаты?")) return;
     await handleAction("DELETE", `/api/admin/payments/${id}`, undefined, "Метод удалён", fetchPayments);
+  };
+
+  const openPriceModal = (rule?: any) => {
+    if (rule) {
+      setPriceForm({
+        game: rule.game ?? "",
+        itemExternalId: rule.itemExternalId ?? "",
+        adjustmentType: rule.adjustmentType ?? "percentage",
+        adjustmentValue: String(rule.adjustmentValue ?? ""),
+        isExcluded: !!rule.isExcluded,
+      });
+      setPriceModal(rule);
+    } else {
+      setPriceForm({ game: "", itemExternalId: "", adjustmentType: "percentage", adjustmentValue: "", isExcluded: false });
+      setPriceModal("new");
+    }
+  };
+
+  const handleSavePriceRule = async () => {
+    const val = parseFloat(priceForm.adjustmentValue);
+    if (isNaN(val)) { addToast("Введите значение"); return; }
+    const body: any = {
+      adjustmentType: priceForm.adjustmentType,
+      adjustmentValue: val,
+      game: priceForm.game || null,
+      itemExternalId: priceForm.itemExternalId || null,
+      isExcluded: priceForm.isExcluded,
+    };
+    if (priceModal !== "new") body.id = priceModal.id;
+    await handleAction("POST", "/api/admin/prices", body,
+      priceModal === "new" ? "Правило создано" : "Правило обновлено",
+      () => { fetchPrices(); setPriceModal(null); });
+  };
+
+  const handleDeletePriceRule = async (id: string) => {
+    if (!confirm("Удалить правило?")) return;
+    await handleAction("DELETE", `/api/admin/prices/${id}`, undefined, "Правило удалено", fetchPrices);
   };
 
   const filteredBalanceUsers = users.filter((u) => {
@@ -443,8 +484,15 @@ export default function AdminPage() {
         {/* ── PRICES ── */}
         {section === "prices" && (
           <div className="adm-section">
-            <div className="adm-section__top"><h1>Ценообразование</h1></div>
-            <div className="adm-grid-2">
+            <div className="adm-section__top">
+              <h1>Ценообразование</h1>
+              <div className="adm-section__actions">
+                <button className="adm-btn adm-btn--ghost" onClick={fetchPrices}>Обновить</button>
+                <button className="adm-btn adm-btn--primary" onClick={() => openPriceModal()}>+ Добавить правило</button>
+              </div>
+            </div>
+
+            <div className="adm-grid-2" style={{ marginBottom: 16 }}>
               <div className="adm-card adm-card--stat">
                 <span className="adm-stat__label">Источник цен</span>
                 <span className="adm-stat__value">TM Market API</span>
@@ -455,23 +503,90 @@ export default function AdminPage() {
                 <span className="adm-stat__value">{pricingRules.length}</span>
               </div>
             </div>
-            <div className="adm-card" style={{ marginTop: 16 }}>
+
+            <div className="adm-card adm-card--accent" style={{ marginBottom: 16 }}>
+              <div style={{ padding: "16px 20px", fontSize: 13, color: "var(--text-sec)", lineHeight: 1.6 }}>
+                <strong style={{ color: "var(--text)" }}>Как работают правила:</strong><br/>
+                <strong>Наценка %</strong> — умножает базовую цену: +10% = цена × 1.10, −15% = цена × 0.85<br/>
+                <strong>Фиксированная</strong> — прибавляет/вычитает сумму в $: +5 = цена + 5$, −3 = цена − 3$<br/>
+                <strong>Игра</strong> — правило для конкретной игры или всех сразу<br/>
+                <strong>Предмет</strong> — правило для конкретного предмета (ID) или глобально<br/>
+                <strong>Исключить</strong> — предмет не будет показан на сайте
+              </div>
+            </div>
+
+            <div className="adm-card">
               <table className="adm-table">
-                <thead><tr><th>Игра</th><th>Предмет</th><th>Тип</th><th>Значение</th><th>Исключён</th><th>Обновлён</th></tr></thead>
+                <thead><tr><th>Игра</th><th>Предмет</th><th>Тип</th><th>Значение</th><th>Исключён</th><th>Обновлён</th><th></th></tr></thead>
                 <tbody>
-                  {pricingRules.length > 0 ? pricingRules.map((r: any) => (
-                    <tr key={r.id}>
-                      <td>{r.game ?? "Все"}</td>
-                      <td>{r.itemExternalId ?? "Глобально"}</td>
-                      <td>{r.adjustmentType}</td>
-                      <td>{r.adjustmentValue}</td>
-                      <td>{r.isExcluded ? "Да" : "Нет"}</td>
-                      <td>{r.updatedAt ? new Date(r.updatedAt).toLocaleDateString("ru-RU") : "—"}</td>
-                    </tr>
-                  )) : <tr><td colSpan={6} className="adm-empty">Нет правил</td></tr>}
+                  {pricingRules.length > 0 ? pricingRules.map((r: any) => {
+                    const val = parseFloat(r.adjustmentValue);
+                    const isPercent = r.adjustmentType === "percentage";
+                    const display = isPercent ? `${val >= 0 ? "+" : ""}${val}%` : `${val >= 0 ? "+" : ""}${val}$`;
+                    const color = val > 0 ? "var(--success)" : val < 0 ? "var(--danger)" : "var(--text-sec)";
+                    return (
+                      <tr key={r.id}>
+                        <td><span className="adm-badge adm-badge--created">{r.game ?? "Все"}</span></td>
+                        <td>{r.itemExternalId ? <span className="adm-mono">{r.itemExternalId.length > 20 ? r.itemExternalId.slice(0, 20) + "…" : r.itemExternalId}</span> : "Глобально"}</td>
+                        <td>{isPercent ? "Процент" : "Фиксированная"}</td>
+                        <td style={{ fontWeight: 700, color }}>{display}</td>
+                        <td>{r.isExcluded ? <span className="adm-badge adm-badge--danger">Да</span> : <span className="adm-badge adm-badge--success">Нет</span>}</td>
+                        <td>{r.updatedAt ? new Date(r.updatedAt).toLocaleDateString("ru-RU") : "—"}</td>
+                        <td className="adm-actions-cell">
+                          <button className="adm-btn adm-btn--sm" onClick={() => openPriceModal(r)}>Ред.</button>
+                          <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => handleDeletePriceRule(r.id)}>Удалить</button>
+                        </td>
+                      </tr>
+                    );
+                  }) : <tr><td colSpan={7} className="adm-empty">Нет правил</td></tr>}
                 </tbody>
               </table>
             </div>
+
+            {priceModal && (
+              <div className="adm-overlay" onClick={() => setPriceModal(null)}>
+                <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
+                  <h2>{priceModal === "new" ? "Новое правило" : "Редактировать правило"}</h2>
+                  <div className="adm-form">
+                    <label>Игра
+                      <select className="adm-input adm-select" value={priceForm.game} onChange={(e) => setPriceForm({ ...priceForm, game: e.target.value })}>
+                        <option value="">Все игры</option>
+                        <option value="CS2">CS2</option>
+                        <option value="DOTA2">Dota 2</option>
+                        <option value="TF2">TF2</option>
+                        <option value="RUST">Rust</option>
+                      </select>
+                    </label>
+                    <label>ID предмета (пусто = глобально)
+                      <input className="adm-input" placeholder="Оставьте пустым для всех предметов" value={priceForm.itemExternalId} onChange={(e) => setPriceForm({ ...priceForm, itemExternalId: e.target.value })} />
+                    </label>
+                    <label>Тип корректировки
+                      <select className="adm-input adm-select" value={priceForm.adjustmentType} onChange={(e) => setPriceForm({ ...priceForm, adjustmentType: e.target.value })}>
+                        <option value="percentage">Процент (наценка/скидка %)</option>
+                        <option value="fixed">Фиксированная сумма ($)</option>
+                      </select>
+                    </label>
+                    <label>
+                      Значение {priceForm.adjustmentType === "percentage" ? "(%, напр. 10 или −15)" : "($, напр. 5 или −3)"}
+                      <input className="adm-input" type="number" step="0.01" placeholder={priceForm.adjustmentType === "percentage" ? "10" : "5.00"} value={priceForm.adjustmentValue} onChange={(e) => setPriceForm({ ...priceForm, adjustmentValue: e.target.value })} />
+                      <span style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
+                        {priceForm.adjustmentType === "percentage"
+                          ? "Положительное = наценка, отрицательное = скидка"
+                          : "Положительное = прибавить, отрицательное = вычесть"}
+                      </span>
+                    </label>
+                    <label style={{ flexDirection: "row", alignItems: "center", gap: 8, display: "flex", cursor: "pointer" }}>
+                      <input type="checkbox" checked={priceForm.isExcluded} onChange={(e) => setPriceForm({ ...priceForm, isExcluded: e.target.checked })} style={{ width: 18, height: 18, accentColor: "var(--accent)" }} />
+                      <span>Исключить предмет (не показывать на сайте)</span>
+                    </label>
+                  </div>
+                  <div className="adm-modal__actions">
+                    <button className="adm-btn adm-btn--primary" onClick={handleSavePriceRule}>{priceModal === "new" ? "Создать" : "Сохранить"}</button>
+                    <button className="adm-btn adm-btn--ghost" onClick={() => setPriceModal(null)}>Отмена</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

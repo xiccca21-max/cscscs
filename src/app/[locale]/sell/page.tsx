@@ -684,7 +684,38 @@ export default function SellPage() {
               </div>
             )}
 
-            {isLoggedIn && !loadingInventory && filteredItems.length === 0 && (
+            {isLoggedIn && !loadingInventory && filteredItems.length === 0 && inventory.length === 0 && (
+              <div className="sell-empty" id="emptyState">
+                <div className="sell-empty__icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 12a9 9 0 1 1-9-9" /><polyline points="21 3 21 9 15 9" /></svg>
+                </div>
+                <h4>{t("noItemsLoaded")}</h4>
+                <p>{t("noItemsLoadedDesc")}</p>
+                <button className="sell-empty__reload" onClick={() => {
+                  setInventory([]);
+                  setLoadingInventory(true);
+                  const loadAll = async () => {
+                    const games = ["cs2", "dota2", "tf2", "rust"] as const;
+                    let allItems: InventoryItem[] = [];
+                    for (const game of games) {
+                      try {
+                        const items = await fetchGame(game);
+                        allItems = [...allItems, ...items];
+                        setInventory([...allItems]);
+                        if (allItems.length > 0) setLoadingInventory(false);
+                      } catch {}
+                    }
+                    setLoadingInventory(false);
+                  };
+                  loadAll();
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-9-9" /><polyline points="21 3 21 9 15 9" /></svg>
+                  {t("reloadInventory")}
+                </button>
+              </div>
+            )}
+
+            {isLoggedIn && !loadingInventory && filteredItems.length === 0 && inventory.length > 0 && (
               <div className="sell-empty" id="emptyState">
                 <div className="sell-empty__icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
@@ -777,28 +808,25 @@ export default function SellPage() {
                 value={tradeUrl}
                 onChange={(e) => { setTradeUrl(e.target.value); setTradeUrlSaved(false); }}
               />
-              <button type="button" className="sidebar-tradeurl__paste" onClick={pasteTradeUrl}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                {t("paste")}
-              </button>
-            </div>
-            <div className="sidebar-tradeurl__actions">
-              <div className="sell-tradeurl__status" id="tradeUrlStatus">
-                {tradeUrl && (tradeUrlValid ? `\u2713 ${t("validTradeUrl")}` : `\u2717 ${t("invalidTradeUrl")}`)}
-              </div>
-              {tradeUrlValid && (
-                <button
-                  type="button"
-                  className={`sidebar-tradeurl__save${tradeUrlSaved ? " saved" : ""}`}
-                  onClick={saveTradeUrl}
-                >
+              {tradeUrlValid ? (
+                <button type="button" className={`sidebar-tradeurl__paste sidebar-tradeurl__paste--save${tradeUrlSaved ? " saved" : ""}`} onClick={saveTradeUrl}>
                   {tradeUrlSaved ? (
                     <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> {t("saved")}</>
                   ) : (
                     <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> {t("save")}</>
                   )}
                 </button>
+              ) : (
+                <button type="button" className="sidebar-tradeurl__paste" onClick={pasteTradeUrl}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                  {t("paste")}
+                </button>
               )}
+            </div>
+            <div className="sidebar-tradeurl__actions">
+              <div className="sell-tradeurl__status" id="tradeUrlStatus">
+                {tradeUrl && (tradeUrlValid ? `\u2713 ${t("validTradeUrl")}` : `\u2717 ${t("invalidTradeUrl")}`)}
+              </div>
             </div>
           </div>
 
@@ -814,39 +842,44 @@ export default function SellPage() {
                   const icon = PAY_ICONS[pm.type] ?? PAY_ICONS.other;
                   const wrapCls = ICON_WRAP_CLS[pm.type] ?? "pay-btn__icon";
                   const commPct = parseFloat(pm.commission);
+                  const minAmt = parseFloat(pm.minAmount);
                   const isFirst = dbPaymentMethods[0]?.id === pm.id;
                   return (
                     <button
                       key={pm.id}
                       className={`pay-btn${paymentMethod === pm.type ? " active" : ""}`}
                       data-method={pm.type}
-                      data-tooltip={`${t("feeLabel")}: ${commPct}%`}
                       onClick={() => setPaymentMethod(pm.type)}
                     >
                       {isFirst && commPct === 0 && <span className="pay-btn__badge">{t("bestRate")}</span>}
                       <span className={wrapCls}>
                         <img src={icon.src} alt={pm.name} className={icon.cls} />
                       </span>
-                      <span>{pm.name}</span>
+                      <span className="pay-btn__name">{pm.name}</span>
+                      <span className="pay-btn__fee">{t("feeLabel")}: {commPct}% · {t("minLabel")}: {format(minAmt)}</span>
                     </button>
                   );
                 }) : <>
-                  <button className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`} data-method="balance" data-tooltip={t("fee0")} onClick={() => setPaymentMethod("balance")}>
+                  <button className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`} onClick={() => setPaymentMethod("balance")}>
                     <span className="pay-btn__badge">{t("bestRate")}</span>
                     <span className="pay-btn__icon"><img src="/icons/pay-balance.png" alt="Balance" className="pay-btn__img pay-btn__img--circle" /></span>
-                    <span>{t("payBalance")}</span>
+                    <span className="pay-btn__name">{t("payBalance")}</span>
+                    <span className="pay-btn__fee">{t("fee0")} · {t("minLabel")}: {format(0)}</span>
                   </button>
-                  <button className={`pay-btn${paymentMethod === "card" ? " active" : ""}`} data-method="card" data-tooltip={t("fee25")} onClick={() => setPaymentMethod("card")}>
+                  <button className={`pay-btn${paymentMethod === "card" ? " active" : ""}`} onClick={() => setPaymentMethod("card")}>
                     <span className="pay-btn__icon pay-btn__icon--card"><img src="/icons/pay-card.png" alt="Card" className="pay-btn__img" /></span>
-                    <span>{t("payCard")}</span>
+                    <span className="pay-btn__name">{t("payCard")}</span>
+                    <span className="pay-btn__fee">{t("fee25")} · {t("minLabel")}: {format(1)}</span>
                   </button>
-                  <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" data-tooltip={t("fee1")} onClick={() => setPaymentMethod("crypto")}>
+                  <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} onClick={() => setPaymentMethod("crypto")}>
                     <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
-                    <span>{t("payCrypto")}</span>
+                    <span className="pay-btn__name">{t("payCrypto")}</span>
+                    <span className="pay-btn__fee">{t("fee1")} · {t("minLabel")}: {format(5)}</span>
                   </button>
-                  <button className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`} data-method="bank" data-tooltip={t("fee3")} onClick={() => setPaymentMethod("bank")}>
+                  <button className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`} onClick={() => setPaymentMethod("bank")}>
                     <span className="pay-btn__icon pay-btn__icon--bank"><img src="/icons/pay-bank.png" alt="Bank" className="pay-btn__img" /></span>
-                    <span>{t("payBank")}</span>
+                    <span className="pay-btn__name">{t("payBank")}</span>
+                    <span className="pay-btn__fee">{t("fee3")} · {t("minLabel")}: {format(10)}</span>
                   </button>
                 </>}
               </div>

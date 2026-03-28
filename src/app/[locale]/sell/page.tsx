@@ -803,28 +803,25 @@ export default function SellPage() {
                 value={tradeUrl}
                 onChange={(e) => { setTradeUrl(e.target.value); setTradeUrlSaved(false); }}
               />
-              <button type="button" className="sidebar-tradeurl__paste" onClick={pasteTradeUrl}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                {t("paste")}
-              </button>
-            </div>
-            <div className="sidebar-tradeurl__actions">
-              <div className="sell-tradeurl__status" id="tradeUrlStatus">
-                {tradeUrl && (tradeUrlValid ? `\u2713 ${t("validTradeUrl")}` : `\u2717 ${t("invalidTradeUrl")}`)}
-              </div>
-              {tradeUrlValid && (
-                <button
-                  type="button"
-                  className={`sidebar-tradeurl__save${tradeUrlSaved ? " saved" : ""}`}
-                  onClick={saveTradeUrl}
-                >
+              {tradeUrlValid ? (
+                <button type="button" className={`sidebar-tradeurl__paste sidebar-tradeurl__paste--save${tradeUrlSaved ? " saved" : ""}`} onClick={saveTradeUrl}>
                   {tradeUrlSaved ? (
                     <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> {t("saved")}</>
                   ) : (
                     <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> {t("save")}</>
                   )}
                 </button>
+              ) : (
+                <button type="button" className="sidebar-tradeurl__paste" onClick={pasteTradeUrl}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                  {t("paste")}
+                </button>
               )}
+            </div>
+            <div className="sidebar-tradeurl__actions">
+              <div className="sell-tradeurl__status" id="tradeUrlStatus">
+                {tradeUrl && (tradeUrlValid ? `\u2713 ${t("validTradeUrl")}` : `\u2717 ${t("invalidTradeUrl")}`)}
+              </div>
             </div>
           </div>
 

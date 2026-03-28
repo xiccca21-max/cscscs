@@ -9,10 +9,20 @@ export async function GET() {
       return NextResponse.json({ success: true, data: null });
     }
 
-    const user = await db.user.findUnique({
-      where: { id: session.userId },
-      select: { balance: true, status: true },
-    });
+    let balance = "0";
+    let status = "ACTIVE";
+    try {
+      const user = await db.user.findUnique({
+        where: { id: session.userId },
+        select: { balance: true, status: true },
+      });
+      if (user) {
+        balance = user.balance?.toString() ?? "0";
+        status = user.status ?? "ACTIVE";
+      }
+    } catch {
+      // DB unavailable — use defaults
+    }
 
     return NextResponse.json({
       success: true,
@@ -22,8 +32,8 @@ export async function GET() {
         steamLogin: session.steamLogin,
         steamAvatar: session.steamAvatar,
         isAdmin: session.isAdmin ?? false,
-        balance: user?.balance?.toString() ?? "0",
-        status: user?.status ?? "ACTIVE",
+        balance,
+        status,
       },
     });
   } catch (e) {

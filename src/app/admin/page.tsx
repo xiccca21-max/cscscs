@@ -103,8 +103,14 @@ export default function AdminPage() {
     const init = async () => {
       const sessionRes = await fetch("/api/auth/session");
       const session = await sessionRes.json();
-      if (!session?.user?.isAdmin) {
-        setAuthError(`Not admin. Steam ID: ${session?.user?.steamId ?? "not logged in"}. Add this ID to ADMIN_STEAM_IDS env var on Vercel.`);
+      const userData = session?.data;
+      if (!userData) {
+        setAuthError("Not logged in. Please log in via Steam first.");
+        setAdminReady(true);
+        return;
+      }
+      if (!userData.isAdmin) {
+        setAuthError(`Not admin. Your Steam ID: ${userData.steamId}. Add it to ADMIN_STEAM_IDS env var on Vercel.`);
         setAdminReady(true);
         return;
       }

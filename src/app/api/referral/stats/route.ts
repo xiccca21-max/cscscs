@@ -1,19 +1,31 @@
 import { db } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { NextResponse } from "next/server";
+
+function generateCode(steamLogin: string | undefined): string {
+  const base = (steamLogin || "user").replace(/[^a-zA-Z0-9]/g, "").slice(0, 8).toUpperCase();
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${base}-${suffix}`;
+}
 
 export async function GET() {
   try {
-    const session = await getSession();
-    if (!session.isReferral || !session.referralId) {
+    const session = await requireAuth();
+
+    const user = await db.user.findUnique({
+      where: { id: session.userId },
+      select: { id: true, steamLogin: true, steamId: true },
+    });
+
+    if (!user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 },
+        { success: false, error: "User not found" },
+        { status: 404 },
       );
     }
 
-    const referral = await db.referral.findUnique({
-      where: { id: session.referralId },
+    let referral = await db.referral.findFirst({
+      where: { name: user.steamId },
       include: {
         users: {
           select: {
@@ -33,10 +45,30 @@ export async function GET() {
     });
 
     if (!referral) {
-      return NextResponse.json(
-        { success: false, error: "Referral not found" },
-        { status: 404 },
-      );
+      referral = await db.referral.create({
+        data: {
+          name: user.steamId,
+          code: generateCode(user.steamLogin ?? undefined),
+          password: "",
+          isActive: true,
+        },
+        include: {
+          users: {
+            select: {
+              id: true,
+              steamLogin: true,
+              createdAt: true,
+              orders: {
+                select: {
+                  id: true,
+                  status: true,
+                  totalAmount: true,
+                },
+              },
+            },
+          },
+        },
+      });
     }
 
     const signups = referral.users.length;
@@ -44,9 +76,9 @@ export async function GET() {
     let done = 0;
     let volume = 0;
 
-    for (const user of referral.users) {
-      if (user.orders.length > 0) ordered++;
-      for (const order of user.orders) {
+    for (const u of referral.users) {
+      if (u.orders.length > 0) ordered++;
+      for (const order of u.orders) {
         if (order.status === "PAID") {
           done++;
           volume += Number(order.totalAmount);
@@ -78,9 +110,10 @@ export async function GET() {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
+    const status = message === "Authentication required" ? 401 : 500;
     return NextResponse.json(
       { success: false, error: message },
-      { status: 500 },
+      { status },
     );
   }
 }

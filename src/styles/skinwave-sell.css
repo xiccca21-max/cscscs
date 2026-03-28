@@ -581,34 +581,68 @@
 .sell-guest-overlay {
   position: absolute;
   inset: 0;
-  top: 100px;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
+  background: rgba(245, 247, 250, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .sell-guest-overlay__content {
   text-align: center;
-  padding: 48px 32px;
+  padding: 48px 40px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  max-width: 420px;
+  width: 90%;
 }
 .sell-guest-overlay__icon {
-  width: 80px; height: 80px;
-  margin: 0 auto 20px;
+  width: 64px; height: 64px;
+  margin: 0 auto 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-xl);
-  background: var(--accent-soft);
-  color: var(--accent);
+  border-radius: 16px;
+  background: #0f172a;
+  color: #fff;
 }
 .sell-guest-overlay__content h3 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
+  color: #0f172a;
   margin-bottom: 8px;
 }
 .sell-guest-overlay__content p {
-  color: var(--text-sec);
-  margin-bottom: 24px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 28px;
+}
+.sell-guest-overlay .btn--primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 24px;
+  background: #0f172a;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sell-guest-overlay .btn--primary:hover {
+  background: #1e293b;
+}
+.sell-guest-overlay__note {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #94a3b8;
 }
 
 /* Scrollable inventory area */
@@ -833,6 +867,98 @@
   padding: 2px 0;
 }
 .sell-offer__items::-webkit-scrollbar { display: none; }
+
+/* Mini cards inside offer bar */
+.inv-card.inv-card--mini {
+  flex: 0 0 90px;
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
+  height: auto;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  transform: none;
+  transform-style: flat;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.inv-card.inv-card--mini:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border-color: rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+}
+.inv-card.inv-card--mini.selected {
+  transform: none;
+  opacity: 1;
+}
+.inv-card.inv-card--mini .inv-card__rarity-line {
+  height: 2px;
+}
+.inv-card.inv-card--mini .inv-card__img {
+  aspect-ratio: auto;
+  height: 56px;
+  padding: 4px;
+}
+.inv-card.inv-card--mini .inv-card__img::before {
+  display: none;
+}
+.inv-card.inv-card--mini .inv-card__skin {
+  width: 100%;
+  height: 100%;
+  max-height: 48px;
+  margin: 0;
+  padding: 2px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+}
+.inv-card.inv-card--mini .inv-card__info {
+  padding: 3px 5px 5px;
+  gap: 1px;
+}
+.inv-card.inv-card--mini .inv-card__name {
+  font-size: 8px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  color: rgba(255,255,255,0.8);
+}
+.inv-card.inv-card--mini .inv-card__weapon {
+  display: none;
+}
+.inv-card.inv-card--mini .inv-card__float-bar {
+  display: none;
+}
+.inv-card.inv-card--mini .inv-card__type {
+  display: none;
+}
+.inv-card.inv-card--mini .inv-card__stickers {
+  display: none;
+}
+.inv-card.inv-card--mini .inv-card__price {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+}
+.inv-card.inv-card--mini .inv-card__price::after {
+  font-size: 9px;
+}
+.inv-card.inv-card--mini .inv-card__cents {
+  font-size: 9px;
+  opacity: 0.7;
+}
 .sell-offer__empty {
   width: calc(100% + 40px);
   margin-left: -20px;
@@ -1246,10 +1372,7 @@
 .inv-card__price {
   font-size: 18px;
   font-weight: 800;
-  background: linear-gradient(135deg, var(--text) 30%, color-mix(in srgb, var(--rarity) 70%, var(--text)));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text);
   letter-spacing: -0.3px;
 }
 .inv-card__price::after {
@@ -1473,8 +1596,14 @@
 .sidebar-tradeurl__hint a:hover {
   text-decoration: underline;
 }
+.sidebar-tradeurl__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  gap: 8px;
+}
 .sell-tradeurl__status {
-  margin-top: 2px;
   font-size: 11px;
   min-height: 0;
   padding-left: 4px;
@@ -1482,6 +1611,32 @@
 }
 .sell-tradeurl__status.valid { color: var(--success); }
 .sell-tradeurl__status.invalid { color: var(--danger); }
+.sidebar-tradeurl__save {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(99,102,241,0.25);
+}
+.sidebar-tradeurl__save:hover {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+  transform: translateY(-1px);
+}
+.sidebar-tradeurl__save.saved {
+  background: linear-gradient(135deg, #10b981, #34d399);
+  box-shadow: 0 2px 6px rgba(16,185,129,0.25);
+}
 
 /* Progress steps (horizontal in topbar) */
 .sell-steps {
@@ -1691,12 +1846,13 @@
 }
 .sell-pay__methods {
   padding: 20px 18px 16px;
+  overflow: hidden;
 }
 
-/* Payment method grid — 4 in a row, square cards */
+/* Payment method grid — responsive, auto-fit */
 .pay-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
   gap: 10px;
   margin-bottom: 0;
 }
@@ -1705,9 +1861,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 18px 6px 14px;
-  aspect-ratio: 1;
+  gap: 8px;
+  padding: 14px 4px 12px;
+  min-width: 0;
   border-radius: 14px;
   border: 2px solid #e4e2ee;
   background: #fff;
@@ -1800,13 +1956,14 @@
   content: attr(data-tooltip);
   position: absolute;
   top: -32px;
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
+  right: 0;
+  transform: translateY(4px);
   background: #1a1a2e;
   color: #fff;
   font-size: 11px;
   font-weight: 600;
   padding: 4px 10px;
+  white-space: nowrap;
   border-radius: 6px;
   white-space: nowrap;
   pointer-events: none;
@@ -1816,12 +1973,20 @@
 }
 .pay-btn[data-tooltip]:hover::before {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
 }
 
+.pay-btn > span:last-child {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
 .pay-btn__icon {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -1843,12 +2008,12 @@
   object-fit: contain;
 }
 .pay-btn__img--circle {
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
 }
 .pay-btn__img--crypto {
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
 }
 .pay-btn__icon--card .pay-btn__img,
 .pay-btn__icon--bank .pay-btn__img {

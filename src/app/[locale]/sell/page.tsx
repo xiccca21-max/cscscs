@@ -8,6 +8,8 @@ import React, {
   useMemo,
 } from "react";
 import { useSession } from "@/components/session-provider";
+import { useCurrency } from "@/components/currency-provider";
+import { useTranslations } from "next-intl";
 
 interface InventoryItem {
   id: string;
@@ -51,26 +53,23 @@ type SortKey =
   | "float-asc"
   | "float-desc";
 
-const SORT_LABELS: Record<SortKey, string> = {
-  "price-desc": "High to Low",
-  "price-asc": "Low to High",
-  "name-asc": "Name A - Z",
-  "name-desc": "Name Z - A",
-  "float-asc": "Float - Best",
-  "float-desc": "Float - Worst",
-};
-
 function getWearShort(item: InventoryItem) {
   return item.wearShort || (item.wear ? WEAR_MAP[item.wear] : undefined);
 }
 
-function formatPrice(price: number) {
-  const [whole, cents] = price.toFixed(2).split(".");
-  return { whole, cents };
-}
-
 export default function SellPage() {
   const { user, loading: sessionLoading } = useSession();
+  const { format, formatParts, symbol } = useCurrency();
+  const t = useTranslations("sell");
+
+  const SORT_LABELS: Record<SortKey, string> = {
+    "price-desc": t("high2low"),
+    "price-asc": t("low2high"),
+    "name-asc": t("nameAZ"),
+    "name-desc": t("nameZA"),
+    "float-asc": t("floatBest"),
+    "float-desc": t("floatWorst"),
+  };
 
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loadingInventory, setLoadingInventory] = useState(false);
@@ -87,6 +86,7 @@ export default function SellPage() {
   const [selectedItems, setSelectedItems] = useState<InventoryItem[]>([]);
 
   const [tradeUrl, setTradeUrl] = useState("");
+  const [tradeUrlSaved, setTradeUrlSaved] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("balance");
   const [submitting, setSubmitting] = useState(false);
 
@@ -95,8 +95,18 @@ export default function SellPage() {
   /* ---- fetch inventory ---- */
   const fetchGame = useCallback(async (game: string) => {
     const gameApiMap: Record<string, string> = { cs2: "CS2", dota2: "DOTA2", tf2: "TF2", rust: "RUST" };
-    const res = await fetch(`/api/inventory?game=${gameApiMap[game] || "CS2"}`);
-    const json = await res.json();
+    let res: Response;
+    try {
+      res = await fetch(`/api/inventory?game=${gameApiMap[game] || "CS2"}`);
+    } catch {
+      return [];
+    }
+    let json: { success?: boolean; data?: { items?: Record<string, unknown>[] } };
+    try {
+      json = await res.json();
+    } catch {
+      return [];
+    }
     if (!json.success || !json.data?.items) return [];
     const wearMap: Record<string, string> = { "Factory New": "FN", "Minimal Wear": "MW", "Field-Tested": "FT", "Well-Worn": "WW", "Battle-Scarred": "BS" };
     return json.data.items.map((item: Record<string, unknown>) => {
@@ -122,18 +132,31 @@ export default function SellPage() {
 
   useEffect(() => {
     if (!user) return;
+    let cancelled = false;
     setLoadingInventory(true);
-    Promise.all([
-      fetchGame("cs2"),
-      fetchGame("dota2"),
-      fetchGame("tf2"),
-      fetchGame("rust"),
-    ])
-      .then(([cs2, dota2, tf2, rust]) => {
-        setInventory([...cs2, ...dota2, ...tf2, ...rust]);
-      })
-      .catch(() => {})
-      .finally(() => setLoadingInventory(false));
+
+    const loadAll = async () => {
+      const games = ["cs2", "dota2", "tf2", "rust"] as const;
+      let allItems: InventoryItem[] = [];
+
+      for (const game of games) {
+        if (cancelled) break;
+        try {
+          const items = await fetchGame(game);
+          if (cancelled) break;
+          allItems = [...allItems, ...items];
+          setInventory([...allItems]);
+        } catch {
+          // skip failed game
+        }
+      }
+    };
+
+    loadAll().finally(() => {
+      if (!cancelled) setLoadingInventory(false);
+    });
+
+    return () => { cancelled = true; };
   }, [user, fetchGame]);
 
   /* ---- derived ---- */
@@ -272,7 +295,29 @@ export default function SellPage() {
     }
   }, [canSubmit, selectedItems, tradeUrl, paymentMethod]);
 
-  /* close sort dropdown on outside click */
+  useEffect(() => {
+    if (!user) return;
+    const saved = localStorage.getItem("sw_tradeUrl");
+    if (saved) setTradeUrl(saved);
+  }, [user]);
+
+  const pasteTradeUrl = useCallback(async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) {
+        setTradeUrl(text);
+        setTradeUrlSaved(false);
+      }
+    } catch { /* clipboard access denied */ }
+  }, []);
+
+  const saveTradeUrl = useCallback(() => {
+    if (!tradeUrlValid) return;
+    localStorage.setItem("sw_tradeUrl", tradeUrl);
+    setTradeUrlSaved(true);
+    setTimeout(() => setTradeUrlSaved(false), 2000);
+  }, [tradeUrl, tradeUrlValid]);
+
   useEffect(() => {
     if (!sortOpen) return;
     const handler = (e: MouseEvent) => {
@@ -291,10 +336,10 @@ export default function SellPage() {
         <div className="sell-offer" id="sellOffer">
           <div className="sell-offer__header">
             <span className="sell-offer__total" id="offerTotal">
-              {selectedTotal.toFixed(2)}$
+              {format(selectedTotal)}
             </span>
             <span className="sell-offer__toggle">
-              You Offer
+              {t("offerLabel")}
               <span className="sell-offer__count" id="offerCount">
                 {selectedItems.length}
               </span>
@@ -313,11 +358,11 @@ export default function SellPage() {
               {selectedItems.length === 0 ? (
                 <div className="sell-offer__empty">
                   <svg className="sell-offer__empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 01-8 0" /></svg>
-                  <span className="sell-offer__empty-text">Select items from inventory below</span>
+                  <span className="sell-offer__empty-text">{t("offerEmpty")}</span>
                 </div>
               ) : (
                 selectedItems.map((item) => {
-                  const { whole, cents } = formatPrice(item.price);
+                  const { whole, cents } = formatParts(item.price);
                   return (
                     <div
                       key={item.id}
@@ -356,7 +401,7 @@ export default function SellPage() {
             <span className="sell-step__num">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4" /><circle cx="7.5" cy="20" r="1.5" /><circle cx="17.5" cy="20" r="1.5" /></svg>
             </span>
-            <span className="sell-step__label">Select Skins</span>
+            <span className="sell-step__label">{t("stepSelect")}</span>
           </div>
           <div className="sell-step__line">
             <span className="sell-step__line-fill" />
@@ -365,7 +410,7 @@ export default function SellPage() {
             <span className="sell-step__num">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" /></svg>
             </span>
-            <span className="sell-step__label">Trade URL</span>
+            <span className="sell-step__label">{t("stepTradeUrl")}</span>
           </div>
           <div className="sell-step__line">
             <span className="sell-step__line-fill" />
@@ -374,7 +419,7 @@ export default function SellPage() {
             <span className="sell-step__num">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /><path d="M6 16h4" /></svg>
             </span>
-            <span className="sell-step__label">Get Paid</span>
+            <span className="sell-step__label">{t("stepGetPaid")}</span>
           </div>
           <div className="sell-steps__progress">
             <div
@@ -391,20 +436,18 @@ export default function SellPage() {
         {/* ── LEFT: Inventory ── */}
         <div className="sell-inventory">
 
-          {/* Unified control panel */}
           <div className="sell-controls">
-            {/* Header + Stats + Tabs */}
             <div className="sell-inventory__header">
-              <h2 className="sell-inventory__title">Your Inventory</h2>
+              <h2 className="sell-inventory__title">{t("inventory")}</h2>
               <div className="sell-stats" id="sellStats">
                 <div className="sell-stats__item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>
-                  <span><strong id="statsCount">{filteredItems.length}</strong> items</span>
+                  <span><strong id="statsCount">{filteredItems.length}</strong> {t("itemsCount")}</span>
                 </div>
                 <div className="sell-stats__divider" />
                 <div className="sell-stats__item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
-                  <span>Total: <strong id="statsTotal">{statsTotal.toFixed(2)}$</strong></span>
+                  <span>{t("totalAmount")} <strong id="statsTotal">{format(statsTotal)}</strong></span>
                 </div>
               </div>
             </div>
@@ -444,7 +487,6 @@ export default function SellPage() {
               </button>
             </div>
 
-            {/* Search + Toolbar combined */}
             <div className="sell-toolbar" id="sellToolbar">
               <div className="sell-inventory__search">
                 <div className="search-wrap">
@@ -453,7 +495,7 @@ export default function SellPage() {
                     type="text"
                     className="input"
                     id="inventorySearch"
-                    placeholder="Search..."
+                    placeholder={t("searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -478,7 +520,7 @@ export default function SellPage() {
                       data-wear={w}
                       onClick={() => setActiveWear(w)}
                     >
-                      {w === "all" ? "All" : w}
+                      {w === "all" ? t("all") : w}
                     </button>
                   ))}
                 </div>
@@ -487,7 +529,7 @@ export default function SellPage() {
                     type="number"
                     className="input input--sm"
                     id="priceMin"
-                    placeholder="Min $"
+                    placeholder={`Min ${symbol}`}
                     min={0}
                     step={0.01}
                     value={priceMin}
@@ -498,7 +540,7 @@ export default function SellPage() {
                     type="number"
                     className="input input--sm"
                     id="priceMax"
-                    placeholder="Max $"
+                    placeholder={`Max ${symbol}`}
                     min={0}
                     step={0.01}
                     value={priceMax}
@@ -537,15 +579,15 @@ export default function SellPage() {
                 </div>
               </div>
               <div className="sell-toolbar__right">
-                <button className="toolbar-btn" id="selectAllBtn" onClick={selectAll}>
+                <button className="toolbar-btn toolbar-btn--accent" id="selectAllBtn" onClick={selectAll}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
-                  Select All
+                  {t("selectAll")}
                 </button>
                 <button className="toolbar-btn" id="clearAllBtn" onClick={clearAll}>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                  Clear
+                  {t("clearAll")}
                 </button>
-                <span className="sell-toolbar__count" id="inventoryCount">{filteredItems.length} items</span>
+                <span className="sell-toolbar__count" id="inventoryCount">{filteredItems.length} {t("itemsCount")}</span>
                 <div className="view-toggle" id="viewToggle">
                   <button
                     className={`view-toggle__btn${viewMode === "grid" ? " active" : ""}`}
@@ -568,46 +610,42 @@ export default function SellPage() {
             </div>
           </div>{/* /.sell-controls */}
 
-          {/* Scrollable inventory area */}
           <div className="sell-inventory__scroll" id="inventoryScroll">
 
-            {/* Guest overlay */}
             {isGuest && (
               <div className="sell-guest-overlay" id="guestOverlay">
                 <div className="sell-guest-overlay__content">
                   <div className="sell-guest-overlay__icon">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
                   </div>
-                  <h3>Sign in to view your inventory</h3>
-                  <p>Connect your Steam account to start selling skins</p>
+                  <h3>{t("loginOverlayTitle")}</h3>
+                  <p>{t("loginOverlayDesc")}</p>
                   <a href="/api/auth/steam" className="btn btn--primary btn--lg" id="guestSignIn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
-                    Sign in with Steam
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+                    {t("loginOverlayBtn")}
                   </a>
+                  <p className="sell-guest-overlay__note">{t("loginOverlayNote")}</p>
                 </div>
               </div>
             )}
 
-            {/* Empty state */}
             {isLoggedIn && !loadingInventory && filteredItems.length === 0 && (
               <div className="sell-empty" id="emptyState">
                 <div className="sell-empty__icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
                 </div>
-                <h4>No items found</h4>
-                <p>Try adjusting your filters or search query</p>
+                <h4>{t("noItemsFound")}</h4>
+                <p>{t("noItemsDesc")}</p>
               </div>
             )}
 
-            {/* Scroll shadow */}
             <div className="sell-inventory__scroll-shadow" id="scrollShadow" />
 
-            {/* Inventory grid */}
-            <div className={`sell-inventory__grid${viewMode === "list" ? " sell-inventory__grid--list" : ""}`} id="inventoryGrid">
+            <div className={`sell-inventory__grid${viewMode === "list" ? " list-view" : ""}`} id="inventoryGrid">
               {filteredItems.map((item) => {
                 const wearShort = getWearShort(item);
                 const floatPct = item.float != null ? (item.float * 100).toFixed(2) : null;
-                const { whole, cents } = formatPrice(item.price);
+                const { whole, cents } = formatParts(item.price);
                 const isSelected = selectedItems.some((s) => s.id === item.id);
 
                 return (
@@ -662,17 +700,17 @@ export default function SellPage() {
         {/* ── RIGHT: Payment Details ── */}
         <div className="sell-sidebar">
 
-          {/* Trade URL */}
           <div className="sidebar-tradeurl">
             <div className="sidebar-tradeurl__header">
-              <span className="sidebar-tradeurl__label">Trade Link</span>
+              <span className="sidebar-tradeurl__label">{t("tradeUrl")}</span>
               <a
                 href="https://steamcommunity.com/my/tradeoffers/privacy#trade_offer_access_url"
                 target="_blank"
                 rel="noreferrer"
                 className="sidebar-tradeurl__find"
               >
-                Find it here
+                {t("findTradeUrl")}
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               </a>
             </div>
             <div className="sidebar-tradeurl__input-wrap">
@@ -680,24 +718,41 @@ export default function SellPage() {
                 type="text"
                 className="sidebar-tradeurl__input"
                 id="tradeUrl"
-                placeholder="https://steamcommunity.com/tradeoffer/new/?partner=012345678&token=ABCDEFG12"
+                placeholder={t("tradeUrlPlaceholder")}
                 value={tradeUrl}
-                onChange={(e) => setTradeUrl(e.target.value)}
+                onChange={(e) => { setTradeUrl(e.target.value); setTradeUrlSaved(false); }}
               />
+              <button type="button" className="sidebar-tradeurl__paste" title="Paste from clipboard" onClick={pasteTradeUrl}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                Paste
+              </button>
             </div>
-            <div className="sell-tradeurl__status" id="tradeUrlStatus">
-              {tradeUrl && (tradeUrlValid ? "\u2713 Valid trade URL" : "\u2717 Invalid trade URL")}
+            <div className="sidebar-tradeurl__actions">
+              <div className="sell-tradeurl__status" id="tradeUrlStatus">
+                {tradeUrl && (tradeUrlValid ? "\u2713 Valid trade URL" : "\u2717 Invalid trade URL")}
+              </div>
+              {tradeUrlValid && (
+                <button
+                  type="button"
+                  className={`sidebar-tradeurl__save${tradeUrlSaved ? " saved" : ""}`}
+                  onClick={saveTradeUrl}
+                >
+                  {tradeUrlSaved ? (
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> Saved</>
+                  ) : (
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save</>
+                  )}
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Payment panel */}
           <div className="sell-pay" id="sellPanel">
             <h3 className="sell-pay__title">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /></svg>
-              Your Payment Details
+              {t("paySidebarTitle")}
             </h3>
 
-            {/* Payment method grid */}
             <div className="sell-pay__methods" id="paymentMethods">
               <div className="pay-grid">
                 <button
@@ -706,10 +761,11 @@ export default function SellPage() {
                   data-tooltip="Fee: 0%"
                   onClick={() => setPaymentMethod("balance")}
                 >
+                  <span className="pay-btn__badge">Best rate</span>
                   <span className="pay-btn__icon">
                     <img src="/icons/pay-balance.png" alt="Balance" className="pay-btn__img pay-btn__img--circle" />
                   </span>
-                  <span>Balance</span>
+                  <span>{t("payBalance")}</span>
                 </button>
                 <button
                   className={`pay-btn${paymentMethod === "card" ? " active" : ""}`}
@@ -720,7 +776,7 @@ export default function SellPage() {
                   <span className="pay-btn__icon pay-btn__icon--card">
                     <img src="/icons/pay-card.png" alt="Debit Card" className="pay-btn__img" />
                   </span>
-                  <span>Debit Card</span>
+                  <span>{t("payCard")}</span>
                 </button>
                 <button
                   className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`}
@@ -731,7 +787,7 @@ export default function SellPage() {
                   <span className="pay-btn__icon">
                     <img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" />
                   </span>
-                  <span>Crypto</span>
+                  <span>{t("payCrypto")}</span>
                 </button>
                 <button
                   className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`}
@@ -742,27 +798,26 @@ export default function SellPage() {
                   <span className="pay-btn__icon pay-btn__icon--bank">
                     <img src="/icons/pay-bank.png" alt="Bank" className="pay-btn__img" />
                   </span>
-                  <span>Bank</span>
+                  <span>{t("payBank")}</span>
                 </button>
               </div>
             </div>
 
-            {/* Bottom section with gradient */}
             <div className="sell-pay__bottom">
               <div className="sell-pay__summary">
                 <div className="pay-summary-row">
                   <span className="pay-summary-row__label">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v12" /><path d="M15.5 9.5a3 3 0 00-3-2.5H11a3 3 0 000 6h2a3 3 0 010 6h-.5a3 3 0 01-3-2.5" /></svg>
-                    Amount
+                    {t("summaryAmount")}
                   </span>
-                  <span id="summaryItems">{selectedTotal.toFixed(2)}$</span>
+                  <span id="summaryItems">{format(selectedTotal)}</span>
                 </div>
                 <div className="pay-summary-row pay-summary-row--total">
                   <span className="pay-summary-row__label">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /><path d="M20 21H4" /></svg>
-                    You Receive
+                    {t("youReceive")}
                   </span>
-                  <span id="summaryTotal">{youReceive.toFixed(2)}$</span>
+                  <span id="summaryTotal">{format(youReceive)}</span>
                 </div>
               </div>
 
@@ -773,21 +828,21 @@ export default function SellPage() {
                 onClick={handleSubmit}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
-                {submitting ? "PROCESSING..." : "SELL YOUR SKINS NOW"}
+                {submitting ? "..." : t("sellNow")}
               </button>
 
               <div className="sell-pay__promo">
                 <div className="promo-input-wrap">
                   <svg className="promo-input__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12" /><path d="M2 7h20v5H2z" /><path d="M12 22V7" /><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z" /></svg>
-                  <input type="text" className="promo-input" placeholder="Enter promo code" />
+                  <input type="text" className="promo-input" placeholder={t("promoPlaceholder")} />
                   <button className="promo-input__btn" onClick={() => {
                     const input = document.querySelector<HTMLInputElement>('.promo-input');
                     if (input && input.value.trim()) {
                       input.classList.add('promo-input--applied');
                       const btn = input.nextElementSibling as HTMLElement;
-                      if (btn) { btn.textContent = 'Applied!'; setTimeout(() => { btn.textContent = 'Apply'; }, 2000); }
+                      if (btn) { btn.textContent = t("promoApply"); setTimeout(() => { btn.textContent = t("promoApply"); }, 2000); }
                     }
-                  }}>Apply</button>
+                  }}>{t("promoApply")}</button>
                 </div>
               </div>
             </div>

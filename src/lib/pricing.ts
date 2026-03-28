@@ -1,7 +1,8 @@
 import { db } from "./db";
 import type { Game } from "@prisma/client";
 
-const TM_API_BASE = "https://market.csgo.com/api/v2";
+const TM_PRICES_URL = "https://market.csgo.com/api/v2/prices/USD.json";
+const CACHE_TTL = 10 * 60 * 1000;
 
 export interface ItemPrice {
   externalId: string;
@@ -12,63 +13,115 @@ export interface ItemPrice {
   available: boolean;
 }
 
-export async function getItemPrice(
-  marketHashName: string,
-  game: Game,
-): Promise<ItemPrice | null> {
-  const apiKey = process.env.TM_MARKET_API_KEY;
-  if (!apiKey) throw new Error("TM_MARKET_API_KEY is not configured");
+let tmPriceCache: Map<string, number> | null = null;
+let tmCacheTimestamp = 0;
+
+async function loadTmPrices(): Promise<Map<string, number>> {
+  if (tmPriceCache && Date.now() - tmCacheTimestamp < CACHE_TTL) {
+    return tmPriceCache;
+  }
 
   try {
-    const encoded = encodeURIComponent(marketHashName);
-    const res = await fetch(
-      `${TM_API_BASE}/prices/class_instance/${encoded}?key=${apiKey}`,
-      { next: { revalidate: 300 } },
-    );
-    if (!res.ok) return null;
-
+    const res = await fetch(TM_PRICES_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(`TM API ${res.status}`);
     const data = await res.json();
-    const price = parseFloat(data?.data?.price || "0");
-    if (price <= 0) return null;
+    const map = new Map<string, number>();
+    if (Array.isArray(data?.items)) {
+      for (const item of data.items) {
+        const price = parseFloat(item.price);
+        if (price > 0) {
+          map.set(item.market_hash_name, price);
+        }
+      }
+    }
+    tmPriceCache = map;
+    tmCacheTimestamp = Date.now();
+    return map;
+  } catch {
+    return tmPriceCache ?? new Map();
+  }
+}
 
-    const adjusted = await applyPricingRules(marketHashName, game, price);
+const GAME_APP_IDS: Record<string, number> = {
+  CS2: 730,
+  DOTA2: 570,
+  TF2: 440,
+  RUST: 252490,
+};
 
-    return {
-      externalId: marketHashName,
-      name: marketHashName,
-      basePrice: price,
-      buyoutPrice: adjusted.price,
-      currency: "USD",
-      available: !adjusted.excluded,
-    };
+async function getSteamMarketPrice(
+  marketHashName: string,
+  game: Game,
+): Promise<number | null> {
+  try {
+    const appId = GAME_APP_IDS[game] ?? 730;
+    const encoded = encodeURIComponent(marketHashName);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const res = await fetch(
+      `https://steamcommunity.com/market/priceoverview/?appid=${appId}&currency=1&market_hash_name=${encoded}`,
+      { signal: controller.signal, cache: "no-store" },
+    );
+    clearTimeout(timeout);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const raw = data?.lowest_price || data?.median_price;
+    if (!raw) return null;
+    const price = parseFloat(raw.replace(/[^0-9.]/g, ""));
+    return price > 0 ? price : null;
   } catch {
     return null;
   }
 }
 
-async function applyPricingRules(
+interface PricingRuleRow {
+  game: Game | null;
+  itemExternalId: string | null;
+  adjustmentType: string;
+  adjustmentValue: unknown;
+  isExcluded: boolean;
+}
+
+async function loadAllPricingRules(
+  game: Game,
+  itemNames: string[],
+): Promise<PricingRuleRow[]> {
+  if (itemNames.length === 0) return [];
+  try {
+    return await db.pricingRule.findMany({
+      where: {
+        OR: [
+          { game: null, itemExternalId: null },
+          { game, itemExternalId: null },
+          { itemExternalId: { in: itemNames } },
+        ],
+      },
+      orderBy: [
+        { game: { sort: "asc", nulls: "first" } },
+        { itemExternalId: { sort: "asc", nulls: "first" } },
+      ],
+    });
+  } catch {
+    return [];
+  }
+}
+
+function applyRulesInMemory(
+  basePrice: number,
   itemName: string,
   game: Game,
-  basePrice: number,
-): Promise<{ price: number; excluded: boolean }> {
-  const rules = await db.pricingRule.findMany({
-    where: {
-      OR: [
-        { game: null, itemExternalId: null },
-        { game, itemExternalId: null },
-        { itemExternalId: itemName },
-      ],
-    },
-    orderBy: [
-      { game: { sort: "asc", nulls: "first" } },
-      { itemExternalId: { sort: "asc", nulls: "first" } },
-    ],
-  });
-
+  allRules: PricingRuleRow[],
+): { price: number; excluded: boolean } {
   let price = basePrice;
   let excluded = false;
 
-  for (const rule of rules) {
+  for (const rule of allRules) {
+    const matchesGlobal = rule.game === null && rule.itemExternalId === null;
+    const matchesGame = rule.game === game && rule.itemExternalId === null;
+    const matchesItem = rule.itemExternalId === itemName;
+
+    if (!matchesGlobal && !matchesGame && !matchesItem) continue;
+
     if (rule.isExcluded) {
       excluded = true;
       continue;
@@ -88,13 +141,58 @@ export async function getBulkPrices(
   items: { name: string; game: Game }[],
 ): Promise<Map<string, ItemPrice>> {
   const priceMap = new Map<string, ItemPrice>();
-  const results = await Promise.allSettled(
-    items.map((item) => getItemPrice(item.name, item.game)),
-  );
-  results.forEach((result, i) => {
-    if (result.status === "fulfilled" && result.value) {
-      priceMap.set(items[i].name, result.value);
+  if (items.length === 0) return priceMap;
+
+  const game = items[0].game;
+  const t0 = Date.now();
+
+  let tmPrices: Map<string, number>;
+  let allRules: PricingRuleRow[] = [];
+
+  try {
+    const results = await Promise.allSettled([
+      loadTmPrices(),
+      loadAllPricingRules(game, items.map((i) => i.name)),
+    ]);
+
+    tmPrices = results[0].status === "fulfilled" ? results[0].value : new Map();
+    allRules = results[1].status === "fulfilled" ? results[1].value : [];
+
+    if (results[0].status === "rejected") console.error(`[pricing] TM load failed:`, results[0].reason);
+    if (results[1].status === "rejected") console.error(`[pricing] Rules load failed:`, results[1].reason);
+  } catch (e) {
+    console.error(`[pricing] Init failed:`, e);
+    tmPrices = new Map();
+  }
+
+  console.log(`[pricing] TM+rules loaded in ${Date.now() - t0}ms, tm=${tmPrices.size}, rules=${allRules.length}`);
+
+  const DEFAULT_BUYOUT_RATE = 0.92;
+
+  for (const item of items) {
+    try {
+      const tmPrice = tmPrices.get(item.name);
+      if (tmPrice && tmPrice > 0) {
+        let buyout = tmPrice * DEFAULT_BUYOUT_RATE;
+        if (allRules.length > 0) {
+          const adjusted = applyRulesInMemory(tmPrice, item.name, item.game, allRules);
+          buyout = adjusted.price;
+          if (adjusted.excluded) continue;
+        }
+        priceMap.set(item.name, {
+          externalId: item.name,
+          name: item.name,
+          basePrice: tmPrice,
+          buyoutPrice: Math.round(buyout * 100) / 100,
+          currency: "USD",
+          available: true,
+        });
+      }
+    } catch (e) {
+      console.error(`[pricing] Error pricing ${item.name}:`, e);
     }
-  });
+  }
+
+  console.log(`[pricing] TM matched ${priceMap.size}/${items.length} in ${Date.now() - t0}ms`);
   return priceMap;
 }

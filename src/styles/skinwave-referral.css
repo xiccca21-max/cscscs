@@ -548,3 +548,226 @@ body.page-dark {
     width: 100%;
   }
 }
+
+/* Guest sign-in prompt */
+.ref-guest {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+.ref-guest__inner {
+  text-align: center;
+  max-width: 400px;
+}
+.ref-guest__inner svg {
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.ref-guest__inner h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-bottom: 20px;
+}
+.ref-guest__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+  transition: all 0.2s;
+}
+.ref-guest__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(99,102,241,0.4);
+}
+
+/* ═══════════════════════════════════════════════
+   REFERRAL LOGIN PAGE
+   ═══════════════════════════════════════════════ */
+
+.ref-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #0f1117;
+  padding: 40px 20px;
+}
+
+.ref-login__wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.ref-login__card {
+  width: 100%;
+  max-width: 420px;
+  background: #181a24;
+  border: 1px solid #1e2030;
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+}
+
+.ref-login__header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.ref-login__logo {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, #818cf8, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+.ref-login__title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+}
+
+.ref-login__sub {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.ref-login__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ref-login__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ref-login__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ref-login__label svg {
+  color: #6366f1;
+}
+
+.ref-login__input-wrap {
+  position: relative;
+}
+
+.ref-login__input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #1e2030;
+  background: #0f1117;
+  color: #e2e8f0;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ref-login__input::placeholder {
+  color: #475569;
+}
+
+.ref-login__input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+.ref-login__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #f87171;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ref-login__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+  margin-top: 4px;
+}
+
+.ref-login__btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(99,102,241,0.4);
+}
+
+.ref-login__btn:active {
+  transform: translateY(0);
+}
+
+.ref-login__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ref-login__spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: ref-spin 0.6s linear infinite;
+}
+
+@keyframes ref-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .ref-login__card {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+  .ref-login__logo {
+    font-size: 20px;
+  }
+  .ref-login__title {
+    font-size: 18px;
+  }
+}

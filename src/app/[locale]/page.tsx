@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 const PAYOUT_NAMES = [
   "Alex C.", "Maria S.", "Denis P.", "John K.", "Emma R.",
@@ -11,6 +12,8 @@ const PAYOUT_NAMES = [
 const SLIDE_COUNT = 7;
 
 export default function HomePage() {
+  const t = useTranslations("landing");
+
   /* ── A) Payout rotation ── */
   const payoutIdxRef = useRef(0);
   const payoutRowRefs = useRef<(HTMLDivElement | null)[]>([null, null, null]);
@@ -95,63 +98,80 @@ export default function HomePage() {
 
   /* ── D) Scroll reveal ── */
   useEffect(() => {
-    const els = document.querySelectorAll(".fade-up");
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          obs.unobserve(entry.target);
-        }
-      });
-    });
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
+    const init = () => {
+      const els = document.querySelectorAll(".fade-up");
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      els.forEach((el) => obs.observe(el));
+      return obs;
+    };
+    const raf = requestAnimationFrame(() => { obsRef = init(); });
+    let obsRef: IntersectionObserver | null = null;
+    return () => { cancelAnimationFrame(raf); obsRef?.disconnect(); };
   }, []);
 
   /* ── E) Card stack fan ── */
   useEffect(() => {
-    const section = document.querySelector(".games-section");
-    const stack = document.querySelector(".card-stack");
-    if (!section || !stack) return;
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        stack.classList.toggle("card-stack--fanned", entry.isIntersecting);
-      });
+    let obs: IntersectionObserver | null = null;
+    const raf = requestAnimationFrame(() => {
+      const section = document.querySelector(".games-section");
+      const stack = document.querySelector(".card-stack");
+      if (!section || !stack) return;
+      obs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            stack.classList.add("card-stack--fanned");
+            obs!.unobserve(section);
+          }
+        });
+      }, { threshold: 0.15 });
+      obs.observe(section);
     });
-    obs.observe(section);
-    return () => obs.disconnect();
+    return () => { cancelAnimationFrame(raf); obs?.disconnect(); };
   }, []);
 
   /* ── F) Steps timeline ── */
   useEffect(() => {
-    const el = document.querySelector(".steps-timeline");
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) el.classList.add("is-visible");
-        });
-      },
-      { threshold: 0.3 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
+    let obs: IntersectionObserver | null = null;
+    const raf = requestAnimationFrame(() => {
+      const el = document.querySelector(".steps-timeline");
+      if (!el) return;
+      obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) el.classList.add("is-visible");
+          });
+        },
+        { threshold: 0.15 }
+      );
+      obs.observe(el);
+    });
+    return () => { cancelAnimationFrame(raf); obs?.disconnect(); };
   }, []);
 
   /* ── G) Features grid stagger ── */
   useEffect(() => {
-    const el = document.querySelector(".features__grid");
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) el.classList.add("is-visible");
-        });
-      },
-      { threshold: 0.2 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
+    let obs: IntersectionObserver | null = null;
+    const raf = requestAnimationFrame(() => {
+      const el = document.querySelector(".features__grid");
+      if (!el) return;
+      obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) el.classList.add("is-visible");
+          });
+        },
+        { threshold: 0.1 }
+      );
+      obs.observe(el);
+    });
+    return () => { cancelAnimationFrame(raf); obs?.disconnect(); };
   }, []);
 
   return (
@@ -171,19 +191,19 @@ export default function HomePage() {
         <div className="hero__inner container">
           <div className="hero__content">
             <h1 className="hero__title">
-              <span className="hero__title-thin">Sell your</span>
-              <span className="hero__title-bold"><span className="hero__title-gradient">CS2 skins</span></span>
-            </h1>
+              <span className="hero__title-thin">{t("heroTitleThin")}</span>
+              <span className="hero__title-bold"><span className="hero__title-gradient">{t("heroTitleGradient")}</span></span>
+          </h1>
             <p className="hero__sub">
-              We buy your CS2, Dota 2, TF2 &amp; Rust skins directly. Get up to 95% of market value with fast payout. No middlemen.
+              {t("heroSubtitle")}
             </p>
             <div className="hero__cta">
               <Link href="/sell" className="hero-btn hero-btn--primary">
                 <span className="hero-btn__bg"></span>
                 <span className="hero-btn__shimmer"></span>
-                <span className="hero-btn__label">Start Selling</span>
+                <span className="hero-btn__label">{t("heroCta")}</span>
                 <svg className="hero-btn__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-              </Link>
+          </Link>
             </div>
           </div>
           <div className="hero__visual">
@@ -238,7 +258,7 @@ export default function HomePage() {
             <div className="hero__payouts">
               <div className="hero__payouts-header">
                 <span className="hero__payouts-dot"></span>
-                Recent payouts
+                {t("recentPayouts")}
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[0] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
                 <div className="hero__payout-user"><span>A</span> Alex C.</div>
@@ -257,11 +277,11 @@ export default function HomePage() {
         </div>
         <div className="hero__stats-bar">
           <div className="container hero__stats-inner">
-            <span><strong>15K+</strong> Skins Sold</span>
+            <span><strong>15K+</strong> {t("statsSkins")}</span>
             <span className="hero__stats-dot">&bull;</span>
-            <span><strong>12K+</strong> Sellers</span>
+            <span><strong>12K+</strong> {t("statsSellers")}</span>
             <span className="hero__stats-dot">&bull;</span>
-            <span><strong>4.87</strong> Rating</span>
+            <span><strong>4.87</strong> {t("statsRating")}</span>
           </div>
         </div>
       </section>
@@ -269,8 +289,8 @@ export default function HomePage() {
       {/* ═══ HOW IT WORKS ═══ */}
       <section className="steps-section" id="howItWorks">
         <div className="container">
-          <h2 className="steps-section__title fade-up">How It <span>Works</span></h2>
-          <p className="steps-section__sub fade-up">Sell your skins in 3 simple steps</p>
+          <h2 className="steps-section__title fade-up">{t("stepsTitle")} <span>{t("stepsTitleAccent")}</span></h2>
+          <p className="steps-section__sub fade-up">{t("stepsSub")}</p>
 
           <div className="steps-timeline">
             <div className="steps-timeline__line">
@@ -284,10 +304,10 @@ export default function HomePage() {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
                 </div>
                 <div className="step__content">
-                  <h4>Sign in with Steam</h4>
-                  <p>Log in securely through your Steam account. No password sharing required.</p>
+                  <h4>{t("step1Title")}</h4>
+                  <p>{t("step1Desc")}</p>
                 </div>
-                <a href="/api/auth/steam" className="step__cta" id="signInStep">Sign In <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg></a>
+                <a href="/api/auth/steam" className="step__cta" id="signInStep">{t("step1Cta")} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg></a>
               </div>
             </div>
 
@@ -298,10 +318,10 @@ export default function HomePage() {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
                 </div>
                 <div className="step__content">
-                  <h4>Select Your Items</h4>
-                  <p>Choose skins from your inventory, enter your Trade URL and select a payout method.</p>
+                  <h4>{t("step2Title")}</h4>
+                  <p>{t("step2Desc")}</p>
                 </div>
-                <Link href="/sell" className="step__cta">Add Trade URL <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg></Link>
+                <Link href="/sell" className="step__cta">{t("step2Cta")} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg></Link>
               </div>
             </div>
 
@@ -312,10 +332,10 @@ export default function HomePage() {
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
                 </div>
                 <div className="step__content">
-                  <h4>Get Your Money</h4>
-                  <p>Accept the trade offer and receive your payout via card, crypto or site balance.</p>
+                  <h4>{t("step3Title")}</h4>
+                  <p>{t("step3Desc")}</p>
                 </div>
-                <Link href="/sell" className="step__cta">Start Selling <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg></Link>
+                <Link href="/sell" className="step__cta">{t("step3Cta")} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg></Link>
               </div>
             </div>
           </div>
@@ -325,40 +345,40 @@ export default function HomePage() {
       {/* ═══ SUPPORTED GAMES ═══ */}
       <section className="games-section fade-up">
         <div className="container">
-          <h2 className="section-title">Supported <span>Games</span></h2>
-          <p className="section-sub">We buy skins from all major Steam games</p>
+          <h2 className="section-title">{t("gamesTitle")} <span>{t("gamesTitleAccent")}</span></h2>
+          <p className="section-sub">{t("gamesSub")}</p>
 
           <div className="card-stack">
-            <div className="card-stack__card" style={{"--i":0,"--g1":"#e2740e","--g2":"#c2590a","--bg-img":"url('https://cdn.cloudflare.steamstatic.com/steam/apps/730/capsule_616x353.jpg')"} as React.CSSProperties}>
+            <div className="card-stack__card" data-i="0" style={{"--g1":"#e2740e","--g2":"#c2590a","--bg-img":"url('https://cdn.cloudflare.steamstatic.com/steam/apps/730/capsule_616x353.jpg')"} as React.CSSProperties}>
               <span className="card-stack__tag">CS2</span>
               <div className="card-stack__glass">
                 <div className="card-stack__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><line x1="12" y1="3" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="21" /><line x1="3" y1="12" x2="7" y2="12" /><line x1="17" y1="12" x2="21" y2="12" /><circle cx="12" cy="12" r="1.5" fill="#fff" stroke="none" /></svg></div>
-                <h3>Counter-Strike 2</h3>
-                <p>Knives, gloves, rifles, pistols and more</p>
+                <h3>{t("gameCs2")}</h3>
+                <p>{t("gameCs2Desc")}</p>
               </div>
             </div>
-            <div className="card-stack__card" style={{"--i":1,"--g1":"#dc2626","--g2":"#b91c1c","--bg-img":"url('https://cdn.cloudflare.steamstatic.com/steam/apps/570/capsule_616x353.jpg')"} as React.CSSProperties}>
+            <div className="card-stack__card" data-i="1" style={{"--g1":"#dc2626","--g2":"#b91c1c","--bg-img":"url('https://cdn.cloudflare.steamstatic.com/steam/apps/570/capsule_616x353.jpg')"} as React.CSSProperties}>
               <span className="card-stack__tag">DOTA 2</span>
               <div className="card-stack__glass">
                 <div className="card-stack__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 8v8l8 6 8-6V8l-8-6z" stroke="#fff" strokeWidth="2" strokeLinejoin="round" /><path d="M12 8v8M8 12h8" stroke="#fff" strokeWidth="2" strokeLinecap="round" /></svg></div>
-                <h3>Dota 2</h3>
-                <p>Arcanas, immortals, sets and treasures</p>
+                <h3>{t("gameDota")}</h3>
+                <p>{t("gameDotaDesc")}</p>
               </div>
             </div>
-            <div className="card-stack__card" style={{"--i":2,"--g1":"#ca8a04","--g2":"#a16207","--bg-img":"url('https://cdn.cloudflare.steamstatic.com/steam/apps/440/capsule_616x353.jpg')"} as React.CSSProperties}>
+            <div className="card-stack__card" data-i="2" style={{"--g1":"#ca8a04","--g2":"#a16207","--bg-img":"url('https://cdn.cloudflare.steamstatic.com/steam/apps/440/capsule_616x353.jpg')"} as React.CSSProperties}>
               <span className="card-stack__tag">TF2</span>
               <div className="card-stack__glass">
                 <div className="card-stack__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 2-2 3-4 3s-4-1-4-3a4 4 0 0 1 4-4z" /><path d="M14.5 9l2.5 4H7l2.5-4" /><rect x="8" y="13" width="8" height="4" rx="1" /><path d="M10 17v3M14 17v3" /></svg></div>
-                <h3>Team Fortress 2</h3>
-                <p>Unusuals, weapons, cosmetics and keys</p>
+                <h3>{t("gameTf2")}</h3>
+                <p>{t("gameTf2Desc")}</p>
               </div>
             </div>
-            <div className="card-stack__card" style={{"--i":3,"--g1":"#16a34a","--g2":"#15803d","--bg-img":"url('https://cdn.cloudflare.steamstatic.com/steam/apps/252490/capsule_616x353.jpg')"} as React.CSSProperties}>
+            <div className="card-stack__card" data-i="3" style={{"--g1":"#16a34a","--g2":"#15803d","--bg-img":"url('https://cdn.cloudflare.steamstatic.com/steam/apps/252490/capsule_616x353.jpg')"} as React.CSSProperties}>
               <span className="card-stack__tag">RUST</span>
               <div className="card-stack__glass">
                 <div className="card-stack__icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /></svg></div>
-                <h3>Rust</h3>
-                <p>Skins, doors, weapons and clothing</p>
+                <h3>{t("gameRust")}</h3>
+                <p>{t("gameRustDesc")}</p>
               </div>
             </div>
           </div>
@@ -368,8 +388,8 @@ export default function HomePage() {
       {/* ═══ PAYMENT METHODS ═══ */}
       <section className="payouts-section fade-up">
         <div className="container">
-          <h2 className="payouts-section__title">Payout <span>Methods</span></h2>
-          <p className="payouts-section__sub">Choose the most convenient way to receive your money</p>
+          <h2 className="payouts-section__title">{t("payoutTitle")} <span>{t("payoutTitleAccent")}</span></h2>
+          <p className="payouts-section__sub">{t("payoutSub")}</p>
           <div className="payouts-grid">
             <div className="payout-card" style={{"--pc":"#1A1F71"} as React.CSSProperties}>
               <div className="payout-card__inner payout-card__front">
@@ -377,16 +397,16 @@ export default function HomePage() {
                   <svg width="40" height="28" viewBox="0 0 48 32"><rect width="48" height="32" rx="4" fill="#1A1F71" /><path d="M20.2 10.5l-3.8 11h-2.8l-1.9-8.8c-.1-.5-.3-.6-.7-.8-.7-.3-1.8-.7-2.8-.9l.1-.5h4.5c.6 0 1.1.4 1.2 1l1.1 5.9 2.8-6.9h2.3zm9.2 7.4c0-2.9-4-3.1-4-4.4 0-.4.4-.8 1.2-.9.6-.1 1.8-.1 2.5.3l.5-2.1c-.6-.2-1.4-.4-2.4-.4-2.5 0-4.3 1.3-4.3 3.2 0 1.4 1.3 2.2 2.2 2.6 1 .5 1.3.8 1.3 1.2 0 .7-.8 1-1.5 1-.9 0-1.7-.2-2.4-.5l-.5 2.2c.7.3 1.7.4 2.7.4 2.7 0 4.5-1.3 4.5-3.3l.2-.3zm6.7 3.6h2.5l-2.2-11h-2.3c-.5 0-.9.3-1.1.7l-3.8 10.3h2.7l.5-1.5h3.3l.4 1.5zm-2.8-3.5l1.4-3.7.8 3.7h-2.2z" fill="#fff" /></svg>
                   <svg width="40" height="28" viewBox="0 0 48 32"><rect width="48" height="32" rx="4" fill="#EB001B" opacity="0" /><circle cx="18" cy="16" r="10" fill="#EB001B" /><circle cx="30" cy="16" r="10" fill="#F79E1B" /><path d="M24 8.6a10 10 0 0 1 3.7 7.4A10 10 0 0 1 24 23.4 10 10 0 0 1 20.3 16 10 10 0 0 1 24 8.6z" fill="#FF5F00" /></svg>
                 </div>
-                <span className="payout-card__badge">Instant</span>
-                <h3>Visa / Mastercard</h3>
-                <p>Funds arrive within minutes</p>
+                <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
+                <h3>{t("payoutVisa")}</h3>
+                <p>{t("payoutVisaDesc")}</p>
               </div>
               <div className="payout-card__inner payout-card__back">
-                <h4>Details</h4>
+                <h4>{t("payoutDetails")}</h4>
                 <ul>
-                  <li>Min. withdrawal: 1$</li>
-                  <li>Processing: Instant</li>
-                  <li>Fee: 0%</li>
+                  <li>{t("payoutMinWd")}: 1$</li>
+                  <li>{t("payoutProcessing")}: {t("payoutBadgeInstant")}</li>
+                  <li>{t("payoutFee")}: 0%</li>
                 </ul>
               </div>
             </div>
@@ -395,16 +415,16 @@ export default function HomePage() {
                 <div className="payout-card__logo-wrap">
                   <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A" /><path d="M22.5 14c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.6 2.6c-.4-.1-.9-.2-1.3-.3l.7-2.6-1.7-.4-.7 2.7c-.4-.1-.7-.2-1-.2v-.1l-2.3-.6-.4 1.8s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c0 .1.1.1.1.1h-.1l-1.2 4.7c-.1.2-.3.6-.8.4 0 0-1.2-.3-1.2-.3l-.8 1.9 2.2.5c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.7.4.7-2.8c2.8.5 5 .3 5.9-2.2.7-2-.1-3.2-1.5-3.9 1.1-.3 1.9-1 2.1-2.6zm-3.7 5.2c-.5 2.1-4.1 1-5.3.7l1-3.8c1.1.3 4.9.8 4.3 3.1zm.5-5.3c-.5 1.9-3.5.9-4.4.7l.8-3.4c1 .2 4.1.7 3.6 2.7z" fill="#fff" /></svg>
                 </div>
-                <span className="payout-card__badge">~10 min</span>
-                <h3>Bitcoin</h3>
-                <p>On-chain transfer with low fees</p>
+                <span className="payout-card__badge">{t("payoutBadge10m")}</span>
+                <h3>{t("payoutBtc")}</h3>
+                <p>{t("payoutBtcDesc")}</p>
               </div>
               <div className="payout-card__inner payout-card__back">
-                <h4>Details</h4>
+                <h4>{t("payoutDetails")}</h4>
                 <ul>
-                  <li>Min. withdrawal: 10$</li>
-                  <li>Processing: ~10 min</li>
-                  <li>Network: BTC</li>
+                  <li>{t("payoutMinWd")}: 10$</li>
+                  <li>{t("payoutProcessing")}: {t("payoutBadge10m")}</li>
+                  <li>{t("payoutNetwork")}: BTC</li>
                 </ul>
               </div>
             </div>
@@ -413,16 +433,16 @@ export default function HomePage() {
                 <div className="payout-card__logo-wrap">
                   <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B" /><path d="M17.9 17.2v0c-.1 0-.7.1-2 .1-1 0-1.7 0-1.9-.1v0c-3.8-.2-6.6-.8-6.6-1.6s2.8-1.5 6.6-1.6v2.6c.3 0 1 .1 2 .1 1.2 0 1.8-.1 1.9-.1v-2.6c3.8.2 6.6.8 6.6 1.6s-2.8 1.4-6.6 1.6zm0-3.5V11h5.3V8H8.9v3h5.3v2.7c-4.3.2-7.5 1.1-7.5 2.1s3.2 1.9 7.5 2.1v7.6h3.7v-7.6c4.3-.2 7.5-1.1 7.5-2.1s-3.2-1.9-7.5-2.1z" fill="#fff" /></svg>
                 </div>
-                <span className="payout-card__badge">Instant</span>
-                <h3>USDT (TRC-20)</h3>
-                <p>No volatility, instant transfer</p>
+                <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
+                <h3>{t("payoutUsdt")}</h3>
+                <p>{t("payoutUsdtDesc")}</p>
               </div>
               <div className="payout-card__inner payout-card__back">
-                <h4>Details</h4>
+                <h4>{t("payoutDetails")}</h4>
                 <ul>
-                  <li>Min. withdrawal: 5$</li>
-                  <li>Processing: Instant</li>
-                  <li>Network: TRC-20</li>
+                  <li>{t("payoutMinWd")}: 5$</li>
+                  <li>{t("payoutProcessing")}: {t("payoutBadgeInstant")}</li>
+                  <li>{t("payoutNetwork")}: TRC-20</li>
                 </ul>
               </div>
             </div>
@@ -431,16 +451,16 @@ export default function HomePage() {
                 <div className="payout-card__logo-wrap">
                   <svg width="44" height="44" viewBox="0 0 32 32"><rect width="32" height="32" rx="16" fill="#6366f1" /><path d="M8 12h16M8 16h12M8 20h8" stroke="#fff" strokeWidth="2" strokeLinecap="round" /><rect x="20" y="18" width="5" height="4" rx="1" fill="#fff" opacity="0.7" /></svg>
                 </div>
-                <span className="payout-card__badge">1–2 days</span>
-                <h3>Bank Transfer</h3>
-                <p>Direct transfer to your bank</p>
+                <span className="payout-card__badge">{t("payoutBadge12d")}</span>
+                <h3>{t("payoutBank")}</h3>
+                <p>{t("payoutBankDesc")}</p>
               </div>
               <div className="payout-card__inner payout-card__back">
-                <h4>Details</h4>
+                <h4>{t("payoutDetails")}</h4>
                 <ul>
-                  <li>Min. withdrawal: 50$</li>
-                  <li>Processing: 1–2 days</li>
-                  <li>Fee: 0%</li>
+                  <li>{t("payoutMinWd")}: 50$</li>
+                  <li>{t("payoutProcessing")}: {t("payoutBadge12d")}</li>
+                  <li>{t("payoutFee")}: 0%</li>
                 </ul>
               </div>
             </div>
@@ -448,7 +468,7 @@ export default function HomePage() {
 
           <div className="payouts-notice">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-            <p><strong>CS2 Trade Hold:</strong> Counter-Strike 2 items may be subject to Steam&apos;s trade hold period. Payment is processed after the hold ends and items are received. Other games are not affected.</p>
+            <p><strong>{t("payoutNoticeStrong")}</strong> {t("payoutNotice")}</p>
           </div>
         </div>
       </section>
@@ -456,8 +476,8 @@ export default function HomePage() {
       {/* ═══ REVIEWS CAROUSEL ═══ */}
       <section className="reviews-section" id="reviews">
         <div className="container">
-          <h2 className="section-title fade-up">What Sellers <span>Say</span></h2>
-          <p className="section-sub fade-up">Real reviews from our community</p>
+          <h2 className="section-title fade-up">{t("reviewsTitle")} <span>{t("reviewsTitleAccent")}</span></h2>
+          <p className="section-sub fade-up">{t("reviewsSub")}</p>
         </div>
 
         <div
@@ -484,10 +504,10 @@ export default function HomePage() {
                     <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
-                <p className="review-card__text">Sold 15 CS2 skins in one go. Got paid via crypto in about 20 minutes after the trade was confirmed. Great prices compared to other sites.</p>
+                <p className="review-card__text">{t("review1Text")}</p>
                 <div className="review-card__footer">
-                  <span className="review-card__game">CS2</span>
-                  <a href="https://steamcommunity.com/id/viktor_cs_trade" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> Steam Profile</a>
+                  <span className="review-card__game">{t("review1Game")}</span>
+                  <a href="https://steamcommunity.com/id/viktor_cs_trade" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -502,10 +522,10 @@ export default function HomePage() {
                     <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
-                <p className="review-card__text">First time selling Dota 2 arcanas. The process was super simple — just picked items, entered Trade URL and money came to my card. Will use again!</p>
+                <p className="review-card__text">{t("review2Text")}</p>
                 <div className="review-card__footer">
-                  <span className="review-card__game">Dota 2</span>
-                  <a href="https://steamcommunity.com/id/anna_dota2" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> Steam Profile</a>
+                  <span className="review-card__game">{t("review2Game")}</span>
+                  <a href="https://steamcommunity.com/id/anna_dota2" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -520,10 +540,10 @@ export default function HomePage() {
                     <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
-                <p className="review-card__text">Sold my Karambit Fade and Butterfly Tiger Tooth. Got the best buyout prices compared to 3 other sites I checked. Payout to my card took about 25 minutes.</p>
+                <p className="review-card__text">{t("review3Text")}</p>
                 <div className="review-card__footer">
-                  <span className="review-card__game">CS2</span>
-                  <a href="https://steamcommunity.com/id/sergey_knives" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> Steam Profile</a>
+                  <span className="review-card__game">{t("review3Game")}</span>
+                  <a href="https://steamcommunity.com/id/sergey_knives" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -538,10 +558,10 @@ export default function HomePage() {
                     <div className="review-card__stars" aria-label="4 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.25"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
-                <p className="review-card__text">Been using SKINWAVE for a month now. Sold TF2 unusuals and Rust skins — prices are fair, support responds quickly. Only 4 stars because CS2 trade hold adds wait time.</p>
+                <p className="review-card__text">{t("review4Text")}</p>
                 <div className="review-card__footer">
-                  <span className="review-card__game">TF2 / Rust</span>
-                  <a href="https://steamcommunity.com/id/max_trader_tf2" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> Steam Profile</a>
+                  <span className="review-card__game">{t("review4Game")}</span>
+                  <a href="https://steamcommunity.com/id/max_trader_tf2" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -556,10 +576,10 @@ export default function HomePage() {
                     <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
-                <p className="review-card__text">Fastest skin selling experience I&apos;ve tried. Sold Rust skins, got USDT to my wallet same day. The buyout prices are better than most competitors.</p>
+                <p className="review-card__text">{t("review1Text")}</p>
                 <div className="review-card__footer">
                   <span className="review-card__game">Rust</span>
-                  <a href="https://steamcommunity.com/id/d1mka_rust" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> Steam Profile</a>
+                  <a href="https://steamcommunity.com/id/d1mka_rust" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -574,10 +594,10 @@ export default function HomePage() {
                     <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
-                <p className="review-card__text">Love that I can keep money on site balance and withdraw later whenever I want. Sold Dota 2 immortals, zero commission to balance. Super convenient!</p>
+                <p className="review-card__text">{t("review2Text")}</p>
                 <div className="review-card__footer">
                   <span className="review-card__game">Dota 2</span>
-                  <a href="https://steamcommunity.com/id/kate_gamer_dota" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> Steam Profile</a>
+                  <a href="https://steamcommunity.com/id/kate_gamer_dota" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -592,10 +612,10 @@ export default function HomePage() {
                     <div className="review-card__stars" aria-label="4 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.25"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
-                <p className="review-card__text">The CS2 trade hold is annoying but that&apos;s Steam&apos;s fault, not SKINWAVE. Everything else is top notch — instant trade offers, clear status tracking, fair prices.</p>
+                <p className="review-card__text">{t("review3Text")}</p>
                 <div className="review-card__footer">
                   <span className="review-card__game">CS2</span>
-                  <a href="https://steamcommunity.com/id/ivan_trade_cs2" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> Steam Profile</a>
+                  <a href="https://steamcommunity.com/id/ivan_trade_cs2" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -627,8 +647,8 @@ export default function HomePage() {
       {/* ═══ FEATURES ═══ */}
       <section className="features" id="features">
         <div className="container">
-          <h2 className="features__title fade-up">Why Choose <span>SKINWAVE</span></h2>
-          <p className="features__sub fade-up">Trusted by thousands of sellers worldwide</p>
+          <h2 className="features__title fade-up">{t("featuresTitle")} <span>{t("featuresTitleAccent")}</span></h2>
+          <p className="features__sub fade-up">{t("featuresSub")}</p>
 
           <div className="features__grid">
             <div className="feature-card" style={{"--fi":0} as React.CSSProperties}>
@@ -636,54 +656,54 @@ export default function HomePage() {
               <div className="feature-card__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
               </div>
-              <span className="feature-card__stat">~2 min</span>
-              <h3>Instant Buyout</h3>
-              <p>We buy your skins directly — no waiting for buyers. See your price and sell immediately.</p>
+              <span className="feature-card__stat">{t("f1stat")}</span>
+              <h3>{t("f1title")}</h3>
+              <p>{t("f1desc")}</p>
             </div>
             <div className="feature-card" style={{"--fi":1} as React.CSSProperties}>
               <span className="feature-card__num">02</span>
               <div className="feature-card__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
               </div>
-              <span className="feature-card__stat">100%</span>
-              <h3>Secure &amp; Transparent</h3>
-              <p>Steam OpenID authentication, clear pricing and full order tracking from start to finish.</p>
+              <span className="feature-card__stat">{t("f2stat")}</span>
+              <h3>{t("f2title")}</h3>
+              <p>{t("f2desc")}</p>
             </div>
             <div className="feature-card" style={{"--fi":2} as React.CSSProperties}>
               <span className="feature-card__num">03</span>
               <div className="feature-card__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
               </div>
-              <span className="feature-card__stat">5+</span>
-              <h3>Multiple Payouts</h3>
-              <p>Get paid via bank card, crypto, bank transfer or keep funds on your site balance.</p>
+              <span className="feature-card__stat">{t("f3stat")}</span>
+              <h3>{t("f3title")}</h3>
+              <p>{t("f3desc")}</p>
             </div>
             <div className="feature-card" style={{"--fi":3} as React.CSSProperties}>
               <span className="feature-card__num">04</span>
               <div className="feature-card__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>
               </div>
-              <span className="feature-card__stat">4</span>
-              <h3>Games Supported</h3>
-              <p>CS2, Dota 2, Team Fortress 2 and Rust — sell skins from all major Steam games.</p>
+              <span className="feature-card__stat">{t("f4stat")}</span>
+              <h3>{t("f4title")}</h3>
+              <p>{t("f4desc")}</p>
             </div>
             <div className="feature-card" style={{"--fi":4} as React.CSSProperties}>
               <span className="feature-card__num">05</span>
               <div className="feature-card__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></svg>
               </div>
-              <span className="feature-card__stat">95%</span>
-              <h3>Fair Prices</h3>
-              <p>Up to 95% of market value. Prices updated in real-time from Steam Market data.</p>
+              <span className="feature-card__stat">{t("f5stat")}</span>
+              <h3>{t("f5title")}</h3>
+              <p>{t("f5desc")}</p>
             </div>
             <div className="feature-card" style={{"--fi":5} as React.CSSProperties}>
               <span className="feature-card__num">06</span>
               <div className="feature-card__icon">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
               </div>
-              <span className="feature-card__stat">24/7</span>
-              <h3>Fast Processing</h3>
-              <p>Trades processed within minutes. Payouts sent as soon as items are received.</p>
+              <span className="feature-card__stat">{t("f6stat")}</span>
+              <h3>{t("f6title")}</h3>
+              <p>{t("f6desc")}</p>
             </div>
           </div>
         </div>
@@ -692,52 +712,52 @@ export default function HomePage() {
       {/* ═══ FAQ PREVIEW ═══ */}
       <section className="faq-preview" id="faqPreview">
         <div className="container">
-          <h2 className="section-title fade-up">Frequently Asked <span>Questions</span></h2>
-          <p className="section-sub fade-up">Can&apos;t find the answer? <Link href="/faq">Visit our full FAQ</Link></p>
+          <h2 className="section-title fade-up">{t("faqPreviewTitle")} <span>{t("faqPreviewAccent")}</span></h2>
+          <p className="section-sub fade-up">{t("faqPreviewSub")} <Link href="/faq">{t("faqPreviewLink")}</Link></p>
 
           <div className="faq-list">
             <div className={`faq-item${openFaqIdx === 0 ? " open" : ""}`} style={{"--fi":0} as React.CSSProperties}>
               <button className="faq-item__q" aria-expanded={openFaqIdx === 0 ? "true" : "false"} onClick={() => toggleFaq(0)}>
                 <span className="faq-item__num">01</span>
                 <svg className="faq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-                <span>How do I sell my skins on SKINWAVE?</span>
+                <span>{t("faq1q")}</span>
                 <svg className="faq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
               </button>
               <div className="faq-item__a">
-                <p>Sign in with your Steam account, go to the Sell page, select items from your inventory, enter your Trade URL, choose a payout method and click &ldquo;Get Payment&rdquo;. Our operator will send you a trade offer — once you accept it and we receive the items, your payout is processed.</p>
+                <p>{t("faq1a")}</p>
               </div>
             </div>
             <div className={`faq-item${openFaqIdx === 1 ? " open" : ""}`} style={{"--fi":1} as React.CSSProperties}>
               <button className="faq-item__q" aria-expanded={openFaqIdx === 1 ? "true" : "false"} onClick={() => toggleFaq(1)}>
                 <span className="faq-item__num">02</span>
                 <svg className="faq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><line x1="12" y1="3" x2="12" y2="7" /><line x1="12" y1="17" x2="12" y2="21" /><line x1="3" y1="12" x2="7" y2="12" /><line x1="17" y1="12" x2="21" y2="12" /></svg>
-                <span>What games are supported?</span>
+                <span>{t("faq2q")}</span>
                 <svg className="faq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
               </button>
               <div className="faq-item__a">
-                <p>We currently buy skins from Counter-Strike 2, Dota 2, Team Fortress 2 and Rust. More games may be added in the future.</p>
+                <p>{t("faq2a")}</p>
               </div>
             </div>
             <div className={`faq-item${openFaqIdx === 2 ? " open" : ""}`} style={{"--fi":2} as React.CSSProperties}>
               <button className="faq-item__q" aria-expanded={openFaqIdx === 2 ? "true" : "false"} onClick={() => toggleFaq(2)}>
                 <span className="faq-item__num">03</span>
                 <svg className="faq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                <span>How long does it take to get paid?</span>
+                <span>{t("faq3q")}</span>
                 <svg className="faq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
               </button>
               <div className="faq-item__a">
-                <p>For Dota 2, TF2 and Rust skins — payout is processed shortly after we receive your items. For CS2 skins, there may be a Steam trade hold period. Payment is processed after the hold ends and items are received by our system.</p>
+                <p>{t("faq3a")}</p>
               </div>
             </div>
             <div className={`faq-item${openFaqIdx === 3 ? " open" : ""}`} style={{"--fi":3} as React.CSSProperties}>
               <button className="faq-item__q" aria-expanded={openFaqIdx === 3 ? "true" : "false"} onClick={() => toggleFaq(3)}>
                 <span className="faq-item__num">04</span>
                 <svg className="faq-item__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /><path d="M6 16h4" /></svg>
-                <span>What is the site balance?</span>
+                <span>{t("faq4q")}</span>
                 <svg className="faq-item__chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
               </button>
               <div className="faq-item__a">
-                <p>Instead of receiving immediate payout, you can choose to credit your sale proceeds to your internal SKINWAVE balance. You can then withdraw from this balance at any time using your preferred payout method — card, crypto or bank transfer.</p>
+                <p>{t("faq4a")}</p>
               </div>
             </div>
           </div>

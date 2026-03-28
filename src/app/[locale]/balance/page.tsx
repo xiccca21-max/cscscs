@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 import "@/styles/skinwave-balance.css";
 
@@ -21,7 +22,7 @@ type BalanceData = {
   transactions: Transaction[];
 };
 
-type FilterType = "all" | "credit" | "withdrawal";
+type FilterType = "all" | "credit" | "withdraw";
 
 export default function BalancePage() {
   const t = useTranslations("balance");
@@ -85,6 +86,17 @@ export default function BalancePage() {
   const commissionAmount = cashoutAmountNum * commissionRate;
   const youReceive = cashoutAmountNum - commissionAmount;
 
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = parseFloat(e.target.value);
+    if (val > balance) {
+      setCashoutAmount(balance.toFixed(2));
+    } else if (val < 0) {
+      setCashoutAmount("");
+    } else {
+      setCashoutAmount(e.target.value);
+    }
+  };
+
   const handleCashout = async () => {
     const amount = parseFloat(cashoutAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
@@ -134,20 +146,20 @@ export default function BalancePage() {
   const filteredTransactions = data
     ? data.transactions.filter((tx) => {
         if (filter === "credit") return tx.type === "CREDIT";
-        if (filter === "withdrawal") return tx.type === "DEBIT";
+        if (filter === "withdraw") return tx.type === "DEBIT";
         return true;
       })
     : [];
 
   if (!sessionLoading && !user) {
     return (
-      <main className="balance-page">
+      <main className="bal">
         <div className="container">
-          <h1 className="balance-page__title">{t("title")}</h1>
-          <div className="balance-login-prompt">
-            <p>Please sign in to view your balance.</p>
+          <h1 className="bal-title">{t("title")}</h1>
+          <div style={{ textAlign: "center", padding: "60px 0" }}>
+            <p style={{ marginBottom: 16, color: "#64748b" }}>Please sign in to view your balance.</p>
             <form action="/api/auth/steam" method="get">
-              <button type="submit" className="btn btn--primary">
+              <button type="submit" className="bal-wallet__cashout">
                 Sign in with Steam
               </button>
             </form>
@@ -158,183 +170,205 @@ export default function BalancePage() {
   }
 
   return (
-    <main className="balance-page">
+    <main className="bal">
       <div className="container">
 
-        <h1 className="balance-page__title">{t("title")}</h1>
+        <h1 className="bal-title">{t("title")}</h1>
 
         {loading ? (
-          <div className="balance-loading">
-            <div className="balance-spinner" />
-          </div>
+          <div style={{ textAlign: "center", padding: "60px 0", color: "#94a3b8" }}>Loading…</div>
         ) : (
           <>
-            {/* Balance overview */}
-            <div className="balance-overview">
-              <div className="balance-card balance-card--main">
-                <span className="balance-card__label">{t("available")}</span>
-                <span className="balance-card__value">{balance.toFixed(2)}$</span>
-                <button
-                  type="button"
-                  className="btn btn--primary"
-                  onClick={() => setCashoutOpen(true)}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
-                  {t("cashout")}
-                </button>
+            {/* Wallet card */}
+            <div className="bal-wallet">
+              <div className="bal-wallet__glow"></div>
+              <div className="bal-wallet__main">
+                <div className="bal-wallet__top">
+                  <span className="bal-wallet__label">{t("available")}</span>
+                  <div className="bal-wallet__icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+                  </div>
+                </div>
+                <h2 className="bal-wallet__amount">{balance.toFixed(2)}<small>$</small></h2>
+                <div className="bal-wallet__actions">
+                  <button
+                    className="bal-wallet__cashout"
+                    onClick={() => {
+                      setCashoutOpen((prev) => !prev);
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                    <span>{t("cashout")}</span>
+                  </button>
+                  <Link href="/sell" className="bal-wallet__sell">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Sell Skins</span>
+                  </Link>
+                </div>
               </div>
-              <div className="balance-card">
-                <span className="balance-card__label">{t("totalEarned")}</span>
-                <span className="balance-card__value balance-card__value--secondary">{totalEarned.toFixed(2)}$</span>
-              </div>
-              <div className="balance-card">
-                <span className="balance-card__label">{t("totalWithdrawn")}</span>
-                <span className="balance-card__value balance-card__value--secondary">{totalWithdrawn.toFixed(2)}$</span>
-              </div>
-              <div className="balance-card">
-                <span className="balance-card__label">{t("pending")}</span>
-                <span className="balance-card__value balance-card__value--warning">{Math.max(0, pendingFrozen).toFixed(2)}$</span>
+
+              {/* Stats row inside wallet */}
+              <div className="bal-wallet__stats">
+                <div className="bal-wstat">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                  <div className="bal-wstat__text">
+                    <span className="bal-wstat__label">{t("totalEarned")}</span>
+                    <span className="bal-wstat__val">{totalEarned.toFixed(2)}$</span>
+                  </div>
+                </div>
+                <div className="bal-wstat__sep"></div>
+                <div className="bal-wstat">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                  <div className="bal-wstat__text">
+                    <span className="bal-wstat__label">{t("totalWithdrawn")}</span>
+                    <span className="bal-wstat__val">{totalWithdrawn.toFixed(2)}$</span>
+                  </div>
+                </div>
+                <div className="bal-wstat__sep"></div>
+                <div className="bal-wstat">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <div className="bal-wstat__text">
+                    <span className="bal-wstat__label">{t("pending")}</span>
+                    <span className="bal-wstat__val">{Math.max(0, pendingFrozen).toFixed(2)}$</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Cash Out Form */}
-            {cashoutOpen && (
-              <div className="cashout-form card">
-                <div className="cashout-form__header">
-                  <h3>{t("cashoutTitle")}</h3>
-                  <button
-                    type="button"
-                    className="btn btn--ghost btn--sm"
-                    onClick={() => setCashoutOpen(false)}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                  </button>
-                </div>
-
-                <div className="cashout-form__body">
-                  <div className="form-group">
-                    <label>{t("amount")}</label>
-                    <div className="cashout-amount-wrap">
-                      <input
-                        type="number"
-                        className="input"
-                        placeholder="0.00"
-                        max={balance}
-                        min={1}
-                        value={cashoutAmount}
-                        onChange={(e) => setCashoutAmount(e.target.value)}
-                        style={{ paddingLeft: "12px", paddingRight: "72px" }}
-                      />
-                      <span className="cashout-amount-prefix" style={{ left: "auto", right: "48px" }}>$</span>
-                      <button
-                        type="button"
-                        className="btn btn--ghost btn--sm"
-                        onClick={() => setCashoutAmount(balance.toFixed(2))}
-                      >
-                        MAX
-                      </button>
-                    </div>
-                    <span className="cashout-available">Available: {balance.toFixed(2)}$</span>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Withdrawal Method</label>
-                    <div className="payment-methods-grid">
-                      <button
-                        type="button"
-                        className={`payment-method${cashoutMethod === "card" ? " active" : ""}`}
-                        onClick={() => setCashoutMethod("card")}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
-                        <span>Card</span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`payment-method${cashoutMethod === "crypto" ? " active" : ""}`}
-                        onClick={() => setCashoutMethod("crypto")}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /><path d="M9.5 8l5 8M14.5 8l-5 8" /></svg>
-                        <span>Crypto</span>
-                      </button>
-                      <button
-                        type="button"
-                        className={`payment-method${cashoutMethod === "bank" ? " active" : ""}`}
-                        onClick={() => setCashoutMethod("bank")}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3" /></svg>
-                        <span>Bank</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="cashout-summary">
-                    <div className="summary-row">
-                      <span>Withdrawal amount</span>
-                      <span>{cashoutAmountNum.toFixed(2)}$</span>
-                    </div>
-                    <div className="summary-row">
-                      <span>Commission (2%)</span>
-                      <span>{commissionAmount.toFixed(2)}$</span>
-                    </div>
-                    <div className="summary-row summary-row--total">
-                      <span>You receive</span>
-                      <span>{youReceive.toFixed(2)}$</span>
-                    </div>
-                  </div>
-
-                  {cashoutError && (
-                    <p className="cashout-modal__error">{cashoutError}</p>
-                  )}
-
-                  <button
-                    type="button"
-                    className="btn btn--primary btn--lg"
-                    disabled={submitting || !cashoutMethod || cashoutAmountNum <= 0}
-                    onClick={handleCashout}
-                    style={{ width: "100%" }}
-                  >
-                    {submitting ? "…" : t("submit")}
-                  </button>
-                </div>
+            {/* Cash Out Form (collapsible) */}
+            <div className={`bal-cashout${cashoutOpen ? " open" : ""}`}>
+              <div className="bal-cashout__head">
+                <h3>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                  <span>{t("cashoutTitle")}</span>
+                </h3>
+                <button className="bal-cashout__close" onClick={() => setCashoutOpen(false)}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="18 15 12 9 6 15"/></svg>
+                  <span>Hide</span>
+                </button>
               </div>
-            )}
+
+              <div className="bal-cashout__body">
+                <div className="form-group">
+                  <label>{t("amount")}</label>
+                  <div className="cashout-amount-wrap">
+                    <input
+                      type="number"
+                      className="input"
+                      placeholder="0.00"
+                      max={balance}
+                      min={1}
+                      value={cashoutAmount}
+                      onChange={handleAmountChange}
+                    />
+                    <span className="cashout-currency">$</span>
+                    <button
+                      className="cashout-max"
+                      onClick={() => setCashoutAmount(balance.toFixed(2))}
+                    >
+                      MAX
+                    </button>
+                  </div>
+                  <span className="cashout-available">Available: <strong>{balance.toFixed(2)}$</strong></span>
+                </div>
+
+                <div className="form-group">
+                  <label>Select Payout Method</label>
+                  <div className="bal-methods">
+                    <button
+                      className={`bal-method${cashoutMethod === "card" ? " active" : ""}`}
+                      onClick={() => setCashoutMethod("card")}
+                    >
+                      <div className="bal-method__icon">
+                        <img src="/icons/pay-card.png" alt="Card" width="28" height="28" style={{ objectFit: "contain" }} />
+                      </div>
+                      <span className="bal-method__name">Debit Card</span>
+                      <span className="bal-method__desc">Visa / Mastercard</span>
+                    </button>
+                    <button
+                      className={`bal-method${cashoutMethod === "crypto" ? " active" : ""}`}
+                      onClick={() => setCashoutMethod("crypto")}
+                    >
+                      <div className="bal-method__icon">
+                        <img src="/icons/tether.png" alt="Crypto" width="28" height="28" style={{ objectFit: "contain" }} />
+                      </div>
+                      <span className="bal-method__name">Cryptocurrency</span>
+                      <span className="bal-method__desc">BTC, USDT, ETH...</span>
+                    </button>
+                    <button
+                      className={`bal-method${cashoutMethod === "bank" ? " active" : ""}`}
+                      onClick={() => setCashoutMethod("bank")}
+                    >
+                      <div className="bal-method__icon">
+                        <img src="/icons/pay-bank.png" alt="Bank" width="28" height="28" style={{ objectFit: "contain" }} />
+                      </div>
+                      <span className="bal-method__name">Bank Transfer</span>
+                      <span className="bal-method__desc">IBAN / SWIFT</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bal-summary">
+                  <div className="bal-summary__row">
+                    <span>Withdrawal amount</span>
+                    <span>{cashoutAmountNum.toFixed(2)}$</span>
+                  </div>
+                  <div className="bal-summary__row">
+                    <span>Commission (2%)</span>
+                    <span>{commissionAmount.toFixed(2)}$</span>
+                  </div>
+                  <div className="bal-summary__row bal-summary__row--total">
+                    <span>You receive</span>
+                    <span>{youReceive.toFixed(2)}$</span>
+                  </div>
+                </div>
+
+                {cashoutError && (
+                  <p style={{ color: "#ef4444", fontSize: 13, fontWeight: 600, marginBottom: 12 }}>{cashoutError}</p>
+                )}
+
+                <button
+                  className="bal-continue"
+                  disabled={submitting || !cashoutMethod || cashoutAmountNum <= 0}
+                  onClick={handleCashout}
+                >
+                  <span>{submitting ? "…" : t("submit")}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
 
             {/* Transaction History */}
-            <div className="balance-history card">
-              <div className="balance-history__header">
+            <div className="bal-history">
+              <div className="bal-history__head">
                 <h3>{t("history")}</h3>
-                <div className="balance-history__filters">
+                <div className="bal-history__filters">
                   <button
-                    type="button"
-                    className={`chip chip--sm${filter === "all" ? " active" : ""}`}
+                    className={`bal-fil${filter === "all" ? " active" : ""}`}
                     onClick={() => setFilter("all")}
                   >
                     All
                   </button>
                   <button
-                    type="button"
-                    className={`chip chip--sm${filter === "credit" ? " active" : ""}`}
+                    className={`bal-fil${filter === "credit" ? " active" : ""}`}
                     onClick={() => setFilter("credit")}
                   >
-                    Credits
+                    Sales
                   </button>
                   <button
-                    type="button"
-                    className={`chip chip--sm${filter === "withdrawal" ? " active" : ""}`}
-                    onClick={() => setFilter("withdrawal")}
+                    className={`bal-fil${filter === "withdraw" ? " active" : ""}`}
+                    onClick={() => setFilter("withdraw")}
                   >
                     Withdrawals
                   </button>
                 </div>
               </div>
-
-              <div className="balance-history__table">
+              <div className="bal-history__table-wrap">
                 {filteredTransactions.length > 0 ? (
-                  <table>
+                  <table className="bal-table">
                     <thead>
                       <tr>
                         <th>Date</th>
-                        <th>Type</th>
                         <th>Description</th>
                         <th>Amount</th>
                         <th>Status</th>
@@ -342,20 +376,29 @@ export default function BalancePage() {
                     </thead>
                     <tbody>
                       {filteredTransactions.map((tx) => (
-                        <tr key={tx.id}>
-                          <td>{new Date(tx.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</td>
+                        <tr key={tx.id} className="bal-row" data-type={tx.type === "CREDIT" ? "credit" : "withdraw"}>
                           <td>
-                            <span className={`badge ${tx.type === "CREDIT" ? "badge--success" : "badge--accent"}`}>
-                              {tx.type === "CREDIT" ? "Credit" : "Withdrawal"}
+                            <span className="bal-row__date">
+                              {new Date(tx.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                             </span>
                           </td>
-                          <td>{tx.comment ?? "—"}</td>
-                          <td className={tx.type === "CREDIT" ? "amount-positive" : "amount-negative"}>
-                            {tx.type === "CREDIT" ? "+" : "-"}{Math.abs(parseFloat(tx.amount)).toFixed(2)}$
+                          <td>
+                            <span className="bal-row__desc">
+                              {tx.type === "CREDIT"
+                                ? <>Skin sale — <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
+                                : <>Withdrawal — <strong>{cashoutMethod ?? "Payout"}</strong></>
+                              }
+                              {tx.comment && <> — {tx.comment}</>}
+                            </span>
                           </td>
                           <td>
-                            <span className="status-badge status-badge--paid">
-                              {tx.type === "CREDIT" ? "Completed" : "Paid"}
+                            <span className={`bal-row__amt ${tx.type === "CREDIT" ? "bal-row__amt--plus" : "bal-row__amt--minus"}`}>
+                              {tx.type === "CREDIT" ? "+" : "-"}{Math.abs(parseFloat(tx.amount)).toFixed(2)}$
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`bal-badge ${tx.type === "CREDIT" ? "bal-badge--credit" : "bal-badge--paid"}`}>
+                              {tx.type === "CREDIT" ? "Credit" : "Paid"}
                             </span>
                           </td>
                         </tr>
@@ -363,7 +406,9 @@ export default function BalancePage() {
                     </tbody>
                   </table>
                 ) : (
-                  <p className="balance-history__empty">{t("noTransactions")}</p>
+                  <div style={{ padding: "40px 24px", textAlign: "center", color: "#94a3b8", fontSize: 14 }}>
+                    {t("noTransactions")}
+                  </div>
                 )}
               </div>
             </div>

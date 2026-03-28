@@ -952,7 +952,7 @@
   -webkit-text-fill-color: unset;
   background-clip: unset;
 }
-.inv-card.inv-card--mini .inv-card__price::after {
+.inv-card.inv-card--mini .inv-card__currency {
   font-size: 9px;
 }
 .inv-card.inv-card--mini .inv-card__cents {
@@ -1375,8 +1375,7 @@
   color: var(--text);
   letter-spacing: -0.3px;
 }
-.inv-card__price::after {
-  content: '$';
+.inv-card__currency {
   font-size: 14px;
   font-weight: 700;
   margin-left: 1px;
@@ -1385,6 +1384,50 @@
   font-size: 13px;
   font-weight: 600;
   opacity: 0.6;
+}
+
+/* Skeleton loading cards */
+@keyframes skeletonPulse {
+  0%   { opacity: 0.4; }
+  50%  { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}
+.skeleton-pulse {
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+.inv-card.inv-card--skeleton {
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(200,198,220,0.5) 0%, rgba(220,218,235,0.4) 100%);
+  border: 1px solid rgba(200,198,220,0.3);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.inv-card--skeleton .inv-card__rarity-line {
+  height: 3px;
+  background: rgba(150,148,180,0.25);
+}
+.inv-card--skeleton .inv-card__img {
+  aspect-ratio: 4/3;
+  background: rgba(180,178,210,0.2);
+}
+.inv-card--skeleton .inv-card__info {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.skeleton-line {
+  display: block;
+  border-radius: 4px;
+  background: rgba(150,148,180,0.25);
+}
+.skeleton-line--name {
+  height: 12px;
+  width: 75%;
+}
+.skeleton-line--price {
+  height: 16px;
+  width: 40%;
 }
 
 /* Selection feedback — bounce + highlight flash */

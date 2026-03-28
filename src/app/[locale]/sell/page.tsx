@@ -377,7 +377,7 @@ export default function SellPage() {
                       <div className="inv-card__info">
                         <span className="inv-card__name">{item.name}</span>
                         <span className="inv-card__price">
-                          {whole}<span className="inv-card__cents">.{cents}</span>
+                          {whole}<span className="inv-card__cents">.{cents}</span><span className="inv-card__currency">{symbol}</span>
                         </span>
                       </div>
                     </div>
@@ -529,7 +529,7 @@ export default function SellPage() {
                     type="number"
                     className="input input--sm"
                     id="priceMin"
-                    placeholder={`Min ${symbol}`}
+                    placeholder={`${t("min")} ${symbol}`}
                     min={0}
                     step={0.01}
                     value={priceMin}
@@ -540,7 +540,7 @@ export default function SellPage() {
                     type="number"
                     className="input input--sm"
                     id="priceMax"
-                    placeholder={`Max ${symbol}`}
+                    placeholder={`${t("max")} ${symbol}`}
                     min={0}
                     step={0.01}
                     value={priceMax}
@@ -629,6 +629,21 @@ export default function SellPage() {
               </div>
             )}
 
+            {isLoggedIn && loadingInventory && (
+              <div className={`sell-inventory__grid`} id="inventoryGridSkeleton">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div key={i} className="inv-card inv-card--skeleton">
+                    <div className="inv-card__rarity-line skeleton-pulse" />
+                    <div className="inv-card__img skeleton-pulse" />
+                    <div className="inv-card__info">
+                      <span className="skeleton-line skeleton-line--name skeleton-pulse" />
+                      <span className="skeleton-line skeleton-line--price skeleton-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {isLoggedIn && !loadingInventory && filteredItems.length === 0 && (
               <div className="sell-empty" id="emptyState">
                 <div className="sell-empty__icon">
@@ -687,7 +702,7 @@ export default function SellPage() {
                       )}
                       {item.type && <span className="inv-card__type">{item.type}</span>}
                       <span className="inv-card__price">
-                        {whole}<span className="inv-card__cents">.{cents}</span>
+                        {whole}<span className="inv-card__cents">.{cents}</span><span className="inv-card__currency">{symbol}</span>
                       </span>
                     </div>
                   </div>
@@ -722,14 +737,14 @@ export default function SellPage() {
                 value={tradeUrl}
                 onChange={(e) => { setTradeUrl(e.target.value); setTradeUrlSaved(false); }}
               />
-              <button type="button" className="sidebar-tradeurl__paste" title="Paste from clipboard" onClick={pasteTradeUrl}>
+              <button type="button" className="sidebar-tradeurl__paste" onClick={pasteTradeUrl}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                Paste
+                {t("paste")}
               </button>
             </div>
             <div className="sidebar-tradeurl__actions">
               <div className="sell-tradeurl__status" id="tradeUrlStatus">
-                {tradeUrl && (tradeUrlValid ? "\u2713 Valid trade URL" : "\u2717 Invalid trade URL")}
+                {tradeUrl && (tradeUrlValid ? `\u2713 ${t("validTradeUrl")}` : `\u2717 ${t("invalidTradeUrl")}`)}
               </div>
               {tradeUrlValid && (
                 <button
@@ -738,9 +753,9 @@ export default function SellPage() {
                   onClick={saveTradeUrl}
                 >
                   {tradeUrlSaved ? (
-                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> Saved</>
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> {t("saved")}</>
                   ) : (
-                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save</>
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> {t("save")}</>
                   )}
                 </button>
               )}
@@ -758,10 +773,10 @@ export default function SellPage() {
                 <button
                   className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`}
                   data-method="balance"
-                  data-tooltip="Fee: 0%"
+                  data-tooltip={t("fee0")}
                   onClick={() => setPaymentMethod("balance")}
                 >
-                  <span className="pay-btn__badge">Best rate</span>
+                  <span className="pay-btn__badge">{t("bestRate")}</span>
                   <span className="pay-btn__icon">
                     <img src="/icons/pay-balance.png" alt="Balance" className="pay-btn__img pay-btn__img--circle" />
                   </span>
@@ -770,7 +785,7 @@ export default function SellPage() {
                 <button
                   className={`pay-btn${paymentMethod === "card" ? " active" : ""}`}
                   data-method="card"
-                  data-tooltip="Fee: 2.5%"
+                  data-tooltip={t("fee25")}
                   onClick={() => setPaymentMethod("card")}
                 >
                   <span className="pay-btn__icon pay-btn__icon--card">
@@ -781,7 +796,7 @@ export default function SellPage() {
                 <button
                   className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`}
                   data-method="crypto"
-                  data-tooltip="Fee: 1%"
+                  data-tooltip={t("fee1")}
                   onClick={() => setPaymentMethod("crypto")}
                 >
                   <span className="pay-btn__icon">
@@ -792,7 +807,7 @@ export default function SellPage() {
                 <button
                   className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`}
                   data-method="bank"
-                  data-tooltip="Fee: 3%"
+                  data-tooltip={t("fee3")}
                   onClick={() => setPaymentMethod("bank")}
                 >
                   <span className="pay-btn__icon pay-btn__icon--bank">

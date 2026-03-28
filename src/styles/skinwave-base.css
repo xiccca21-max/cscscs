@@ -838,10 +838,8 @@ input, select, textarea { font: inherit; }
 .avatar-menu-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 98;
-  background: rgba(15,23,42,0.35);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  z-index: 9998;
+  background: rgba(15,23,42,0.45);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.25s, visibility 0.25s;
@@ -850,17 +848,30 @@ input, select, textarea { font: inherit; }
   opacity: 1;
   visibility: visible;
 }
+body.avatar-blur > header,
+body.avatar-blur > main,
+body.avatar-blur > footer,
+body.avatar-blur > .footer {
+  filter: blur(8px);
+  transition: filter 0.25s;
+}
+.avatar-menu.active {
+  pointer-events: auto;
+}
+.avatar-menu-backdrop.active {
+  pointer-events: auto;
+}
 
 .avatar-menu {
-  position: absolute;
-  top: calc(100% + 12px);
-  right: 0;
+  position: fixed;
+  top: calc(var(--header-h) + 8px);
+  right: 24px;
+  z-index: 9999;
   width: 240px;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%);
   border-radius: 14px;
   padding: 8px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.1);
-  z-index: 100;
   opacity: 0;
   visibility: hidden;
   transform: translateY(8px) scale(0.96);

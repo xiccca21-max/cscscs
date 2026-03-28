@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 import "@/styles/skinwave-balance.css";
@@ -26,6 +27,7 @@ type FilterType = "all" | "credit" | "withdraw";
 
 export default function BalancePage() {
   const t = useTranslations("balance");
+  const locale = useLocale();
   const { user, loading: sessionLoading, refresh: refreshSession } = useSession();
   const [data, setData] = useState<BalanceData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -100,15 +102,15 @@ export default function BalancePage() {
   const handleCashout = async () => {
     const amount = parseFloat(cashoutAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
-      setCashoutError("Enter a valid amount");
+      setCashoutError(t("errorInvalidAmount"));
       return;
     }
     if (amount > balance) {
-      setCashoutError("Insufficient balance");
+      setCashoutError(t("errorInsufficient"));
       return;
     }
     if (!cashoutMethod) {
-      setCashoutError("Select a withdrawal method");
+      setCashoutError(t("errorSelectMethod"));
       return;
     }
 
@@ -134,10 +136,10 @@ export default function BalancePage() {
         fetchBalance();
         refreshSession();
       } else {
-        setCashoutError(json.error ?? "Failed");
+        setCashoutError(json.error ?? t("errorFailed"));
       }
     } catch {
-      setCashoutError("Network error");
+      setCashoutError(t("errorNetwork"));
     } finally {
       setSubmitting(false);
     }
@@ -157,10 +159,10 @@ export default function BalancePage() {
         <div className="container">
           <h1 className="bal-title">{t("title")}</h1>
           <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <p style={{ marginBottom: 16, color: "#64748b" }}>Please sign in to view your balance.</p>
+            <p style={{ marginBottom: 16, color: "#64748b" }}>{t("signInPrompt")}</p>
             <form action="/api/auth/steam" method="get">
               <button type="submit" className="bal-wallet__cashout">
-                Sign in with Steam
+                {t("signInBtn")}
               </button>
             </form>
           </div>
@@ -176,7 +178,7 @@ export default function BalancePage() {
         <h1 className="bal-title">{t("title")}</h1>
 
         {loading ? (
-          <div style={{ textAlign: "center", padding: "60px 0", color: "#94a3b8" }}>Loading…</div>
+          <div style={{ textAlign: "center", padding: "60px 0", color: "#94a3b8" }}>{t("loading")}</div>
         ) : (
           <>
             {/* Wallet card */}
@@ -202,7 +204,7 @@ export default function BalancePage() {
                   </button>
                   <Link href="/sell" className="bal-wallet__sell">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    <span>Sell Skins</span>
+                    <span>{t("sellSkins")}</span>
                   </Link>
                 </div>
               </div>
@@ -244,7 +246,7 @@ export default function BalancePage() {
                 </h3>
                 <button className="bal-cashout__close" onClick={() => setCashoutOpen(false)}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="18 15 12 9 6 15"/></svg>
-                  <span>Hide</span>
+                  <span>{t("hide")}</span>
                 </button>
               </div>
 
@@ -266,14 +268,14 @@ export default function BalancePage() {
                       className="cashout-max"
                       onClick={() => setCashoutAmount(balance.toFixed(2))}
                     >
-                      MAX
+                      {t("max")}
                     </button>
                   </div>
-                  <span className="cashout-available">Available: <strong>{balance.toFixed(2)}$</strong></span>
+                  <span className="cashout-available">{t("availableAmount")} <strong>{balance.toFixed(2)}$</strong></span>
                 </div>
 
                 <div className="form-group">
-                  <label>Select Payout Method</label>
+                  <label>{t("selectMethod")}</label>
                   <div className="bal-methods">
                     <button
                       className={`bal-method${cashoutMethod === "card" ? " active" : ""}`}
@@ -282,8 +284,8 @@ export default function BalancePage() {
                       <div className="bal-method__icon">
                         <img src="/icons/pay-card.png" alt="Card" width="28" height="28" style={{ objectFit: "contain" }} />
                       </div>
-                      <span className="bal-method__name">Debit Card</span>
-                      <span className="bal-method__desc">Visa / Mastercard</span>
+                      <span className="bal-method__name">{t("debitCard")}</span>
+                      <span className="bal-method__desc">{t("visaMc")}</span>
                     </button>
                     <button
                       className={`bal-method${cashoutMethod === "crypto" ? " active" : ""}`}
@@ -292,8 +294,8 @@ export default function BalancePage() {
                       <div className="bal-method__icon">
                         <img src="/icons/tether.png" alt="Crypto" width="28" height="28" style={{ objectFit: "contain" }} />
                       </div>
-                      <span className="bal-method__name">Cryptocurrency</span>
-                      <span className="bal-method__desc">BTC, USDT, ETH...</span>
+                      <span className="bal-method__name">{t("cryptocurrency")}</span>
+                      <span className="bal-method__desc">{t("cryptoDesc")}</span>
                     </button>
                     <button
                       className={`bal-method${cashoutMethod === "bank" ? " active" : ""}`}
@@ -302,23 +304,23 @@ export default function BalancePage() {
                       <div className="bal-method__icon">
                         <img src="/icons/pay-bank.png" alt="Bank" width="28" height="28" style={{ objectFit: "contain" }} />
                       </div>
-                      <span className="bal-method__name">Bank Transfer</span>
-                      <span className="bal-method__desc">IBAN / SWIFT</span>
+                      <span className="bal-method__name">{t("bankTransfer")}</span>
+                      <span className="bal-method__desc">{t("ibanSwift")}</span>
                     </button>
                   </div>
                 </div>
 
                 <div className="bal-summary">
                   <div className="bal-summary__row">
-                    <span>Withdrawal amount</span>
+                    <span>{t("withdrawalAmount")}</span>
                     <span>{cashoutAmountNum.toFixed(2)}$</span>
                   </div>
                   <div className="bal-summary__row">
-                    <span>Commission (2%)</span>
+                    <span>{t("commission")}</span>
                     <span>{commissionAmount.toFixed(2)}$</span>
                   </div>
                   <div className="bal-summary__row bal-summary__row--total">
-                    <span>You receive</span>
+                    <span>{t("youReceive")}</span>
                     <span>{youReceive.toFixed(2)}$</span>
                   </div>
                 </div>
@@ -347,19 +349,19 @@ export default function BalancePage() {
                     className={`bal-fil${filter === "all" ? " active" : ""}`}
                     onClick={() => setFilter("all")}
                   >
-                    All
+                    {t("filterAll")}
                   </button>
                   <button
                     className={`bal-fil${filter === "credit" ? " active" : ""}`}
                     onClick={() => setFilter("credit")}
                   >
-                    Sales
+                    {t("filterSales")}
                   </button>
                   <button
                     className={`bal-fil${filter === "withdraw" ? " active" : ""}`}
                     onClick={() => setFilter("withdraw")}
                   >
-                    Withdrawals
+                    {t("filterWithdrawals")}
                   </button>
                 </div>
               </div>
@@ -368,10 +370,10 @@ export default function BalancePage() {
                   <table className="bal-table">
                     <thead>
                       <tr>
-                        <th>Date</th>
-                        <th>Description</th>
-                        <th>Amount</th>
-                        <th>Status</th>
+                        <th>{t("colDate")}</th>
+                        <th>{t("colDescription")}</th>
+                        <th>{t("colAmount")}</th>
+                        <th>{t("colStatus")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -379,14 +381,14 @@ export default function BalancePage() {
                         <tr key={tx.id} className="bal-row" data-type={tx.type === "CREDIT" ? "credit" : "withdraw"}>
                           <td>
                             <span className="bal-row__date">
-                              {new Date(tx.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                              {new Date(tx.createdAt).toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
                             </span>
                           </td>
                           <td>
                             <span className="bal-row__desc">
                               {tx.type === "CREDIT"
-                                ? <>Skin sale — <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
-                                : <>Withdrawal — <strong>{cashoutMethod ?? "Payout"}</strong></>
+                                ? <>{t("skinSale")} — <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
+                                : <>{t("withdrawal")} — <strong>{cashoutMethod ?? t("payout")}</strong></>
                               }
                               {tx.comment && <> — {tx.comment}</>}
                             </span>
@@ -398,7 +400,7 @@ export default function BalancePage() {
                           </td>
                           <td>
                             <span className={`bal-badge ${tx.type === "CREDIT" ? "bal-badge--credit" : "bal-badge--paid"}`}>
-                              {tx.type === "CREDIT" ? "Credit" : "Paid"}
+                              {tx.type === "CREDIT" ? t("credit") : t("paid")}
                             </span>
                           </td>
                         </tr>

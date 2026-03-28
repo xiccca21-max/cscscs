@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 import "@/styles/skinwave-orders.css";
 
@@ -87,15 +87,7 @@ function paymentIcon(type: string | undefined) {
   }
 }
 
-function formatRelativeDate(dateStr: string): { label: string; full: string } {
-  const d = new Date(dateStr);
-  const now = new Date();
-  const diff = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-  const full = d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-  if (diff === 0) return { label: "Today", full };
-  if (diff === 1) return { label: "Yesterday", full };
-  return { label: `${diff} days ago`, full };
-}
+// formatRelativeDate moved inside component for i18n access
 
 function amtClass(status: string): string {
   if (status === "PAID" || status === "TRADE_COMPLETED") return "ord-row__amt ord-row__amt--paid";
@@ -105,7 +97,18 @@ function amtClass(status: string): string {
 
 export default function OrdersPage() {
   const t = useTranslations("orders");
+  const locale = useLocale();
   const { user, loading: sessionLoading } = useSession();
+
+  const formatRelativeDate = useCallback((dateStr: string): { label: string; full: string } => {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+    const full = d.toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US", { month: "long", day: "numeric", year: "numeric" });
+    if (diff === 0) return { label: t("today"), full };
+    if (diff === 1) return { label: t("yesterday"), full };
+    return { label: t("daysAgo", { count: diff }), full };
+  }, [locale, t]);
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
@@ -312,7 +315,7 @@ export default function OrdersPage() {
                 <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" />
               </svg>
             </div>
-            <h3>Loading…</h3>
+            <h3>{t("loading")}</h3>
             <p>&nbsp;</p>
           </div>
         ) : hasOrders && hasResults ? (
@@ -350,7 +353,7 @@ export default function OrdersPage() {
                           <span className="ord-row__date" title={rel.full}>{rel.label}</span>
                         </td>
                         <td data-label="Items">
-                          <span className="ord-row__items">{order.itemCount} {order.itemCount === 1 ? "item" : "items"}</span>
+                          <span className="ord-row__items">{order.itemCount} {order.itemCount === 1 ? t("item") : t("items_count")}</span>
                         </td>
                         <td data-label="Amount">
                           <span className={amtClass(order.status)}>
@@ -390,7 +393,7 @@ export default function OrdersPage() {
             {totalPages > 1 && (
               <div className="ord-pag">
                 <span className="ord-pag__info">
-                  Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} of {filtered.length} orders
+                  {t("showing", { from: (currentPage - 1) * ITEMS_PER_PAGE + 1, to: Math.min(currentPage * ITEMS_PER_PAGE, filtered.length), total: filtered.length })}
                 </span>
                 <div className="ord-pag__btns">
                   <button

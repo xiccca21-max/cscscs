@@ -4,6 +4,22 @@ import { logAudit } from "@/lib/audit";
 import { Prisma, type OrderStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const admin = await requireAdmin();
+    if (!admin) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    const { id } = await params;
+    const order = await db.order.findUnique({
+      where: { id },
+      include: { user: true, items: true, paymentMethod: true, botAccount: true, statusHistory: { orderBy: { createdAt: "desc" } } },
+    });
+    if (!order) return NextResponse.json({ success: false, error: "Order not found" }, { status: 404 });
+    return NextResponse.json({ success: true, data: order });
+  } catch (e: any) {
+    return NextResponse.json({ success: false, error: e.message ?? "Server error" }, { status: 500 });
+  }
+}
+
 const VALID_NEXT: Partial<Record<OrderStatus, OrderStatus[]>> = {
   CREATED: ["TRADE_SENT", "PAYMENT_PENDING", "PAID", "TRADE_CANCELLED"],
   TRADE_SENT: ["TRADE_COMPLETED", "TRADE_CANCELLED", "PAYMENT_PENDING", "PAID"],

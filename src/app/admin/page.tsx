@@ -24,8 +24,7 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
-  const [prices, setPrices] = useState<any>(null);
-  const [balances, setBalances] = useState<any[]>([]);
+  const [pricingRules, setPricingRules] = useState<any[]>([]);
   const [cashouts, setCashouts] = useState<any[]>([]);
   const [bots, setBots] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<any[]>([]);
@@ -37,6 +36,12 @@ export default function AdminPage() {
   const [balancesSearch, setBalancesSearch] = useState("");
   const [cashoutsStatus, setCashoutsStatus] = useState("");
   const [logsSearch, setLogsSearch] = useState("");
+
+  const [balanceModal, setBalanceModal] = useState<{ userId: string; username: string; action: "CREDIT" | "DEBIT" } | null>(null);
+  const [balanceAmount, setBalanceAmount] = useState("");
+  const [balanceComment, setBalanceComment] = useState("");
+
+  const [orderDetail, setOrderDetail] = useState<any>(null);
 
   const SOCIAL_KEYS = [
     { key: "social_discord", label: "Discord", placeholder: "https://discord.gg/your-server" },
@@ -56,20 +61,43 @@ export default function AdminPage() {
     setToasts((prev) => prev.filter((_, i) => i !== idx));
   }, []);
 
-  useEffect(() => {
-    fetch("/api/admin/orders").then((r) => r.json()).then((d) => { if (d.success) setOrders(d.data ?? d.orders ?? []); });
-    fetch("/api/admin/users").then((r) => r.json()).then((d) => { if (d.success) setUsers(d.data ?? d.users ?? []); });
-    fetch("/api/admin/payments").then((r) => r.json()).then((d) => { if (d.success) setPaymentMethods(d.data ?? d.methods ?? []); });
-    fetch("/api/admin/prices").then((r) => r.json()).then((d) => { if (d.success) setPrices(d.data ?? d); });
-    fetch("/api/admin/balance").then((r) => r.json()).then((d) => { if (d.success) setBalances(d.data ?? d.balances ?? []); });
-    fetch("/api/admin/cashouts").then((r) => r.json()).then((d) => { if (d.success) setCashouts(d.data ?? d.cashouts ?? []); });
-    fetch("/api/admin/bots").then((r) => r.json()).then((d) => { if (d.success) setBots(d.data ?? d.bots ?? []); });
-    fetch("/api/admin/referrals").then((r) => r.json()).then((d) => { if (d.success) setReferrals(d.data ?? d.referrals ?? []); });
-    fetch("/api/admin/audit").then((r) => r.json()).then((d) => { if (d.success) setAuditLogs(d.data ?? d.logs ?? []); });
-    fetch("/api/admin/settings").then((r) => r.json()).then((d) => { if (d.success && d.data) setSocialLinks(d.data); });
+  const fetchOrders = useCallback(() => {
+    fetch("/api/admin/orders").then((r) => r.json()).then((d) => {
+      if (d.success) setOrders(d.data?.orders ?? []);
+    }).catch(() => {});
   }, []);
 
-  const handleAction = async (method: string, url: string, body?: any, successMsg?: string) => {
+  const fetchUsers = useCallback(() => {
+    fetch("/api/admin/users").then((r) => r.json()).then((d) => {
+      if (d.success) setUsers(d.data?.users ?? []);
+    }).catch(() => {});
+  }, []);
+
+  const fetchCashouts = useCallback(() => {
+    fetch("/api/admin/cashouts").then((r) => r.json()).then((d) => {
+      if (d.success) setCashouts(d.data?.cashouts ?? []);
+    }).catch(() => {});
+  }, []);
+
+  const fetchAuditLogs = useCallback(() => {
+    fetch("/api/admin/audit").then((r) => r.json()).then((d) => {
+      if (d.success) setAuditLogs(d.data?.logs ?? []);
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetchOrders();
+    fetchUsers();
+    fetch("/api/admin/payments").then((r) => r.json()).then((d) => { if (d.success) setPaymentMethods(d.data ?? []); }).catch(() => {});
+    fetch("/api/admin/prices").then((r) => r.json()).then((d) => { if (d.success) setPricingRules(Array.isArray(d.data) ? d.data : []); }).catch(() => {});
+    fetchCashouts();
+    fetch("/api/admin/bots").then((r) => r.json()).then((d) => { if (d.success) setBots(d.data ?? []); }).catch(() => {});
+    fetch("/api/admin/referrals").then((r) => r.json()).then((d) => { if (d.success) setReferrals(d.data ?? []); }).catch(() => {});
+    fetchAuditLogs();
+    fetch("/api/admin/settings").then((r) => r.json()).then((d) => { if (d.success && d.data) setSocialLinks(d.data); }).catch(() => {});
+  }, [fetchOrders, fetchUsers, fetchCashouts, fetchAuditLogs]);
+
+  const handleAction = async (method: string, url: string, body?: any, successMsg?: string, onSuccess?: () => void) => {
     try {
       const res = await fetch(url, {
         method,
@@ -79,12 +107,15 @@ export default function AdminPage() {
       const json = await res.json();
       if (json.success) {
         addToast(successMsg ?? "Action completed");
+        onSuccess?.();
+        return json;
       } else {
         addToast("Error: " + (json.error ?? "Unknown error"));
       }
     } catch {
       addToast("Network error");
     }
+    return null;
   };
 
   const handleSaveSocialLinks = async () => {
@@ -105,9 +136,26 @@ export default function AdminPage() {
     }
   };
 
+  const handleBalanceSubmit = async () => {
+    if (!balanceModal) return;
+    const amount = parseFloat(balanceAmount);
+    if (!amount || amount <= 0) { addToast("Enter a valid amount"); return; }
+    await handleAction("POST", "/api/admin/balance", {
+      userId: balanceModal.userId,
+      type: balanceModal.action,
+      amount,
+      comment: balanceComment || null,
+    }, `Balance ${balanceModal.action === "CREDIT" ? "credited" : "debited"}`, () => {
+      fetchUsers();
+      setBalanceModal(null);
+      setBalanceAmount("");
+      setBalanceComment("");
+    });
+  };
+
   const navItems: { key: Section; label: string; badge?: string; icon: ReactNode }[] = [
     {
-      key: "orders", label: "Orders", badge: "12",
+      key: "orders", label: "Orders",
       icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></svg>,
     },
     {
@@ -127,7 +175,7 @@ export default function AdminPage() {
       icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2" /><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4" /></svg>,
     },
     {
-      key: "cashouts", label: "Cashout Requests", badge: "3",
+      key: "cashouts", label: "Cashout Requests",
       icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12l7 7 7-7" /></svg>,
     },
     {
@@ -148,9 +196,14 @@ export default function AdminPage() {
     },
   ];
 
+  const filteredBalanceUsers = users.filter((u) => {
+    if (!balancesSearch) return true;
+    const q = balancesSearch.toLowerCase();
+    return (u.steamId ?? "").toLowerCase().includes(q) || (u.steamLogin ?? "").toLowerCase().includes(q);
+  });
+
   return (
     <>
-      {/* Admin Header */}
       <header className="header admin-header">
         <div className="header__inner">
           <div className="header__left">
@@ -167,9 +220,7 @@ export default function AdminPage() {
         </div>
       </header>
 
-      {/* Admin Layout */}
       <div className="admin-layout">
-        {/* Sidebar */}
         <aside className="admin-sidebar" id="adminSidebar">
           <nav className="admin-nav">
             {navItems.map((item) => (
@@ -188,7 +239,6 @@ export default function AdminPage() {
           </nav>
         </aside>
 
-        {/* Main content */}
         <main className="admin-main">
 
           {/* ORDERS */}
@@ -199,59 +249,78 @@ export default function AdminPage() {
                 <input type="text" className="input" placeholder="Search by ID, Steam ID..." style={{ width: 280 }} value={ordersSearch} onChange={(e) => setOrdersSearch(e.target.value)} />
                 <select className="input select" style={{ width: 160 }} value={ordersStatus} onChange={(e) => setOrdersStatus(e.target.value)}>
                   <option value="">All Statuses</option>
-                  <option>Created</option>
-                  <option>Trade Sent</option>
-                  <option>Trade Completed</option>
-                  <option>Cancelled</option>
-                  <option>Payment Pending</option>
-                  <option>Paid</option>
+                  <option value="CREATED">Created</option>
+                  <option value="TRADE_SENT">Trade Sent</option>
+                  <option value="TRADE_COMPLETED">Trade Completed</option>
+                  <option value="TRADE_CANCELLED">Cancelled</option>
+                  <option value="PAYMENT_PENDING">Payment Pending</option>
+                  <option value="PAID">Paid</option>
                 </select>
+                <button className="btn btn--secondary btn--sm" onClick={fetchOrders}>Refresh</button>
               </div>
             </div>
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>User</th>
-                    <th>Items</th>
-                    <th>Amount</th>
-                    <th>Method</th>
-                    <th>Bot</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
+                  <tr><th>Order ID</th><th>User</th><th>Items</th><th>Amount</th><th>Method</th><th>Bot</th><th>Status</th><th>Created</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
-                  {orders.length > 0 ? orders.map((o: any, i: number) => (
-                    <tr key={o.id ?? i}>
-                      <td><strong>#{o.id ?? o.orderId ?? `SW-${i}`}</strong></td>
-                      <td><a href="#" className="link">{o.user ?? o.steamLogin ?? "—"}</a></td>
-                      <td>{o.itemsCount ?? o.items ?? "—"}</td>
-                      <td>{o.amount ?? "—"}</td>
-                      <td>{o.method ?? o.payoutMethod ?? "—"}</td>
-                      <td>{o.bot ?? "—"}</td>
-                      <td><span className={`status-badge status-badge--${(o.status ?? "created").toLowerCase().replace(/\s+/g, "-")}`}>{o.status ?? "Created"}</span></td>
+                  {orders.length > 0 ? orders.map((o: any) => (
+                    <tr key={o.id}>
+                      <td><strong>#{o.orderNumber ?? o.id?.slice(0, 8)}</strong></td>
+                      <td>{o.user?.steamLogin ?? o.user?.steamId ?? "—"}</td>
+                      <td>{o.items?.length ?? 0}</td>
+                      <td>{parseFloat(o.totalAmount ?? 0).toFixed(2)}$</td>
+                      <td>{o.paymentMethod?.name ?? o.paymentMethodId ?? "—"}</td>
+                      <td>{o.botAccount?.name ?? "—"}</td>
+                      <td><span className={`status-badge status-badge--${(o.status ?? "CREATED").toLowerCase().replace(/_/g, "-")}`}>{o.status}</span></td>
                       <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : "—"}</td>
-                      <td><button className="btn btn--ghost btn--sm" onClick={() => handleAction("GET", `/api/admin/orders/${o.id}`, undefined, "Order details loaded")}>View</button></td>
+                      <td>
+                        <button className="btn btn--ghost btn--sm" onClick={() => setOrderDetail(o)}>View</button>
+                      </td>
                     </tr>
                   )) : (
-                    <tr>
-                      <td><strong>#SW-2847</strong></td>
-                      <td><a href="#" className="link">user123</a></td>
-                      <td>3</td>
-                      <td>160.40$</td>
-                      <td>Crypto</td>
-                      <td>—</td>
-                      <td><span className="status-badge status-badge--created">Created</span></td>
-                      <td>Mar 24, 14:35</td>
-                      <td><button className="btn btn--ghost btn--sm">View</button></td>
-                    </tr>
+                    <tr><td colSpan={9} style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>No orders found</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
+
+            {orderDetail && (
+              <div style={{ position: "fixed", inset: 0, zIndex: 10000, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setOrderDetail(null)}>
+                <div className="card" style={{ maxWidth: 600, width: "90%", maxHeight: "80vh", overflow: "auto", padding: 24 }} onClick={(e) => e.stopPropagation()}>
+                  <h3>Order #{orderDetail.orderNumber ?? orderDetail.id?.slice(0, 8)}</h3>
+                  <div style={{ display: "grid", gap: 8, marginTop: 16, fontSize: 14 }}>
+                    <div><strong>Status:</strong> {orderDetail.status}</div>
+                    <div><strong>User:</strong> {orderDetail.user?.steamLogin} ({orderDetail.user?.steamId})</div>
+                    <div><strong>Amount:</strong> {parseFloat(orderDetail.totalAmount ?? 0).toFixed(2)}$</div>
+                    <div><strong>Method:</strong> {orderDetail.paymentMethod?.name ?? orderDetail.paymentMethodId}</div>
+                    <div><strong>Bot:</strong> {orderDetail.botAccount?.name ?? "Not assigned"}</div>
+                    <div><strong>Items:</strong> {orderDetail.items?.length ?? 0}</div>
+                    {orderDetail.items?.map((it: any, idx: number) => (
+                      <div key={idx} style={{ paddingLeft: 16 }}>• {it.name} — {parseFloat(it.price ?? 0).toFixed(2)}$</div>
+                    ))}
+                    <div><strong>Created:</strong> {new Date(orderDetail.createdAt).toLocaleString()}</div>
+                    {orderDetail.tradeOfferId && <div><strong>Trade Offer:</strong> {orderDetail.tradeOfferId}</div>}
+                  </div>
+                  <div style={{ marginTop: 20, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {orderDetail.status === "CREATED" && (
+                      <button className="btn btn--primary btn--sm" onClick={() => handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_SENT" }, "Status → TRADE_SENT", () => { fetchOrders(); setOrderDetail(null); })}>Mark Trade Sent</button>
+                    )}
+                    {orderDetail.status === "TRADE_SENT" && (
+                      <button className="btn btn--primary btn--sm" onClick={() => handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_COMPLETED" }, "Status → TRADE_COMPLETED", () => { fetchOrders(); setOrderDetail(null); })}>Mark Completed</button>
+                    )}
+                    {(orderDetail.status === "TRADE_COMPLETED" || orderDetail.status === "PAYMENT_PENDING") && (
+                      <button className="btn btn--primary btn--sm" onClick={() => handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "PAID" }, "Status → PAID", () => { fetchOrders(); setOrderDetail(null); })}>Mark Paid</button>
+                    )}
+                    {orderDetail.status !== "TRADE_CANCELLED" && orderDetail.status !== "PAID" && (
+                      <button className="btn btn--ghost btn--sm" style={{ color: "var(--danger)" }} onClick={() => handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_CANCELLED" }, "Order cancelled", () => { fetchOrders(); setOrderDetail(null); })}>Cancel</button>
+                    )}
+                    <button className="btn btn--ghost btn--sm" onClick={() => setOrderDetail(null)}>Close</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* USERS */}
@@ -260,56 +329,37 @@ export default function AdminPage() {
               <h2>Users</h2>
               <div className="admin-section__actions">
                 <input type="text" className="input" placeholder="Search by Steam ID, username..." style={{ width: 300 }} value={usersSearch} onChange={(e) => setUsersSearch(e.target.value)} />
+                <button className="btn btn--secondary btn--sm" onClick={fetchUsers}>Refresh</button>
               </div>
             </div>
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Steam ID</th>
-                    <th>Orders</th>
-                    <th>Balance</th>
-                    <th>Referral</th>
-                    <th>Joined</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
+                  <tr><th>User</th><th>Steam ID</th><th>Balance</th><th>Joined</th><th>Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
-                  {users.length > 0 ? users.map((u: any, i: number) => (
-                    <tr key={u.id ?? i}>
+                  {users.length > 0 ? users.map((u: any) => (
+                    <tr key={u.id}>
                       <td>
                         <div className="ref-user">
-                          <div className="ref-user__avatar"><span>{(u.username ?? u.steamLogin ?? "U")[0].toUpperCase()}</span></div>
-                          <span>{u.username ?? u.steamLogin ?? "—"}</span>
+                          {u.steamAvatar ? <img src={u.steamAvatar} alt="" style={{ width: 28, height: 28, borderRadius: 6 }} /> : <div className="ref-user__avatar"><span>{(u.steamLogin ?? "U")[0].toUpperCase()}</span></div>}
+                          <span>{u.steamLogin ?? "—"}</span>
                         </div>
                       </td>
-                      <td>{u.steamId ?? "—"}</td>
-                      <td>{u.ordersCount ?? 0}</td>
-                      <td>{u.balance ?? "0.00"}$</td>
-                      <td>{u.referralCode ?? "—"}</td>
+                      <td style={{ fontSize: 12, fontFamily: "monospace" }}>{u.steamId ?? "—"}</td>
+                      <td>{parseFloat(u.balance ?? 0).toFixed(2)}$</td>
                       <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}</td>
-                      <td><span className="badge badge--success">{u.status ?? "Active"}</span></td>
+                      <td><span className={`badge badge--${u.status === "BLOCKED" ? "warning" : "success"}`}>{u.status ?? "ACTIVE"}</span></td>
                       <td>
-                        <button className="btn btn--ghost btn--sm" onClick={() => handleAction("PATCH", `/api/admin/users/${u.id}`, {}, "User updated")}>Edit</button>
-                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--danger)" }} onClick={() => handleAction("PATCH", `/api/admin/users/${u.id}`, { blocked: true }, "User blocked")}>Block</button>
+                        {u.status !== "BLOCKED" ? (
+                          <button className="btn btn--ghost btn--sm" style={{ color: "var(--danger)" }} onClick={() => handleAction("PATCH", `/api/admin/users/${u.id}`, { status: "BLOCKED" }, "User blocked", fetchUsers)}>Block</button>
+                        ) : (
+                          <button className="btn btn--ghost btn--sm" style={{ color: "var(--success)" }} onClick={() => handleAction("PATCH", `/api/admin/users/${u.id}`, { status: "ACTIVE" }, "User unblocked", fetchUsers)}>Unblock</button>
+                        )}
                       </td>
                     </tr>
                   )) : (
-                    <tr>
-                      <td><div className="ref-user"><div className="ref-user__avatar"><span>U</span></div><span>user123</span></div></td>
-                      <td>76561198012345</td>
-                      <td>14</td>
-                      <td>245.50$</td>
-                      <td>PARTNER123</td>
-                      <td>Mar 10, 2026</td>
-                      <td><span className="badge badge--success">Active</span></td>
-                      <td>
-                        <button className="btn btn--ghost btn--sm">Edit</button>
-                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--danger)" }}>Block</button>
-                      </td>
-                    </tr>
+                    <tr><td colSpan={6} style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>No users found</td></tr>
                   )}
                 </tbody>
               </table>
@@ -320,45 +370,26 @@ export default function AdminPage() {
           <section className="admin-section" id="sec-payments" style={{ display: activeSection === "payments" ? undefined : "none" }}>
             <div className="admin-section__header">
               <h2>Payment Methods</h2>
-              <button className="btn btn--primary btn--sm" onClick={() => handleAction("POST", "/api/admin/payments", {}, "Payment method added")}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                Add Method
-              </button>
             </div>
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
-                  <tr>
-                    <th>Method</th>
-                    <th>Type</th>
-                    <th>Commission</th>
-                    <th>Min Amount</th>
-                    <th>Currencies</th>
-                    <th>Status</th>
-                    <th>Order</th>
-                    <th>Actions</th>
-                  </tr>
+                  <tr><th>Method</th><th>Type</th><th>Commission</th><th>Min Amount</th><th>Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                   {paymentMethods.length > 0 ? paymentMethods.map((pm: any, i: number) => (
                     <tr key={pm.id ?? i}>
-                      <td><strong>{pm.name ?? pm.method ?? "—"}</strong></td>
+                      <td><strong>{pm.name ?? "—"}</strong></td>
                       <td>{pm.type ?? "—"}</td>
-                      <td>{pm.commission ?? "—"}</td>
-                      <td>{pm.minAmount ?? "—"}</td>
-                      <td>{pm.currencies ?? "—"}</td>
+                      <td>{pm.commission != null ? `${pm.commission}%` : "—"}</td>
+                      <td>{pm.minAmount != null ? `${pm.minAmount}$` : "—"}</td>
                       <td><span className={`badge badge--${pm.active !== false ? "success" : "warning"}`}>{pm.active !== false ? "Active" : "Inactive"}</span></td>
-                      <td>{pm.order ?? pm.sortOrder ?? i + 1}</td>
-                      <td><button className="btn btn--ghost btn--sm" onClick={() => handleAction("PATCH", `/api/admin/payments/${pm.id}`, {}, "Payment method updated")}>Edit</button></td>
+                      <td>
+                        <button className="btn btn--ghost btn--sm" onClick={() => handleAction("PATCH", `/api/admin/payments/${pm.id}`, { active: !pm.active }, pm.active ? "Deactivated" : "Activated")}>{pm.active ? "Deactivate" : "Activate"}</button>
+                      </td>
                     </tr>
                   )) : (
-                    <>
-                      <tr><td><strong>Visa / Mastercard</strong></td><td>Card</td><td>2.5%</td><td>10.00$</td><td>USD, EUR, RUB</td><td><span className="badge badge--success">Active</span></td><td>1</td><td><button className="btn btn--ghost btn--sm">Edit</button></td></tr>
-                      <tr><td><strong>Bitcoin (BTC)</strong></td><td>Crypto</td><td>1.0%</td><td>20.00$</td><td>USD</td><td><span className="badge badge--success">Active</span></td><td>2</td><td><button className="btn btn--ghost btn--sm">Edit</button></td></tr>
-                      <tr><td><strong>USDT (TRC-20)</strong></td><td>Crypto</td><td>0.5%</td><td>15.00$</td><td>USD</td><td><span className="badge badge--success">Active</span></td><td>3</td><td><button className="btn btn--ghost btn--sm">Edit</button></td></tr>
-                      <tr><td><strong>Bank Transfer</strong></td><td>Bank</td><td>3.0%</td><td>50.00$</td><td>USD, EUR</td><td><span className="badge badge--warning">Inactive</span></td><td>4</td><td><button className="btn btn--ghost btn--sm">Edit</button></td></tr>
-                      <tr><td><strong>Site Balance</strong></td><td>Balance</td><td>0%</td><td>1.00$</td><td>USD</td><td><span className="badge badge--success">Active</span></td><td>5</td><td><button className="btn btn--ghost btn--sm">Edit</button></td></tr>
-                    </>
+                    <tr><td colSpan={6} style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>No payment methods found</td></tr>
                   )}
                 </tbody>
               </table>
@@ -368,62 +399,40 @@ export default function AdminPage() {
           {/* PRICES */}
           <section className="admin-section" id="sec-prices" style={{ display: activeSection === "prices" ? undefined : "none" }}>
             <div className="admin-section__header">
-              <h2>Pricing Settings</h2>
+              <h2>Pricing Rules</h2>
             </div>
             <div className="admin-card-grid">
               <div className="card">
-                <h3>Global Price Modifier</h3>
-                <p className="admin-hint">Applied to all TM Market API prices</p>
-                <div className="admin-inline-form">
-                  <input type="number" className="input" defaultValue={prices?.modifier ?? -5} style={{ width: 100 }} id="priceModifier" />
-                  <span>%</span>
-                  <button className="btn btn--primary btn--sm" onClick={() => {
-                    const val = (document.getElementById("priceModifier") as HTMLInputElement)?.value;
-                    handleAction("PATCH", "/api/admin/prices", { modifier: Number(val) }, "Price modifier saved");
-                  }}>Save</button>
-                </div>
+                <h3>Price Source</h3>
+                <p className="admin-hint">Base prices from TM Market API, rules applied on top</p>
+                <span className="badge badge--success">Connected</span>
               </div>
               <div className="card">
-                <h3>Price Source</h3>
-                <p className="admin-hint">Base prices from TM Market API</p>
-                <div className="admin-inline-form">
-                  <span className="badge badge--success">Connected</span>
-                  <button className="btn btn--secondary btn--sm" onClick={() => handleAction("POST", "/api/admin/prices/sync", {}, "Prices synced")}>Sync Now</button>
-                </div>
+                <h3>Active Rules</h3>
+                <p className="admin-hint">Total pricing rules configured</p>
+                <strong style={{ fontSize: 24 }}>{pricingRules.length}</strong>
               </div>
             </div>
             <div className="card" style={{ marginTop: 16 }}>
-              <h3>Item Price Overrides</h3>
-              <p className="admin-hint" style={{ marginBottom: 16 }}>Override individual item prices or disable them from buyout</p>
+              <h3>Pricing Rules</h3>
+              <p className="admin-hint" style={{ marginBottom: 16 }}>Rules that modify base market prices. Create via API: POST /api/admin/prices</p>
               <div className="admin-table-wrap">
                 <table className="admin-table">
                   <thead>
-                    <tr>
-                      <th>Item</th>
-                      <th>Game</th>
-                      <th>Market Price</th>
-                      <th>Buyout Price</th>
-                      <th>Override</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
+                    <tr><th>Game</th><th>Item</th><th>Adjustment</th><th>Value</th><th>Excluded</th><th>Updated</th></tr>
                   </thead>
                   <tbody>
-                    {prices?.overrides?.length > 0 ? prices.overrides.map((p: any, i: number) => (
-                      <tr key={p.id ?? i}>
-                        <td>{p.item ?? p.name ?? "—"}</td>
-                        <td>{p.game ?? "CS2"}</td>
-                        <td>{p.marketPrice ?? "—"}</td>
-                        <td>{p.buyoutPrice ?? "—"}</td>
-                        <td>{p.override ?? "—"}</td>
-                        <td><span className={`badge badge--${p.active !== false ? "success" : "warning"}`}>{p.active !== false ? "Active" : "Disabled"}</span></td>
-                        <td><button className="btn btn--ghost btn--sm" onClick={() => handleAction("PATCH", `/api/admin/prices/${p.id}`, {}, "Price override updated")}>Edit</button></td>
+                    {pricingRules.length > 0 ? pricingRules.map((r: any) => (
+                      <tr key={r.id}>
+                        <td>{r.game ?? "All"}</td>
+                        <td>{r.itemExternalId ?? "Global"}</td>
+                        <td>{r.adjustmentType}</td>
+                        <td>{r.adjustmentValue}</td>
+                        <td>{r.isExcluded ? "Yes" : "No"}</td>
+                        <td>{r.updatedAt ? new Date(r.updatedAt).toLocaleDateString() : "—"}</td>
                       </tr>
                     )) : (
-                      <>
-                        <tr><td>AK-47 | Case Hardened (FN)</td><td>CS2</td><td>712.50$</td><td>675.00$</td><td>—</td><td><span className="badge badge--success">Active</span></td><td><button className="btn btn--ghost btn--sm">Edit</button></td></tr>
-                        <tr><td>Dragonclaw Hook</td><td>Dota 2</td><td>200.00$</td><td>185.00$</td><td>185.00$</td><td><span className="badge badge--success">Active</span></td><td><button className="btn btn--ghost btn--sm">Edit</button></td></tr>
-                      </>
+                      <tr><td colSpan={6} style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>No pricing rules configured</td></tr>
                     )}
                   </tbody>
                 </table>
@@ -431,7 +440,7 @@ export default function AdminPage() {
             </div>
           </section>
 
-          {/* BALANCES */}
+          {/* BALANCES (uses users data + POST /api/admin/balance) */}
           <section className="admin-section" id="sec-balances" style={{ display: activeSection === "balances" ? undefined : "none" }}>
             <div className="admin-section__header">
               <h2>User Balances</h2>
@@ -440,104 +449,93 @@ export default function AdminPage() {
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Steam ID</th>
-                    <th>Balance</th>
-                    <th>Last Activity</th>
-                    <th>Actions</th>
-                  </tr>
+                  <tr><th>User</th><th>Steam ID</th><th>Balance</th><th>Joined</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
-                  {balances.length > 0 ? balances.map((b: any, i: number) => (
-                    <tr key={b.id ?? i}>
-                      <td><strong>{b.username ?? b.steamLogin ?? "—"}</strong></td>
-                      <td>{b.steamId ?? "—"}</td>
-                      <td><strong>{b.balance ?? "0.00"}$</strong></td>
-                      <td>{b.lastActivity ? new Date(b.lastActivity).toLocaleDateString() : "—"}</td>
+                  {filteredBalanceUsers.length > 0 ? filteredBalanceUsers.map((u: any) => (
+                    <tr key={u.id}>
+                      <td><strong>{u.steamLogin ?? "—"}</strong></td>
+                      <td style={{ fontSize: 12, fontFamily: "monospace" }}>{u.steamId ?? "—"}</td>
+                      <td><strong>{parseFloat(u.balance ?? 0).toFixed(2)}$</strong></td>
+                      <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}</td>
                       <td>
-                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--success)" }} onClick={() => handleAction("PATCH", `/api/admin/balance/${b.id}`, { action: "credit" }, "Balance credited")}>Credit</button>
-                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--danger)" }} onClick={() => handleAction("PATCH", `/api/admin/balance/${b.id}`, { action: "debit" }, "Balance debited")}>Debit</button>
-                        <button className="btn btn--ghost btn--sm" onClick={() => handleAction("GET", `/api/admin/balance/${b.id}/history`, undefined, "History loaded")}>History</button>
+                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--success)" }} onClick={() => setBalanceModal({ userId: u.id, username: u.steamLogin ?? u.steamId, action: "CREDIT" })}>Credit</button>
+                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--danger)" }} onClick={() => setBalanceModal({ userId: u.id, username: u.steamLogin ?? u.steamId, action: "DEBIT" })}>Debit</button>
                       </td>
                     </tr>
                   )) : (
-                    <tr>
-                      <td><strong>user123</strong></td>
-                      <td>76561198012345</td>
-                      <td><strong>245.50$</strong></td>
-                      <td>Mar 24, 2026</td>
-                      <td>
-                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--success)" }}>Credit</button>
-                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--danger)" }}>Debit</button>
-                        <button className="btn btn--ghost btn--sm">History</button>
-                      </td>
-                    </tr>
+                    <tr><td colSpan={5} style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>No users found</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
+
+            {balanceModal && (
+              <div style={{ position: "fixed", inset: 0, zIndex: 10000, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setBalanceModal(null)}>
+                <div className="card" style={{ maxWidth: 400, width: "90%", padding: 24 }} onClick={(e) => e.stopPropagation()}>
+                  <h3>{balanceModal.action === "CREDIT" ? "Credit" : "Debit"} Balance — {balanceModal.username}</h3>
+                  <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
+                    <div>
+                      <label style={{ fontWeight: 600, fontSize: 14 }}>Amount ($)</label>
+                      <input type="number" className="input" placeholder="0.00" min={0} step={0.01} value={balanceAmount} onChange={(e) => setBalanceAmount(e.target.value)} style={{ width: "100%", marginTop: 4 }} />
+                    </div>
+                    <div>
+                      <label style={{ fontWeight: 600, fontSize: 14 }}>Comment (optional)</label>
+                      <input type="text" className="input" placeholder="Reason..." value={balanceComment} onChange={(e) => setBalanceComment(e.target.value)} style={{ width: "100%", marginTop: 4 }} />
+                    </div>
+                  </div>
+                  <div style={{ marginTop: 20, display: "flex", gap: 8 }}>
+                    <button className="btn btn--primary btn--sm" onClick={handleBalanceSubmit}>Confirm</button>
+                    <button className="btn btn--ghost btn--sm" onClick={() => setBalanceModal(null)}>Cancel</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
           {/* CASHOUT REQUESTS */}
           <section className="admin-section" id="sec-cashouts" style={{ display: activeSection === "cashouts" ? undefined : "none" }}>
             <div className="admin-section__header">
               <h2>Cashout Requests</h2>
-              <select className="input select" style={{ width: 160 }} value={cashoutsStatus} onChange={(e) => setCashoutsStatus(e.target.value)}>
-                <option value="">All Statuses</option>
-                <option>Created</option>
-                <option>Pending</option>
-                <option>Approved</option>
-                <option>Rejected</option>
-                <option>Paid</option>
-              </select>
+              <div className="admin-section__actions">
+                <select className="input select" style={{ width: 160 }} value={cashoutsStatus} onChange={(e) => setCashoutsStatus(e.target.value)}>
+                  <option value="">All Statuses</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="REJECTED">Rejected</option>
+                  <option value="PAID">Paid</option>
+                </select>
+                <button className="btn btn--secondary btn--sm" onClick={fetchCashouts}>Refresh</button>
+              </div>
             </div>
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>User</th>
-                    <th>Amount</th>
-                    <th>Commission</th>
-                    <th>Net</th>
-                    <th>Method</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Actions</th>
-                  </tr>
+                  <tr><th>ID</th><th>User</th><th>Amount</th><th>Method</th><th>Status</th><th>Created</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
-                  {cashouts.length > 0 ? cashouts.map((c: any, i: number) => (
-                    <tr key={c.id ?? i}>
-                      <td>#{c.id ?? `CO-${i}`}</td>
-                      <td>{c.user ?? c.username ?? "—"}</td>
-                      <td>{c.amount ?? "—"}</td>
-                      <td>{c.commission ?? "—"}</td>
-                      <td>{c.net ?? "—"}</td>
-                      <td>{c.method ?? "—"}</td>
-                      <td><span className={`status-badge status-badge--${(c.status ?? "created").toLowerCase()}`}>{c.status ?? "Pending"}</span></td>
+                  {cashouts.length > 0 ? cashouts.map((c: any) => (
+                    <tr key={c.id}>
+                      <td>#{c.id?.slice(0, 8)}</td>
+                      <td>{c.user?.steamLogin ?? c.user?.steamId ?? "—"}</td>
+                      <td>{parseFloat(c.amount ?? 0).toFixed(2)}$</td>
+                      <td>{c.paymentMethod ?? "—"}</td>
+                      <td><span className={`status-badge status-badge--${(c.status ?? "PENDING").toLowerCase()}`}>{c.status}</span></td>
                       <td>{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "—"}</td>
                       <td>
-                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--success)" }} onClick={() => handleAction("PATCH", `/api/admin/cashouts/${c.id}`, { status: "approved" }, "Cashout approved")}>Approve</button>
-                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--danger)" }} onClick={() => handleAction("PATCH", `/api/admin/cashouts/${c.id}`, { status: "rejected" }, "Cashout rejected")}>Reject</button>
+                        {c.status === "PENDING" && (
+                          <>
+                            <button className="btn btn--ghost btn--sm" style={{ color: "var(--success)" }} onClick={() => handleAction("PATCH", `/api/admin/cashouts/${c.id}`, { status: "APPROVED" }, "Cashout approved", fetchCashouts)}>Approve</button>
+                            <button className="btn btn--ghost btn--sm" style={{ color: "var(--danger)" }} onClick={() => handleAction("PATCH", `/api/admin/cashouts/${c.id}`, { status: "REJECTED" }, "Cashout rejected", () => { fetchCashouts(); fetchUsers(); })}>Reject</button>
+                          </>
+                        )}
+                        {c.status === "APPROVED" && (
+                          <button className="btn btn--ghost btn--sm" style={{ color: "var(--success)" }} onClick={() => handleAction("PATCH", `/api/admin/cashouts/${c.id}`, { status: "PAID" }, "Cashout paid", fetchCashouts)}>Mark Paid</button>
+                        )}
                       </td>
                     </tr>
                   )) : (
-                    <tr>
-                      <td>#CO-115</td>
-                      <td>user123</td>
-                      <td>200.00$</td>
-                      <td>4.00$</td>
-                      <td>196.00$</td>
-                      <td>USDT (TRC-20)</td>
-                      <td><span className="status-badge status-badge--created">Pending</span></td>
-                      <td>Mar 24, 2026</td>
-                      <td>
-                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--success)" }}>Approve</button>
-                        <button className="btn btn--ghost btn--sm" style={{ color: "var(--danger)" }}>Reject</button>
-                      </td>
-                    </tr>
+                    <tr><td colSpan={7} style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>No cashout requests</td></tr>
                   )}
                 </tbody>
               </table>
@@ -548,39 +546,25 @@ export default function AdminPage() {
           <section className="admin-section" id="sec-bots" style={{ display: activeSection === "bots" ? undefined : "none" }}>
             <div className="admin-section__header">
               <h2>Steam Bots</h2>
-              <button className="btn btn--primary btn--sm" onClick={() => handleAction("POST", "/api/admin/bots", {}, "Bot added")}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                Add Bot
-              </button>
             </div>
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
-                  <tr>
-                    <th>Bot</th>
-                    <th>Steam ID</th>
-                    <th>Profile</th>
-                    <th>Active Orders</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
+                  <tr><th>Bot</th><th>Steam ID</th><th>Profile</th><th>Status</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                   {bots.length > 0 ? bots.map((b: any, i: number) => (
                     <tr key={b.id ?? i}>
                       <td><strong>{b.name ?? `Bot #${i + 1}`}</strong></td>
-                      <td>{b.steamId ?? "—"}</td>
-                      <td><a href={b.profileUrl ?? "#"} className="link" target="_blank" rel="noopener noreferrer">Steam Profile</a></td>
-                      <td>{b.activeOrders ?? 0}</td>
+                      <td style={{ fontSize: 12, fontFamily: "monospace" }}>{b.steamId ?? "—"}</td>
+                      <td>{b.steamProfileUrl ? <a href={b.steamProfileUrl} className="link" target="_blank" rel="noopener noreferrer">Profile</a> : "—"}</td>
                       <td><span className={`badge badge--${b.active !== false ? "success" : "warning"}`}>{b.active !== false ? "Active" : "Inactive"}</span></td>
-                      <td><button className="btn btn--ghost btn--sm" onClick={() => handleAction("PATCH", `/api/admin/bots/${b.id}`, {}, "Bot updated")}>Edit</button></td>
+                      <td>
+                        <button className="btn btn--ghost btn--sm" onClick={() => handleAction("PATCH", `/api/admin/bots/${b.id}`, { active: !b.active }, b.active ? "Bot deactivated" : "Bot activated")}>{b.active ? "Deactivate" : "Activate"}</button>
+                      </td>
                     </tr>
                   )) : (
-                    <>
-                      <tr><td><strong>Bot #1 — TradeBot Alpha</strong></td><td>76561198099001</td><td><a href="#" className="link">Steam Profile</a></td><td>2</td><td><span className="badge badge--success">Active</span></td><td><button className="btn btn--ghost btn--sm">Edit</button></td></tr>
-                      <tr><td><strong>Bot #2 — TradeBot Beta</strong></td><td>76561198099002</td><td><a href="#" className="link">Steam Profile</a></td><td>1</td><td><span className="badge badge--success">Active</span></td><td><button className="btn btn--ghost btn--sm">Edit</button></td></tr>
-                      <tr><td><strong>Bot #3 — TradeBot Gamma</strong></td><td>76561198099003</td><td><a href="#" className="link">Steam Profile</a></td><td>0</td><td><span className="badge badge--warning">Inactive</span></td><td><button className="btn btn--ghost btn--sm">Edit</button></td></tr>
-                    </>
+                    <tr><td colSpan={5} style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>No bots configured</td></tr>
                   )}
                 </tbody>
               </table>
@@ -595,34 +579,19 @@ export default function AdminPage() {
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
-                  <tr>
-                    <th>Partner</th>
-                    <th>Code</th>
-                    <th>Referred Users</th>
-                    <th>Orders</th>
-                    <th>Successful</th>
-                    <th>Volume</th>
-                  </tr>
+                  <tr><th>Partner</th><th>Code</th><th>Referred Users</th><th>Active</th><th>Created</th></tr>
                 </thead>
                 <tbody>
-                  {referrals.length > 0 ? referrals.map((r: any, i: number) => (
-                    <tr key={r.id ?? i}>
-                      <td><strong>{r.partner ?? r.name ?? "—"}</strong></td>
-                      <td>{r.code ?? "—"}</td>
-                      <td>{r.referredUsers ?? r.signups ?? 0}</td>
-                      <td>{r.orders ?? r.ordered ?? 0}</td>
-                      <td>{r.successful ?? r.done ?? 0}</td>
-                      <td>{r.volume ?? "0.00"}$</td>
+                  {referrals.length > 0 ? referrals.map((r: any) => (
+                    <tr key={r.id}>
+                      <td><strong>{r.name ?? "—"}</strong></td>
+                      <td style={{ fontFamily: "monospace" }}>{r.code ?? "—"}</td>
+                      <td>{r.userCount ?? 0}</td>
+                      <td><span className={`badge badge--${r.active !== false ? "success" : "warning"}`}>{r.active !== false ? "Active" : "Inactive"}</span></td>
+                      <td>{r.createdAt ? new Date(r.createdAt).toLocaleDateString() : "—"}</td>
                     </tr>
                   )) : (
-                    <tr>
-                      <td><strong>PARTNER123</strong></td>
-                      <td>PARTNER123</td>
-                      <td>147</td>
-                      <td>89</td>
-                      <td>72</td>
-                      <td>12,450.00$</td>
-                    </tr>
+                    <tr><td colSpan={5} style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>No referrals</td></tr>
                   )}
                 </tbody>
               </table>
@@ -633,36 +602,27 @@ export default function AdminPage() {
           <section className="admin-section" id="sec-logs" style={{ display: activeSection === "logs" ? undefined : "none" }}>
             <div className="admin-section__header">
               <h2>Audit Log</h2>
-              <input type="text" className="input" placeholder="Search logs..." style={{ width: 260 }} value={logsSearch} onChange={(e) => setLogsSearch(e.target.value)} />
+              <div className="admin-section__actions">
+                <input type="text" className="input" placeholder="Search logs..." style={{ width: 260 }} value={logsSearch} onChange={(e) => setLogsSearch(e.target.value)} />
+                <button className="btn btn--secondary btn--sm" onClick={fetchAuditLogs}>Refresh</button>
+              </div>
             </div>
             <div className="admin-table-wrap">
               <table className="admin-table">
                 <thead>
-                  <tr>
-                    <th>Timestamp</th>
-                    <th>Actor</th>
-                    <th>Action</th>
-                    <th>Entity</th>
-                    <th>Details</th>
-                  </tr>
+                  <tr><th>Timestamp</th><th>Actor</th><th>Action</th><th>Entity</th><th>Details</th></tr>
                 </thead>
                 <tbody>
-                  {auditLogs.length > 0 ? auditLogs.map((l: any, i: number) => (
-                    <tr key={l.id ?? i}>
-                      <td>{l.timestamp ? new Date(l.timestamp).toLocaleString() : "—"}</td>
-                      <td>{l.actor ?? "—"}</td>
+                  {auditLogs.length > 0 ? auditLogs.map((l: any) => (
+                    <tr key={l.id}>
+                      <td>{l.createdAt ? new Date(l.createdAt).toLocaleString() : "—"}</td>
+                      <td>{l.actorId ?? "system"}</td>
                       <td>{l.action ?? "—"}</td>
-                      <td>{l.entity ?? "—"}</td>
-                      <td>{l.details ?? "—"}</td>
+                      <td>{l.entityType}{l.entityId ? ` #${l.entityId.slice(0, 8)}` : ""}</td>
+                      <td style={{ maxWidth: 300, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{typeof l.details === "object" ? JSON.stringify(l.details) : (l.details ?? "—")}</td>
                     </tr>
                   )) : (
-                    <>
-                      <tr><td>Mar 24, 14:38</td><td>admin</td><td>Status changed</td><td>Order #SW-2846</td><td>CREATED → TRADE_SENT</td></tr>
-                      <tr><td>Mar 24, 14:36</td><td>admin</td><td>Bot assigned</td><td>Order #SW-2846</td><td>Assigned Bot #2</td></tr>
-                      <tr><td>Mar 24, 11:10</td><td>admin</td><td>Balance credited</td><td>user: maria_d</td><td>+89.50$ (Order #SW-2845)</td></tr>
-                      <tr><td>Mar 24, 11:08</td><td>admin</td><td>Status changed</td><td>Order #SW-2845</td><td>PAYMENT_PENDING → PAID</td></tr>
-                      <tr><td>Mar 24, 09:50</td><td>system</td><td>Order cancelled</td><td>Order #SW-2844</td><td>Trade not accepted</td></tr>
-                    </>
+                    <tr><td colSpan={5} style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>No audit logs</td></tr>
                   )}
                 </tbody>
               </table>
@@ -702,7 +662,6 @@ export default function AdminPage() {
         </main>
       </div>
 
-      {/* Toast container */}
       <div className="toast-container" id="toastContainer">
         {toasts.map((msg, i) => (
           <Toast key={`${msg}-${i}`} message={msg} onDone={() => removeToast(i)} />

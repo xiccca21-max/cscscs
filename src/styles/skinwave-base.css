@@ -241,10 +241,12 @@ input, select, textarea { font: inherit; }
   top: 0;
   z-index: 100;
   height: var(--header-h);
-  background: var(--bg-header);
+  background: rgba(248,249,251,0.55);
+  backdrop-filter: blur(40px) saturate(1.8);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
   border-bottom: 1px solid transparent;
   border-image: linear-gradient(90deg, transparent, rgba(99,102,241,0.15) 30%, rgba(129,140,248,0.2) 50%, rgba(99,102,241,0.15) 70%, transparent) 1;
-  transition: height 0.35s cubic-bezier(0.4,0,0.2,1), background 0.4s, box-shadow 0.4s, border-image 0.4s;
+  transition: height 0.35s cubic-bezier(0.4,0,0.2,1), background 0.4s, box-shadow 0.4s, border-image 0.4s, backdrop-filter 0.4s;
   animation: headerSlideIn 0.6s ease forwards;
 }
 .header::after {
@@ -275,13 +277,13 @@ input, select, textarea { font: inherit; }
 }
 .header.is-scrolled {
   height: calc(var(--header-h) - 6px);
-  background: rgba(248,249,251,0.72);
-  backdrop-filter: blur(24px) saturate(1.8);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  background: rgba(248,249,251,0.6);
+  backdrop-filter: blur(50px) saturate(2.2);
+  -webkit-backdrop-filter: blur(50px) saturate(2.2);
   box-shadow:
-    0 4px 32px rgba(99,102,241,0.06),
-    0 1px 4px rgba(0,0,0,0.04),
-    inset 0 -1px 0 rgba(99,102,241,0.08);
+    0 4px 32px rgba(99,102,241,0.08),
+    0 1px 4px rgba(0,0,0,0.05),
+    inset 0 -1px 0 rgba(99,102,241,0.1);
   border-image: linear-gradient(90deg, transparent, rgba(99,102,241,0.1) 30%, rgba(129,140,248,0.15) 50%, rgba(99,102,241,0.1) 70%, transparent) 1;
 }
 .header.is-scrolled .header__logo {

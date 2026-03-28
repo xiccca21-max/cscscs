@@ -837,6 +837,7 @@ export default function SellPage() {
                   const icon = PAY_ICONS[pm.type] ?? PAY_ICONS.other;
                   const wrapCls = ICON_WRAP_CLS[pm.type] ?? "pay-btn__icon";
                   const commPct = parseFloat(pm.commission);
+                  const minAmt = parseFloat(pm.minAmount);
                   const isFirst = dbPaymentMethods[0]?.id === pm.id;
                   return (
                     <button
@@ -850,7 +851,7 @@ export default function SellPage() {
                         <img src={icon.src} alt={pm.name} className={icon.cls} />
                       </span>
                       <span className="pay-btn__name">{pm.name}</span>
-                      <span className="pay-btn__fee">{t("feeLabel")}: {commPct}%</span>
+                      <span className="pay-btn__fee">{t("feeLabel")}: {commPct}% · {t("minLabel")}: {format(minAmt)}</span>
                     </button>
                   );
                 }) : <>
@@ -858,22 +859,22 @@ export default function SellPage() {
                     <span className="pay-btn__badge">{t("bestRate")}</span>
                     <span className="pay-btn__icon"><img src="/icons/pay-balance.png" alt="Balance" className="pay-btn__img pay-btn__img--circle" /></span>
                     <span className="pay-btn__name">{t("payBalance")}</span>
-                    <span className="pay-btn__fee">{t("fee0")}</span>
+                    <span className="pay-btn__fee">{t("fee0")} · {t("minLabel")}: {format(0)}</span>
                   </button>
                   <button className={`pay-btn${paymentMethod === "card" ? " active" : ""}`} onClick={() => setPaymentMethod("card")}>
                     <span className="pay-btn__icon pay-btn__icon--card"><img src="/icons/pay-card.png" alt="Card" className="pay-btn__img" /></span>
                     <span className="pay-btn__name">{t("payCard")}</span>
-                    <span className="pay-btn__fee">{t("fee25")}</span>
+                    <span className="pay-btn__fee">{t("fee25")} · {t("minLabel")}: {format(1)}</span>
                   </button>
                   <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} onClick={() => setPaymentMethod("crypto")}>
                     <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
                     <span className="pay-btn__name">{t("payCrypto")}</span>
-                    <span className="pay-btn__fee">{t("fee1")}</span>
+                    <span className="pay-btn__fee">{t("fee1")} · {t("minLabel")}: {format(5)}</span>
                   </button>
                   <button className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`} onClick={() => setPaymentMethod("bank")}>
                     <span className="pay-btn__icon pay-btn__icon--bank"><img src="/icons/pay-bank.png" alt="Bank" className="pay-btn__img" /></span>
                     <span className="pay-btn__name">{t("payBank")}</span>
-                    <span className="pay-btn__fee">{t("fee3")}</span>
+                    <span className="pay-btn__fee">{t("fee3")} · {t("minLabel")}: {format(10)}</span>
                   </button>
                 </>}
               </div>

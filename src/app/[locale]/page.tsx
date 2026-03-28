@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { useCurrency } from "@/components/currency-provider";
 
 const PAYOUT_NAMES = [
   "Alex C.", "Maria S.", "Denis P.", "John K.", "Emma R.",
@@ -13,10 +14,14 @@ const SLIDE_COUNT = 7;
 
 export default function HomePage() {
   const t = useTranslations("landing");
+  const { format, symbol } = useCurrency();
 
   /* ── A) Payout rotation ── */
   const payoutIdxRef = useRef(0);
   const payoutRowRefs = useRef<(HTMLDivElement | null)[]>([null, null, null]);
+
+  const formatRef = useRef(format);
+  formatRef.current = format;
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -27,11 +32,11 @@ export default function HomePage() {
         row.style.transform = "translateY(-8px)";
         setTimeout(() => {
           const name = PAYOUT_NAMES[Math.floor(Math.random() * PAYOUT_NAMES.length)];
-          const amount = (Math.random() * 4000 + 50).toFixed(2);
+          const amountUsd = Math.random() * 4000 + 50;
           const userEl = row.querySelector(".hero__payout-user");
           const amountEl = row.querySelector(".hero__payout-amount");
           if (userEl) userEl.innerHTML = `<span>${name[0]}</span> ${name}`;
-          if (amountEl) amountEl.textContent = `${amount}$`;
+          if (amountEl) amountEl.textContent = formatRef.current(amountUsd);
           row.style.opacity = "1";
           row.style.transform = "translateY(0)";
         }, 300);
@@ -219,8 +224,8 @@ export default function HomePage() {
                 </div>
                 <p className="hero__card-name">AK-47 | Case Hardened</p>
                 <div className="hero__card-bottom">
-                  <span className="hero__card-price">675.00$</span>
-                  <span className="hero__card-steam">712.50$</span>
+                  <span className="hero__card-price">{format(675)}</span>
+                  <span className="hero__card-steam">{format(712.5)}</span>
                 </div>
               </div>
               <div className="hero__card" style={{"--i":1,"--color":"#d32ce6"} as React.CSSProperties}>
@@ -234,8 +239,8 @@ export default function HomePage() {
                 </div>
                 <p className="hero__card-name">AWP | Gungnir</p>
                 <div className="hero__card-bottom">
-                  <span className="hero__card-price">1,290.00$</span>
-                  <span className="hero__card-steam">1,380.00$</span>
+                  <span className="hero__card-price">{format(1290)}</span>
+                  <span className="hero__card-steam">{format(1380)}</span>
                 </div>
               </div>
               <div className="hero__card" style={{"--i":2,"--color":"#eb4b4b"} as React.CSSProperties}>
@@ -249,8 +254,8 @@ export default function HomePage() {
                 </div>
                 <p className="hero__card-name">M4A4 | Howl</p>
                 <div className="hero__card-bottom">
-                  <span className="hero__card-price">1,850.00$</span>
-                  <span className="hero__card-steam">1,950.00$</span>
+                  <span className="hero__card-price">{format(1850)}</span>
+                  <span className="hero__card-steam">{format(1950)}</span>
                 </div>
               </div>
             </div>
@@ -262,15 +267,15 @@ export default function HomePage() {
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[0] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
                 <div className="hero__payout-user"><span>A</span> Alex C.</div>
-                <span className="hero__payout-amount">1,790.00$</span>
+                <span className="hero__payout-amount">{format(1790)}</span>
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[1] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
                 <div className="hero__payout-user"><span>M</span> Maria S.</div>
-                <span className="hero__payout-amount">89.50$</span>
+                <span className="hero__payout-amount">{format(89.5)}</span>
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[2] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
                 <div className="hero__payout-user"><span>D</span> Denis P.</div>
-                <span className="hero__payout-amount">3,100.00$</span>
+                <span className="hero__payout-amount">{format(3100)}</span>
               </div>
             </div>
           </div>

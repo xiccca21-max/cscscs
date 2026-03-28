@@ -1845,7 +1845,7 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 2px 12px rgba(99,102,241,0.05);
-  overflow: hidden;
+  overflow: visible;
 }
 .sell-pay__title {
   font-size: 18px;
@@ -1998,9 +1998,9 @@
 .pay-btn[data-tooltip]::before {
   content: attr(data-tooltip);
   position: absolute;
-  top: -32px;
-  right: 0;
-  transform: translateY(4px);
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
   background: #1a1a2e;
   color: #fff;
   font-size: 11px;
@@ -2008,7 +2008,6 @@
   padding: 4px 10px;
   white-space: nowrap;
   border-radius: 6px;
-  white-space: nowrap;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s, transform 0.2s;
@@ -2016,7 +2015,7 @@
 }
 .pay-btn[data-tooltip]:hover::before {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(-50%) translateY(0);
 }
 
 .pay-btn > span:last-child {

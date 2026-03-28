@@ -42,6 +42,8 @@ export default function AdminPage() {
   const [balanceComment, setBalanceComment] = useState("");
 
   const [orderDetail, setOrderDetail] = useState<any>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [adminReady, setAdminReady] = useState(false);
 
   const SOCIAL_KEYS = [
     { key: "social_discord", label: "Discord", placeholder: "https://discord.gg/your-server" },
@@ -61,41 +63,64 @@ export default function AdminPage() {
     setToasts((prev) => prev.filter((_, i) => i !== idx));
   }, []);
 
-  const fetchOrders = useCallback(() => {
-    fetch("/api/admin/orders").then((r) => r.json()).then((d) => {
-      if (d.success) setOrders(d.data?.orders ?? []);
-    }).catch(() => {});
+  const safeFetch = useCallback(async (url: string): Promise<any> => {
+    try {
+      const r = await fetch(url);
+      const d = await r.json();
+      if (!d.success) {
+        if (d.error === "Unauthorized" || d.error === "Forbidden") {
+          setAuthError(d.error);
+        }
+        return null;
+      }
+      return d;
+    } catch {
+      return null;
+    }
   }, []);
 
-  const fetchUsers = useCallback(() => {
-    fetch("/api/admin/users").then((r) => r.json()).then((d) => {
-      if (d.success) setUsers(d.data?.users ?? []);
-    }).catch(() => {});
-  }, []);
+  const fetchOrders = useCallback(async () => {
+    const d = await safeFetch("/api/admin/orders");
+    if (d) setOrders(d.data?.orders ?? []);
+  }, [safeFetch]);
 
-  const fetchCashouts = useCallback(() => {
-    fetch("/api/admin/cashouts").then((r) => r.json()).then((d) => {
-      if (d.success) setCashouts(d.data?.cashouts ?? []);
-    }).catch(() => {});
-  }, []);
+  const fetchUsers = useCallback(async () => {
+    const d = await safeFetch("/api/admin/users");
+    if (d) setUsers(d.data?.users ?? []);
+  }, [safeFetch]);
 
-  const fetchAuditLogs = useCallback(() => {
-    fetch("/api/admin/audit").then((r) => r.json()).then((d) => {
-      if (d.success) setAuditLogs(d.data?.logs ?? []);
-    }).catch(() => {});
-  }, []);
+  const fetchCashouts = useCallback(async () => {
+    const d = await safeFetch("/api/admin/cashouts");
+    if (d) setCashouts(d.data?.cashouts ?? []);
+  }, [safeFetch]);
+
+  const fetchAuditLogs = useCallback(async () => {
+    const d = await safeFetch("/api/admin/audit");
+    if (d) setAuditLogs(d.data?.logs ?? []);
+  }, [safeFetch]);
 
   useEffect(() => {
-    fetchOrders();
-    fetchUsers();
-    fetch("/api/admin/payments").then((r) => r.json()).then((d) => { if (d.success) setPaymentMethods(d.data ?? []); }).catch(() => {});
-    fetch("/api/admin/prices").then((r) => r.json()).then((d) => { if (d.success) setPricingRules(Array.isArray(d.data) ? d.data : []); }).catch(() => {});
-    fetchCashouts();
-    fetch("/api/admin/bots").then((r) => r.json()).then((d) => { if (d.success) setBots(d.data ?? []); }).catch(() => {});
-    fetch("/api/admin/referrals").then((r) => r.json()).then((d) => { if (d.success) setReferrals(d.data ?? []); }).catch(() => {});
-    fetchAuditLogs();
-    fetch("/api/admin/settings").then((r) => r.json()).then((d) => { if (d.success && d.data) setSocialLinks(d.data); }).catch(() => {});
-  }, [fetchOrders, fetchUsers, fetchCashouts, fetchAuditLogs]);
+    const init = async () => {
+      const sessionRes = await fetch("/api/auth/session");
+      const session = await sessionRes.json();
+      if (!session?.user?.isAdmin) {
+        setAuthError(`Not admin. Steam ID: ${session?.user?.steamId ?? "not logged in"}. Add this ID to ADMIN_STEAM_IDS env var on Vercel.`);
+        setAdminReady(true);
+        return;
+      }
+      setAdminReady(true);
+      fetchOrders();
+      fetchUsers();
+      safeFetch("/api/admin/payments").then((d) => { if (d) setPaymentMethods(d.data ?? []); });
+      safeFetch("/api/admin/prices").then((d) => { if (d) setPricingRules(Array.isArray(d.data) ? d.data : []); });
+      fetchCashouts();
+      safeFetch("/api/admin/bots").then((d) => { if (d) setBots(d.data ?? []); });
+      safeFetch("/api/admin/referrals").then((d) => { if (d) setReferrals(d.data ?? []); });
+      fetchAuditLogs();
+      safeFetch("/api/admin/settings").then((d) => { if (d?.data) setSocialLinks(d.data); });
+    };
+    init();
+  }, [fetchOrders, fetchUsers, fetchCashouts, fetchAuditLogs, safeFetch]);
 
   const handleAction = async (method: string, url: string, body?: any, successMsg?: string, onSuccess?: () => void) => {
     try {
@@ -220,7 +245,17 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <div className="admin-layout">
+      {authError && (
+        <div style={{ background: "#ef4444", color: "#fff", padding: "12px 24px", fontSize: 14, fontWeight: 600, textAlign: "center" }}>
+          Admin access denied: {authError}
+        </div>
+      )}
+
+      {!adminReady && (
+        <div style={{ textAlign: "center", padding: "100px 24px", color: "#94a3b8", fontSize: 16 }}>Loading admin panel...</div>
+      )}
+
+      <div className="admin-layout" style={!adminReady || authError ? { display: "none" } : undefined}>
         <aside className="admin-sidebar" id="adminSidebar">
           <nav className="admin-nav">
             {navItems.map((item) => (

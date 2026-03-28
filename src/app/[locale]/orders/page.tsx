@@ -344,29 +344,29 @@ export default function OrdersPage() {
                         className="ord-row"
                         data-status={STATUS_DATA_ATTR[order.status] ?? "created"}
                       >
-                        <td data-label="Order ID">
+                        <td data-label={t("colOrder")}>
                           <Link href={`/order/${order.id}` as `/order/${string}`}>
                             <span className="ord-row__id">#{order.orderNumber}</span>
                           </Link>
                         </td>
-                        <td data-label="Date">
+                        <td data-label={t("colDate")}>
                           <span className="ord-row__date" title={rel.full}>{rel.label}</span>
                         </td>
-                        <td data-label="Items">
+                        <td data-label={t("colItems")}>
                           <span className="ord-row__items">{order.itemCount} {order.itemCount === 1 ? t("item") : t("items_count")}</span>
                         </td>
-                        <td data-label="Amount">
+                        <td data-label={t("colAmount")}>
                           <span className={amtClass(order.status)}>
                             {parseFloat(order.totalAmount).toFixed(2)}<small>$</small>
                           </span>
                         </td>
-                        <td data-label="Payment">
+                        <td data-label={t("colMethod")}>
                           <span className="ord-row__pay">
                             {paymentIcon(order.paymentMethod?.type)}
                             {order.paymentMethod?.name ?? "—"}
                           </span>
                         </td>
-                        <td data-label="Status">
+                        <td data-label={t("colStatus")}>
                           <span className={`ord-badge ${STATUS_BADGE[order.status] ?? "ord-badge--created"}`}>
                             {isPaid && (
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>

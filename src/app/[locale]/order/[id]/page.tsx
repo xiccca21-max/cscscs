@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Fragment, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 import "@/styles/skinwave-order.css";
 
@@ -74,6 +74,7 @@ export default function OrderPage({
   params: Promise<{ id: string; locale: string }>;
 }) {
   const t = useTranslations("order");
+  const locale = useLocale();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -181,7 +182,7 @@ export default function OrderPage({
     order.status === "PAYMENT_PENDING" ||
     order.status === "TRADE_COMPLETED";
   const totalAmount = parseFloat(order.totalAmount).toFixed(2);
-  const createdDate = new Date(order.createdAt).toLocaleDateString("en-US", {
+  const createdDate = new Date(order.createdAt).toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -252,7 +253,7 @@ export default function OrderPage({
               <div className="odr-tl__decor-grid"></div>
             </div>
             <div className="odr-tl__progress">
-              Step {activeStep + 1} of {TIMELINE_STEPS.length}
+              {t("stepProgress", { current: activeStep + 1, total: TIMELINE_STEPS.length })}
             </div>
             <div className="odr-tl__steps">
               {TIMELINE_STEPS.map((step, i) => {
@@ -354,7 +355,7 @@ export default function OrderPage({
                   {t("field.totalItems")}
                 </span>
                 <span className="odr-field__val odr-field__val--chip odr-field__val--chip-neutral">
-                  {order.items.length} items
+                  {t("itemCount", { count: order.items.length })}
                 </span>
               </div>
               <div className="odr-field odr-field--row">

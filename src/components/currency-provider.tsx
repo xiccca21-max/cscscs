@@ -5,7 +5,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo, t
 export type CurrencyCode = "USD" | "EUR" | "RUB";
 
 const DEFAULT_RUB_RATE = 92;
-const EUR_RATE = 0.92;
+const DEFAULT_EUR_RATE = 0.92;
 
 interface CurrencyCtx {
   currency: string;
@@ -28,6 +28,7 @@ const CurrencyContext = createContext<CurrencyCtx>({
 export function CurrencyProvider({ children }: { children: ReactNode }) {
   const [currency, setCurrencyState] = useState("USD");
   const [rubRate, setRubRate] = useState(DEFAULT_RUB_RATE);
+  const [eurRate, setEurRate] = useState(DEFAULT_EUR_RATE);
 
   useEffect(() => {
     const saved = localStorage.getItem("sw_currency");
@@ -36,16 +37,17 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
     fetch("/api/settings/exchange-rate")
       .then((r) => r.json())
       .then((d) => {
-        if (d?.data?.rate && d.data.rate > 0) setRubRate(d.data.rate);
+        if (d?.data?.rub && d.data.rub > 0) setRubRate(d.data.rub);
+        if (d?.data?.eur && d.data.eur > 0) setEurRate(d.data.eur);
       })
       .catch(() => {});
   }, []);
 
   const rates = useMemo<Record<string, { symbol: string; rate: number }>>(() => ({
     USD: { symbol: "$", rate: 1 },
-    EUR: { symbol: "€", rate: EUR_RATE },
+    EUR: { symbol: "€", rate: eurRate },
     RUB: { symbol: "₽", rate: rubRate },
-  }), [rubRate]);
+  }), [rubRate, eurRate]);
 
   const setCurrency = useCallback((c: string) => {
     if (!rates[c]) return;

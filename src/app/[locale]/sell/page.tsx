@@ -35,11 +35,27 @@ const WEAR_MAP: Record<string, string> = {
   "Battle-Scarred": "BS",
 };
 
-const COMMISSION: Record<string, number> = {
+const COMMISSION_FALLBACK: Record<string, number> = {
   balance: 0,
   crypto: 0.01,
   card: 0.025,
   bank: 0.03,
+};
+
+const PAY_ICONS: Record<string, { src: string; cls: string }> = {
+  balance: { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
+  card:    { src: "/icons/pay-card.png",    cls: "pay-btn__img" },
+  crypto:  { src: "/icons/pay-crypto.png",  cls: "pay-btn__img pay-btn__img--circle pay-btn__img--crypto" },
+  bank:    { src: "/icons/pay-bank.png",    cls: "pay-btn__img" },
+  sbp:     { src: "/icons/pay-bank.png",    cls: "pay-btn__img" },
+  qiwi:    { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
+  yoomoney:{ src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
+  other:   { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
+};
+
+const ICON_WRAP_CLS: Record<string, string> = {
+  card: "pay-btn__icon pay-btn__icon--card",
+  bank: "pay-btn__icon pay-btn__icon--bank",
 };
 
 const TRADE_URL_RE =
@@ -89,6 +105,7 @@ export default function SellPage() {
   const [tradeUrlSaved, setTradeUrlSaved] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("balance");
   const [submitting, setSubmitting] = useState(false);
+  const [dbPaymentMethods, setDbPaymentMethods] = useState<any[]>([]);
 
   const offerItemsRef = useRef<HTMLDivElement>(null);
 
@@ -160,6 +177,18 @@ export default function SellPage() {
     return () => { cancelled = true; };
   }, [user, fetchGame]);
 
+  useEffect(() => {
+    fetch("/api/payment-methods")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && Array.isArray(d.data) && d.data.length > 0) {
+          setDbPaymentMethods(d.data);
+          setPaymentMethod(d.data[0].type);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   /* ---- derived ---- */
   const gameCounts = useMemo(() => {
     const c: Record<string, number> = { cs2: 0, dota2: 0, tf2: 0, rust: 0 };
@@ -215,7 +244,11 @@ export default function SellPage() {
     [selectedItems],
   );
 
-  const commission = COMMISSION[paymentMethod] ?? 0;
+  const commission = useMemo(() => {
+    const fromDb = dbPaymentMethods.find((m) => m.type === paymentMethod);
+    if (fromDb) return parseFloat(fromDb.commission) / 100;
+    return COMMISSION_FALLBACK[paymentMethod] ?? 0;
+  }, [paymentMethod, dbPaymentMethods]);
   const youReceive = selectedTotal * (1 - commission);
   const tradeUrlValid = TRADE_URL_RE.test(tradeUrl);
 
@@ -266,7 +299,8 @@ export default function SellPage() {
     setSubmitting(true);
     try {
       const gameApiMap: Record<string, string> = { cs2: "CS2", dota2: "DOTA2", tf2: "TF2", rust: "RUST" };
-      const commissionRate = paymentMethod === "balance" ? 0 : paymentMethod === "card" ? 0.05 : paymentMethod === "crypto" ? 0.03 : 0.07;
+      const fromDb = dbPaymentMethods.find((m) => m.type === paymentMethod);
+      const commissionRate = fromDb ? parseFloat(fromDb.commission) / 100 : (COMMISSION_FALLBACK[paymentMethod] ?? 0);
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -281,7 +315,7 @@ export default function SellPage() {
             currency: "USD",
           })),
           tradeUrl,
-          paymentMethodId: paymentMethod,
+          paymentMethodId: dbPaymentMethods.find((m) => m.type === paymentMethod)?.id ?? paymentMethod,
           currency: "USD",
         }),
       });
@@ -294,7 +328,7 @@ export default function SellPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, selectedItems, tradeUrl, paymentMethod]);
+  }, [canSubmit, selectedItems, tradeUrl, paymentMethod, dbPaymentMethods]);
 
   useEffect(() => {
     if (!user) return;
@@ -771,51 +805,45 @@ export default function SellPage() {
 
             <div className="sell-pay__methods" id="paymentMethods">
               <div className="pay-grid">
-                <button
-                  className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`}
-                  data-method="balance"
-                  data-tooltip={t("fee0")}
-                  onClick={() => setPaymentMethod("balance")}
-                >
-                  <span className="pay-btn__badge">{t("bestRate")}</span>
-                  <span className="pay-btn__icon">
-                    <img src="/icons/pay-balance.png" alt="Balance" className="pay-btn__img pay-btn__img--circle" />
-                  </span>
-                  <span>{t("payBalance")}</span>
-                </button>
-                <button
-                  className={`pay-btn${paymentMethod === "card" ? " active" : ""}`}
-                  data-method="card"
-                  data-tooltip={t("fee25")}
-                  onClick={() => setPaymentMethod("card")}
-                >
-                  <span className="pay-btn__icon pay-btn__icon--card">
-                    <img src="/icons/pay-card.png" alt="Debit Card" className="pay-btn__img" />
-                  </span>
-                  <span>{t("payCard")}</span>
-                </button>
-                <button
-                  className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`}
-                  data-method="crypto"
-                  data-tooltip={t("fee1")}
-                  onClick={() => setPaymentMethod("crypto")}
-                >
-                  <span className="pay-btn__icon">
-                    <img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" />
-                  </span>
-                  <span>{t("payCrypto")}</span>
-                </button>
-                <button
-                  className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`}
-                  data-method="bank"
-                  data-tooltip={t("fee3")}
-                  onClick={() => setPaymentMethod("bank")}
-                >
-                  <span className="pay-btn__icon pay-btn__icon--bank">
-                    <img src="/icons/pay-bank.png" alt="Bank" className="pay-btn__img" />
-                  </span>
-                  <span>{t("payBank")}</span>
-                </button>
+                {dbPaymentMethods.length > 0 ? dbPaymentMethods.map((pm) => {
+                  const icon = PAY_ICONS[pm.type] ?? PAY_ICONS.other;
+                  const wrapCls = ICON_WRAP_CLS[pm.type] ?? "pay-btn__icon";
+                  const commPct = parseFloat(pm.commission);
+                  const isFirst = dbPaymentMethods[0]?.id === pm.id;
+                  return (
+                    <button
+                      key={pm.id}
+                      className={`pay-btn${paymentMethod === pm.type ? " active" : ""}`}
+                      data-method={pm.type}
+                      data-tooltip={`${t("feeLabel")}: ${commPct}%`}
+                      onClick={() => setPaymentMethod(pm.type)}
+                    >
+                      {isFirst && commPct === 0 && <span className="pay-btn__badge">{t("bestRate")}</span>}
+                      <span className={wrapCls}>
+                        <img src={icon.src} alt={pm.name} className={icon.cls} />
+                      </span>
+                      <span>{pm.name}</span>
+                    </button>
+                  );
+                }) : <>
+                  <button className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`} data-method="balance" data-tooltip={t("fee0")} onClick={() => setPaymentMethod("balance")}>
+                    <span className="pay-btn__badge">{t("bestRate")}</span>
+                    <span className="pay-btn__icon"><img src="/icons/pay-balance.png" alt="Balance" className="pay-btn__img pay-btn__img--circle" /></span>
+                    <span>{t("payBalance")}</span>
+                  </button>
+                  <button className={`pay-btn${paymentMethod === "card" ? " active" : ""}`} data-method="card" data-tooltip={t("fee25")} onClick={() => setPaymentMethod("card")}>
+                    <span className="pay-btn__icon pay-btn__icon--card"><img src="/icons/pay-card.png" alt="Card" className="pay-btn__img" /></span>
+                    <span>{t("payCard")}</span>
+                  </button>
+                  <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" data-tooltip={t("fee1")} onClick={() => setPaymentMethod("crypto")}>
+                    <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
+                    <span>{t("payCrypto")}</span>
+                  </button>
+                  <button className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`} data-method="bank" data-tooltip={t("fee3")} onClick={() => setPaymentMethod("bank")}>
+                    <span className="pay-btn__icon pay-btn__icon--bank"><img src="/icons/pay-bank.png" alt="Bank" className="pay-btn__img" /></span>
+                    <span>{t("payBank")}</span>
+                  </button>
+                </>}
               </div>
             </div>
 

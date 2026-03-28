@@ -45,6 +45,7 @@ export default function AdminPage() {
   const [socialSaving, setSocialSaving] = useState(false);
 
   const [exchangeRate, setExchangeRate] = useState("");
+  const [eurRate, setEurRate] = useState("");
   const [exchangeRateSaving, setExchangeRateSaving] = useState(false);
 
   const [pmModal, setPmModal] = useState(false);
@@ -93,6 +94,7 @@ export default function AdminPage() {
         if (d?.data) {
           setSocialLinks(d.data);
           if (d.data.exchange_rate_usd_rub) setExchangeRate(d.data.exchange_rate_usd_rub);
+          if (d.data.exchange_rate_usd_eur) setEurRate(d.data.exchange_rate_usd_eur);
         }
       });
     };
@@ -121,14 +123,17 @@ export default function AdminPage() {
     finally { setSocialSaving(false); }
   };
 
-  const handleSaveExchangeRate = async () => {
-    const val = parseFloat(exchangeRate);
-    if (!val || val <= 0) { addToast("Введите корректный курс"); return; }
+  const handleSaveExchangeRates = async () => {
+    const rubVal = parseFloat(exchangeRate);
+    const eurVal = parseFloat(eurRate);
+    if (exchangeRate && (!rubVal || rubVal <= 0)) { addToast("Некорректный курс RUB"); return; }
+    if (eurRate && (!eurVal || eurVal <= 0)) { addToast("Некорректный курс EUR"); return; }
     setExchangeRateSaving(true);
     try {
-      await fetch("/api/admin/settings", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "exchange_rate_usd_rub", value: String(val) }) });
-      addToast(`Курс сохранён: ${val} ₽/$`);
-    } catch { addToast("Ошибка сохранения курса"); }
+      if (rubVal) await fetch("/api/admin/settings", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "exchange_rate_usd_rub", value: String(rubVal) }) });
+      if (eurVal) await fetch("/api/admin/settings", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: "exchange_rate_usd_eur", value: String(eurVal) }) });
+      addToast("Курсы сохранены");
+    } catch { addToast("Ошибка сохранения курсов"); }
     finally { setExchangeRateSaving(false); }
   };
 
@@ -333,21 +338,31 @@ export default function AdminPage() {
           <div className="adm-section">
             <div className="adm-section__top">
               <h1>Оплата и курс</h1>
-              <button className="adm-btn adm-btn--primary" onClick={() => setPmModal(true)}>+ Добавить метод</button>
+              <div className="adm-section__actions">
+                <button className="adm-btn adm-btn--ghost" onClick={async () => {
+                  const res = await handleAction("POST", "/api/admin/seed-payments", undefined, "Методы по умолчанию добавлены", fetchPayments);
+                  if (res) fetchPayments();
+                }}>Добавить стандартные</button>
+                <button className="adm-btn adm-btn--primary" onClick={() => setPmModal(true)}>+ Добавить метод</button>
+              </div>
             </div>
 
-            {/* Exchange rate card */}
+            {/* Exchange rates card */}
             <div className="adm-card adm-card--accent" style={{ marginBottom: 20 }}>
               <div className="adm-exchange">
                 <div className="adm-exchange__info">
-                  <h3>Курс USD → RUB</h3>
-                  <p>Используется для конвертации цен на сайте</p>
+                  <h3>Курсы валют</h3>
+                  <p>Используются для конвертации цен на сайте</p>
                 </div>
                 <div className="adm-exchange__controls">
                   <span className="adm-exchange__prefix">1$ =</span>
                   <input className="adm-input adm-exchange__input" type="number" step="0.01" min="0" placeholder="88.50" value={exchangeRate} onChange={(e) => setExchangeRate(e.target.value)} />
                   <span className="adm-exchange__suffix">₽</span>
-                  <button className="adm-btn adm-btn--primary" onClick={handleSaveExchangeRate} disabled={exchangeRateSaving}>{exchangeRateSaving ? "..." : "Сохранить"}</button>
+                  <span className="adm-exchange__divider">|</span>
+                  <span className="adm-exchange__prefix">1$ =</span>
+                  <input className="adm-input adm-exchange__input" type="number" step="0.001" min="0" placeholder="0.92" value={eurRate} onChange={(e) => setEurRate(e.target.value)} />
+                  <span className="adm-exchange__suffix">€</span>
+                  <button className="adm-btn adm-btn--primary" onClick={handleSaveExchangeRates} disabled={exchangeRateSaving}>{exchangeRateSaving ? "..." : "Сохранить"}</button>
                 </div>
               </div>
             </div>

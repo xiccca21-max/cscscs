@@ -238,6 +238,7 @@
     "fee1": "Fee: 1%",
     "fee25": "Fee: 2.5%",
     "fee3": "Fee: 3%",
+    "feeLabel": "Fee",
     "min": "Min",
     "max": "Max"
   },

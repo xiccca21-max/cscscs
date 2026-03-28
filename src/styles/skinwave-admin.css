@@ -205,6 +205,11 @@
   font-weight: 600;
   color: var(--text-sec);
 }
+.adm-exchange__divider {
+  color: var(--border);
+  font-size: 18px;
+  margin: 0 4px;
+}
 .adm-exchange__input {
   width: 100px !important;
   text-align: center;

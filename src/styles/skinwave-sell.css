@@ -2340,6 +2340,29 @@
 .sell-empty p {
   font-size: 13px;
   color: var(--text-muted);
+  max-width: 340px;
+}
+.sell-empty__reload {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+.sell-empty__reload:hover {
+  background: var(--accent-h);
+  transform: translateY(-1px);
+}
+.sell-empty__reload:active {
+  transform: scale(0.97);
 }
 
 /* Skeleton loader */

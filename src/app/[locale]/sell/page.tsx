@@ -679,7 +679,38 @@ export default function SellPage() {
               </div>
             )}
 
-            {isLoggedIn && !loadingInventory && filteredItems.length === 0 && (
+            {isLoggedIn && !loadingInventory && filteredItems.length === 0 && inventory.length === 0 && (
+              <div className="sell-empty" id="emptyState">
+                <div className="sell-empty__icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 12a9 9 0 1 1-9-9" /><polyline points="21 3 21 9 15 9" /></svg>
+                </div>
+                <h4>{t("noItemsLoaded")}</h4>
+                <p>{t("noItemsLoadedDesc")}</p>
+                <button className="sell-empty__reload" onClick={() => {
+                  setInventory([]);
+                  setLoadingInventory(true);
+                  const loadAll = async () => {
+                    const games = ["cs2", "dota2", "tf2", "rust"] as const;
+                    let allItems: InventoryItem[] = [];
+                    for (const game of games) {
+                      try {
+                        const items = await fetchGame(game);
+                        allItems = [...allItems, ...items];
+                        setInventory([...allItems]);
+                        if (allItems.length > 0) setLoadingInventory(false);
+                      } catch {}
+                    }
+                    setLoadingInventory(false);
+                  };
+                  loadAll();
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12a9 9 0 1 1-9-9" /><polyline points="21 3 21 9 15 9" /></svg>
+                  {t("reloadInventory")}
+                </button>
+              </div>
+            )}
+
+            {isLoggedIn && !loadingInventory && filteredItems.length === 0 && inventory.length > 0 && (
               <div className="sell-empty" id="emptyState">
                 <div className="sell-empty__icon">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="11" x2="14" y2="11" /></svg>

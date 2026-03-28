@@ -473,7 +473,10 @@ export default function SellPage() {
 
           <div className="sell-controls">
             <div className="sell-inventory__header">
-              <h2 className="sell-inventory__title">{t("inventory")}</h2>
+              <h2 className="sell-inventory__title">
+                <svg className="sell-inventory__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                {t("inventory")}
+              </h2>
               <div className="sell-stats" id="sellStats">
                 <div className="sell-stats__item">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" /><line x1="7" y1="7" x2="7.01" y2="7" /></svg>
@@ -523,27 +526,58 @@ export default function SellPage() {
             </div>
 
             <div className="sell-toolbar" id="sellToolbar">
-              <div className="sell-inventory__search">
-                <div className="search-wrap">
-                  <svg className="search-wrap__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                  <input
-                    type="text"
-                    className="input"
-                    id="inventorySearch"
-                    placeholder={t("searchPlaceholder")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <button
-                    className="search-wrap__clear"
-                    id="searchClear"
-                    type="button"
-                    aria-label="Clear search"
-                    style={{ display: searchQuery ? undefined : "none" }}
-                    onClick={() => setSearchQuery("")}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              <div className="sell-toolbar__top">
+                <div className="sell-inventory__search">
+                  <div className="search-wrap">
+                    <svg className="search-wrap__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                    <input
+                      type="text"
+                      className="input"
+                      id="inventorySearch"
+                      placeholder={t("searchPlaceholder")}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <button
+                      className="search-wrap__clear"
+                      id="searchClear"
+                      type="button"
+                      aria-label="Clear search"
+                      style={{ display: searchQuery ? undefined : "none" }}
+                      onClick={() => setSearchQuery("")}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                    </button>
+                  </div>
+                </div>
+                <div className="sell-toolbar__right">
+                  <button className="toolbar-btn toolbar-btn--accent" id="selectAllBtn" onClick={selectAll}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+                    {t("selectAll")}
                   </button>
+                  <span className="sell-toolbar__count" id="inventoryCount">{filteredItems.length} {t("itemsCount")}</span>
+                  <button className="toolbar-btn" id="clearAllBtn" onClick={clearAll}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                    {t("clearAll")}
+                  </button>
+                  <div className="view-toggle" id="viewToggle">
+                    <button
+                      className={`view-toggle__btn${viewMode === "grid" ? " active" : ""}`}
+                      data-view="grid"
+                      title="Grid view"
+                      onClick={() => setViewMode("grid")}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
+                    </button>
+                    <button
+                      className={`view-toggle__btn${viewMode === "list" ? " active" : ""}`}
+                      data-view="list"
+                      title="List view"
+                      onClick={() => setViewMode("list")}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
               <div className="sell-toolbar__left">
@@ -611,35 +645,6 @@ export default function SellPage() {
                       </button>
                     ))}
                   </div>
-                </div>
-              </div>
-              <div className="sell-toolbar__right">
-                <button className="toolbar-btn toolbar-btn--accent" id="selectAllBtn" onClick={selectAll}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 11 12 14 22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
-                  {t("selectAll")}
-                </button>
-                <button className="toolbar-btn" id="clearAllBtn" onClick={clearAll}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                  {t("clearAll")}
-                </button>
-                <span className="sell-toolbar__count" id="inventoryCount">{filteredItems.length} {t("itemsCount")}</span>
-                <div className="view-toggle" id="viewToggle">
-                  <button
-                    className={`view-toggle__btn${viewMode === "grid" ? " active" : ""}`}
-                    data-view="grid"
-                    title="Grid view"
-                    onClick={() => setViewMode("grid")}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
-                  </button>
-                  <button
-                    className={`view-toggle__btn${viewMode === "list" ? " active" : ""}`}
-                    data-view="list"
-                    title="List view"
-                    onClick={() => setViewMode("list")}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
-                  </button>
                 </div>
               </div>
             </div>

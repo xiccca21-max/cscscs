@@ -847,9 +847,9 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(80px);
+  -webkit-backdrop-filter: blur(80px);
 }
 .sell-guest-overlay__content {
   text-align: center;

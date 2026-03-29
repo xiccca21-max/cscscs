@@ -3360,16 +3360,20 @@
   .sell-offer__arrow { display: none; }
   .sell-page-wrap {
     height: auto;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     max-width: 100vw;
   }
   .sell-layout {
     grid-template-columns: 1fr;
     height: auto;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
+    flex: 0 0 auto;
   }
   .sell-inventory {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     height: auto;
     min-width: 0;
   }
@@ -3384,7 +3388,8 @@
     border-left: none;
     border-top: 1px solid #e4e2ee;
     min-width: 0;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
   }
   .sell-stats {
     flex-direction: row;

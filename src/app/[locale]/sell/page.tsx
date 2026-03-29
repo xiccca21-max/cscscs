@@ -75,7 +75,7 @@ function getWearShort(item: InventoryItem) {
 
 export default function SellPage() {
   const { user, loading: sessionLoading } = useSession();
-  const { format, formatParts, symbol } = useCurrency();
+  const { format, formatParts, symbol, convert } = useCurrency();
   const t = useTranslations("sell");
 
   const SORT_LABELS: Record<SortKey, string> = {
@@ -207,11 +207,11 @@ export default function SellPage() {
     }
     if (priceMin) {
       const v = parseFloat(priceMin);
-      if (!isNaN(v)) items = items.filter((i) => i.price >= v);
+      if (!isNaN(v)) items = items.filter((i) => convert(i.price) >= v);
     }
     if (priceMax) {
       const v = parseFloat(priceMax);
-      if (!isNaN(v)) items = items.filter((i) => i.price <= v);
+      if (!isNaN(v)) items = items.filter((i) => convert(i.price) <= v);
     }
     items.sort((a, b) => {
       switch (sort) {
@@ -232,7 +232,7 @@ export default function SellPage() {
       }
     });
     return items;
-  }, [inventory, activeGame, searchQuery, activeWear, sort, priceMin, priceMax]);
+  }, [inventory, activeGame, searchQuery, activeWear, sort, priceMin, priceMax, convert]);
 
   const statsTotal = useMemo(
     () => filteredItems.reduce((s, i) => s + i.price, 0),
@@ -494,7 +494,7 @@ export default function SellPage() {
               <button
                 className={`game-tab${activeGame === "cs2" ? " active" : ""}`}
                 data-game="cs2"
-                onClick={() => setActiveGame("cs2")}
+                onClick={() => { setActiveGame("cs2"); setActiveWear("all"); }}
               >
                 <img className="game-tab__icon" src="/icons/cs2.png" alt="CS2" width={18} height={18} />
                 CS2 <span className="game-tab__count" data-game-count="cs2">{gameCounts.cs2}</span>
@@ -502,7 +502,7 @@ export default function SellPage() {
               <button
                 className={`game-tab${activeGame === "dota2" ? " active" : ""}`}
                 data-game="dota2"
-                onClick={() => setActiveGame("dota2")}
+                onClick={() => { setActiveGame("dota2"); setActiveWear("all"); }}
               >
                 <img className="game-tab__icon" src="/icons/dota2.png" alt="Dota 2" width={18} height={18} />
                 Dota 2 <span className="game-tab__count" data-game-count="dota2">{gameCounts.dota2}</span>
@@ -510,7 +510,7 @@ export default function SellPage() {
               <button
                 className={`game-tab${activeGame === "tf2" ? " active" : ""}`}
                 data-game="tf2"
-                onClick={() => setActiveGame("tf2")}
+                onClick={() => { setActiveGame("tf2"); setActiveWear("all"); }}
               >
                 <img className="game-tab__icon" src="/icons/tf2.png" alt="TF2" width={18} height={18} />
                 TF2 <span className="game-tab__count" data-game-count="tf2">{gameCounts.tf2}</span>
@@ -518,7 +518,7 @@ export default function SellPage() {
               <button
                 className={`game-tab${activeGame === "rust" ? " active" : ""}`}
                 data-game="rust"
-                onClick={() => setActiveGame("rust")}
+                onClick={() => { setActiveGame("rust"); setActiveWear("all"); }}
               >
                 <svg className="game-tab__icon game-tab__icon--svg" viewBox="0 0 48 48" width={18} height={18} fill="currentColor"><polygon points="18,3 30,3 28,16 20,16" /><polygon points="18,3 30,3 28,16 20,16" transform="rotate(120,24,24)" /><polygon points="18,3 30,3 28,16 20,16" transform="rotate(240,24,24)" /><rect x="21.5" y="21.5" width="5" height="5" rx="1" transform="rotate(45,24,24)" /><rect x="22.5" y="12.5" width="3" height="3" rx="0.7" transform="rotate(60,24,24)" /><rect x="22.5" y="12.5" width="3" height="3" rx="0.7" transform="rotate(180,24,24)" /><rect x="22.5" y="12.5" width="3" height="3" rx="0.7" transform="rotate(300,24,24)" /></svg>
                 Rust <span className="game-tab__count" data-game-count="rust">{gameCounts.rust}</span>
@@ -616,7 +616,7 @@ export default function SellPage() {
                     onChange={(e) => setPriceMax(e.target.value)}
                   />
                 </div>
-                <div className="sell-toolbar__sort" id="sortWrap">
+                <div className={`sell-toolbar__sort${sortOpen ? " open" : ""}`} id="sortWrap">
                   <button
                     className="sort-trigger"
                     id="sortTrigger"
@@ -626,11 +626,7 @@ export default function SellPage() {
                     <span id="sortLabel">{SORT_LABELS[sort]}</span>
                     <svg className="sort-trigger__chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="6 9 12 15 18 9" /></svg>
                   </button>
-                  <div
-                    className="sort-dropdown"
-                    id="sortDropdown"
-                    style={{ display: sortOpen ? "block" : "none" }}
-                  >
+                  <div className="sort-dropdown" id="sortDropdown">
                     {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
                       <button
                         key={key}

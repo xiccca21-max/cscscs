@@ -507,8 +507,8 @@
 }
 .sort-dropdown {
   position: absolute;
-  top: 0;
-  left: calc(100% + 8px);
+  top: calc(100% + 6px);
+  right: 0;
   min-width: 190px;
   background: rgba(255,255,255,0.96);
   backdrop-filter: blur(16px);
@@ -519,13 +519,13 @@
   padding: 4px;
   z-index: 100;
   opacity: 0;
-  transform: translateX(-6px) scale(0.97);
+  transform: translateY(-6px) scale(0.97);
   pointer-events: none;
   transition: opacity 0.2s, transform 0.2s;
 }
 .sell-toolbar__sort.open .sort-dropdown {
   opacity: 1;
-  transform: translateX(0) scale(1);
+  transform: translateY(0) scale(1);
   pointer-events: auto;
 }
 .sort-dropdown__item {

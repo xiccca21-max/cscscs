@@ -16,7 +16,9 @@
     "menuBalance": "Баланс",
     "menuReferral": "Реферал",
     "menuSupport": "Поддержка",
-    "menuLogout": "Выход"
+    "menuLogout": "Выход",
+    "currency": "Валюта",
+    "language": "Язык"
   },
   "footer": {
     "ctaTitle": "Готовы продать свои скины?",

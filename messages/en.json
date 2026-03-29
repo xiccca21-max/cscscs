@@ -16,7 +16,9 @@
     "menuBalance": "Balance",
     "menuReferral": "Referral",
     "menuSupport": "Support",
-    "menuLogout": "Log Out"
+    "menuLogout": "Log Out",
+    "currency": "Currency",
+    "language": "Language"
   },
   "footer": {
     "ctaTitle": "Ready to sell your skins?",

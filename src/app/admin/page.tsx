@@ -107,6 +107,15 @@ export default function AdminPage() {
     init();
   }, [fetchOrders, fetchUsers, fetchCashouts, fetchAuditLogs, fetchPayments, fetchPrices, safeFetch]);
 
+  useEffect(() => {
+    if (!adminReady || authError) return;
+    const id = setInterval(() => {
+      if (section === "orders") fetchOrders();
+      if (section === "cashouts") fetchCashouts();
+    }, 8000);
+    return () => clearInterval(id);
+  }, [adminReady, authError, section, fetchOrders, fetchCashouts]);
+
   const handleAction = async (method: string, url: string, body?: any, successMsg?: string, onSuccess?: () => void) => {
     try {
       const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });

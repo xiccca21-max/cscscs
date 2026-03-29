@@ -478,11 +478,12 @@ section + section::before {
 .games-section {
   padding: 60px 0 140px;
   background: #fff;
+  overflow: hidden;
 }
 .card-stack {
   position: relative;
-  width: 300px;
-  height: 240px;
+  width: min(300px, 80vw);
+  height: min(240px, 64vw);
   margin: 40px auto 0;
 }
 .card-stack__card {
@@ -599,34 +600,59 @@ section + section::before {
   .card-stack__card { animation: none !important; }
 }
 @media (max-width: 768px) {
-  .card-stack { width: 260px; height: 220px; }
+  .games-section { padding: 40px 0 100px; }
+  .card-stack { width: min(240px, 70vw); height: min(200px, 56vw); }
+  .card-stack__card h3 { font-size: 14px; }
+  .card-stack__card p { font-size: 11px; }
+  .card-stack__glass { padding: 12px 14px 14px; }
   .card-stack--fanned .card-stack__card[data-i="0"] {
-    transform: rotate(-12deg) translateX(-130px) translateY(-8px);
+    transform: rotate(-10deg) translateX(-90px) translateY(-6px);
   }
   .card-stack--fanned .card-stack__card[data-i="1"] {
-    transform: rotate(-4deg) translateX(-42px) translateY(-3px);
+    transform: rotate(-3deg) translateX(-30px) translateY(-2px);
   }
   .card-stack--fanned .card-stack__card[data-i="2"] {
-    transform: rotate(4deg) translateX(42px) translateY(-3px);
+    transform: rotate(3deg) translateX(30px) translateY(-2px);
   }
   .card-stack--fanned .card-stack__card[data-i="3"] {
-    transform: rotate(12deg) translateX(130px) translateY(-8px);
+    transform: rotate(10deg) translateX(90px) translateY(-6px);
   }
 }
 @media (max-width: 480px) {
-  .card-stack { width: 240px; height: 200px; }
-  .card-stack__card h3 { font-size: 15px; }
+  .games-section { padding: 32px 0 80px; }
+  .card-stack { width: min(200px, 60vw); height: min(170px, 50vw); }
+  .card-stack__card h3 { font-size: 13px; }
+  .card-stack__card p { font-size: 10px; }
+  .card-stack__glass { padding: 10px 12px 12px; }
+  .card-stack__icon { width: 32px; height: 32px; border-radius: 8px; margin-bottom: 6px; }
+  .card-stack__icon svg { width: 16px; height: 16px; }
+  .card-stack__tag { font-size: 9px; padding: 2px 6px; top: 6px; right: 8px; }
   .card-stack--fanned .card-stack__card[data-i="0"] {
-    transform: rotate(-8deg) translateX(-90px) translateY(-6px);
+    transform: rotate(-7deg) translateX(-60px) translateY(-4px);
   }
   .card-stack--fanned .card-stack__card[data-i="1"] {
-    transform: rotate(-3deg) translateX(-28px) translateY(-2px);
+    transform: rotate(-2deg) translateX(-20px) translateY(-1px);
   }
   .card-stack--fanned .card-stack__card[data-i="2"] {
-    transform: rotate(3deg) translateX(28px) translateY(-2px);
+    transform: rotate(2deg) translateX(20px) translateY(-1px);
   }
   .card-stack--fanned .card-stack__card[data-i="3"] {
-    transform: rotate(8deg) translateX(90px) translateY(-6px);
+    transform: rotate(7deg) translateX(60px) translateY(-4px);
+  }
+}
+@media (max-width: 360px) {
+  .card-stack { width: 170px; height: 145px; }
+  .card-stack--fanned .card-stack__card[data-i="0"] {
+    transform: rotate(-6deg) translateX(-45px) translateY(-3px);
+  }
+  .card-stack--fanned .card-stack__card[data-i="1"] {
+    transform: rotate(-2deg) translateX(-15px) translateY(-1px);
+  }
+  .card-stack--fanned .card-stack__card[data-i="2"] {
+    transform: rotate(2deg) translateX(15px) translateY(-1px);
+  }
+  .card-stack--fanned .card-stack__card[data-i="3"] {
+    transform: rotate(6deg) translateX(45px) translateY(-3px);
   }
 }
 

@@ -159,7 +159,7 @@ export async function PATCH(
                 type: "UNFREEZE",
                 amount: new Prisma.Decimal(amt.toFixed(2)),
                 balanceAfter: new Prisma.Decimal(nextBal.toFixed(2)),
-                comment: `Order ${existing.orderNumber} — payout unfrozen`,
+                comment: `Order ${existing.orderNumber} - payout unfrozen`,
                 orderId: id,
               },
             });
@@ -172,7 +172,7 @@ export async function PATCH(
                 type: "UNFREEZE",
                 amount: new Prisma.Decimal(amt.toFixed(2)),
                 balanceAfter: new Prisma.Decimal(Number(user.balance).toFixed(2)),
-                comment: `Order ${existing.orderNumber} cancelled — payout unfrozen`,
+                comment: `Order ${existing.orderNumber} cancelled - payout unfrozen`,
                 orderId: id,
               },
             });

@@ -21,7 +21,7 @@ export async function GET() {
         status = user.status ?? "ACTIVE";
       }
     } catch {
-      // DB unavailable — use defaults
+      // DB unavailable - use defaults
     }
 
     return NextResponse.json({

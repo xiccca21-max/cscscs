@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   BALANCE PAGE — v3 Wallet style
+   BALANCE PAGE - v3 Wallet style
    ═══════════════════════════════════════════════ */
 
 .bal {
@@ -175,7 +175,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   CASHOUT FORM — collapsible
+   CASHOUT FORM - collapsible
    ══════════════════════════════════════════════ */
 .bal-cashout {
   background: #fff;
@@ -786,7 +786,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   LEGACY — hide old
+   LEGACY - hide old
    ══════════════════════════════════════════════ */
 .balance-page { display: none; }
 

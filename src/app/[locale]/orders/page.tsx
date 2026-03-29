@@ -243,7 +243,7 @@ export default function OrdersPage() {
               </div>
               <div className="ord-stat__body">
                 <span className="ord-stat__label">{t("statsTotal")}</span>
-                <span className="ord-stat__val">{loading ? "–" : orders.length}</span>
+                <span className="ord-stat__val">{loading ? "-" : orders.length}</span>
               </div>
             </div>
             <div className="ord-stat">
@@ -252,7 +252,7 @@ export default function OrdersPage() {
               </div>
               <div className="ord-stat__body">
                 <span className="ord-stat__label">{t("statsEarned")}</span>
-                <span className="ord-stat__val">{loading ? "–" : <>{totalEarned.toFixed(2)}<small>$</small></>}</span>
+                <span className="ord-stat__val">{loading ? "-" : <>{totalEarned.toFixed(2)}<small>$</small></>}</span>
               </div>
             </div>
             <div className="ord-stat">
@@ -261,7 +261,7 @@ export default function OrdersPage() {
               </div>
               <div className="ord-stat__body">
                 <span className="ord-stat__label">{t("statsPending")}</span>
-                <span className="ord-stat__val">{loading ? "–" : <>{pendingAmount.toFixed(2)}<small>$</small></>}</span>
+                <span className="ord-stat__val">{loading ? "-" : <>{pendingAmount.toFixed(2)}<small>$</small></>}</span>
               </div>
             </div>
             <div className="ord-stat">
@@ -270,7 +270,7 @@ export default function OrdersPage() {
               </div>
               <div className="ord-stat__body">
                 <span className="ord-stat__label">{t("statsCompleted")}</span>
-                <span className="ord-stat__val">{loading ? "–" : completedCount}</span>
+                <span className="ord-stat__val">{loading ? "-" : completedCount}</span>
               </div>
             </div>
           </div>
@@ -363,7 +363,7 @@ export default function OrdersPage() {
                         <td data-label={t("colMethod")}>
                           <span className="ord-row__pay">
                             {paymentIcon(order.paymentMethod?.type)}
-                            {order.paymentMethod?.name ?? "—"}
+                            {order.paymentMethod?.name ?? "-"}
                           </span>
                         </td>
                         <td data-label={t("colStatus")}>

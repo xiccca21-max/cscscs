@@ -304,12 +304,12 @@ export default function AdminPage() {
                   {orders.length > 0 ? orders.map((o: any) => (
                     <tr key={o.id}>
                       <td className="adm-mono">#{o.orderNumber ?? o.id?.slice(0, 8)}</td>
-                      <td>{o.user?.steamLogin ?? "—"}</td>
+                      <td>{o.user?.steamLogin ?? "-"}</td>
                       <td>{o.items?.length ?? 0}</td>
                       <td className="adm-bold">{parseFloat(o.totalAmount ?? 0).toFixed(2)}$</td>
-                      <td>{o.paymentMethod?.name ?? "—"}</td>
+                      <td>{o.paymentMethod?.name ?? "-"}</td>
                       <td><span className={`adm-badge adm-badge--${(o.status ?? "").toLowerCase().replace(/_/g, "-")}`}>{o.status}</span></td>
-                      <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString("ru-RU") : "—"}</td>
+                      <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString("ru-RU") : "-"}</td>
                       <td><button className="adm-btn adm-btn--sm" onClick={() => setOrderDetail(o)}>Детали</button></td>
                     </tr>
                   )) : <tr><td colSpan={8} className="adm-empty">Нет заказов</td></tr>}
@@ -323,12 +323,12 @@ export default function AdminPage() {
 
                   <div className="adm-modal__grid">
                     <div><span className="adm-label">Статус</span><span className={`adm-badge adm-badge--${(orderDetail.status ?? "").toLowerCase().replace(/_/g, "-")}`}>{orderDetail.status}</span></div>
-                    <div><span className="adm-label">Юзер</span><a href={orderDetail.steamProfileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>{orderDetail.user?.steamLogin ?? "—"}</a> <span style={{ color: "var(--text-muted)", fontSize: 12 }}>({orderDetail.user?.steamId})</span></div>
-                    <div><span className="adm-label">Профиль Steam</span><a href={orderDetail.steamProfileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", wordBreak: "break-all", fontSize: 12 }}>{orderDetail.steamProfileUrl ?? "—"}</a></div>
-                    <div><span className="adm-label">Trade URL</span><a href={orderDetail.tradeUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", wordBreak: "break-all", fontSize: 12 }}>{orderDetail.tradeUrl ?? "—"}</a></div>
+                    <div><span className="adm-label">Юзер</span><a href={orderDetail.steamProfileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>{orderDetail.user?.steamLogin ?? "-"}</a> <span style={{ color: "var(--text-muted)", fontSize: 12 }}>({orderDetail.user?.steamId})</span></div>
+                    <div><span className="adm-label">Профиль Steam</span><a href={orderDetail.steamProfileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", wordBreak: "break-all", fontSize: 12 }}>{orderDetail.steamProfileUrl ?? "-"}</a></div>
+                    <div><span className="adm-label">Trade URL</span><a href={orderDetail.tradeUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", wordBreak: "break-all", fontSize: 12 }}>{orderDetail.tradeUrl ?? "-"}</a></div>
                     <div><span className="adm-label">Сумма</span><span style={{ fontWeight: 700, fontSize: 16 }}>{parseFloat(orderDetail.totalAmount ?? 0).toFixed(2)}$</span></div>
-                    <div><span className="adm-label">Метод выплаты</span>{orderDetail.paymentMethod?.name ?? "—"} <span style={{ color: "var(--text-muted)", fontSize: 12 }}>({orderDetail.paymentMethod?.type})</span></div>
-                    <div><span className="adm-label">Бот</span>{orderDetail.botAccount ? <><span style={{ fontWeight: 600 }}>{orderDetail.botAccount.name}</span> — <a href={orderDetail.botAccount.steamProfileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: 12 }}>{orderDetail.botAccount.steamProfileUrl}</a></> : <span style={{ color: "var(--text-muted)" }}>Не назначен</span>}</div>
+                    <div><span className="adm-label">Метод выплаты</span>{orderDetail.paymentMethod?.name ?? "-"} <span style={{ color: "var(--text-muted)", fontSize: 12 }}>({orderDetail.paymentMethod?.type})</span></div>
+                    <div><span className="adm-label">Бот</span>{orderDetail.botAccount ? <><span style={{ fontWeight: 600 }}>{orderDetail.botAccount.name}</span> - <a href={orderDetail.botAccount.steamProfileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: 12 }}>{orderDetail.botAccount.steamProfileUrl}</a></> : <span style={{ color: "var(--text-muted)" }}>Не назначен</span>}</div>
                     <div><span className="adm-label">Создан</span>{new Date(orderDetail.createdAt).toLocaleString("ru-RU")}</div>
                   </div>
 
@@ -414,12 +414,12 @@ export default function AdminPage() {
                       <td>
                         <div className="adm-user">
                           {u.steamAvatar ? <img src={u.steamAvatar} alt="" className="adm-user__ava" /> : <div className="adm-user__ava adm-user__ava--placeholder">{(u.steamLogin ?? "U")[0]}</div>}
-                          <span>{u.steamLogin ?? "—"}</span>
+                          <span>{u.steamLogin ?? "-"}</span>
                         </div>
                       </td>
-                      <td className="adm-mono">{u.steamId ?? "—"}</td>
+                      <td className="adm-mono">{u.steamId ?? "-"}</td>
                       <td className="adm-bold">{parseFloat(u.balance ?? 0).toFixed(2)}$</td>
-                      <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString("ru-RU") : "—"}</td>
+                      <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString("ru-RU") : "-"}</td>
                       <td><span className={`adm-badge adm-badge--${u.status === "BLOCKED" ? "danger" : "success"}`}>{u.status ?? "ACTIVE"}</span></td>
                       <td>
                         {u.status !== "BLOCKED"
@@ -568,11 +568,11 @@ export default function AdminPage() {
             <div className="adm-card adm-card--accent" style={{ marginBottom: 16 }}>
               <div style={{ padding: "16px 20px", fontSize: 13, color: "var(--text-sec)", lineHeight: 1.6 }}>
                 <strong style={{ color: "var(--text)" }}>Как работают правила:</strong><br/>
-                <strong>Наценка %</strong> — умножает базовую цену: +10% = цена × 1.10, −15% = цена × 0.85<br/>
-                <strong>Фиксированная</strong> — прибавляет/вычитает сумму в $: +5 = цена + 5$, −3 = цена − 3$<br/>
-                <strong>Игра</strong> — правило для конкретной игры или всех сразу<br/>
-                <strong>Предмет</strong> — правило для конкретного предмета (ID) или глобально<br/>
-                <strong>Исключить</strong> — предмет не будет показан на сайте
+                <strong>Наценка %</strong> - умножает базовую цену: +10% = цена × 1.10, -15% = цена × 0.85<br/>
+                <strong>Фиксированная</strong> - прибавляет/вычитает сумму в $: +5 = цена + 5$, -3 = цена - 3$<br/>
+                <strong>Игра</strong> - правило для конкретной игры или всех сразу<br/>
+                <strong>Предмет</strong> - правило для конкретного предмета (ID) или глобально<br/>
+                <strong>Исключить</strong> - предмет не будет показан на сайте
               </div>
             </div>
 
@@ -592,7 +592,7 @@ export default function AdminPage() {
                         <td>{isPercent ? "Процент" : "Фиксированная"}</td>
                         <td style={{ fontWeight: 700, color }}>{display}</td>
                         <td>{r.isExcluded ? <span className="adm-badge adm-badge--danger">Да</span> : <span className="adm-badge adm-badge--success">Нет</span>}</td>
-                        <td>{r.updatedAt ? new Date(r.updatedAt).toLocaleDateString("ru-RU") : "—"}</td>
+                        <td>{r.updatedAt ? new Date(r.updatedAt).toLocaleDateString("ru-RU") : "-"}</td>
                         <td className="adm-actions-cell">
                           <button className="adm-btn adm-btn--sm" onClick={() => openPriceModal(r)}>Ред.</button>
                           <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => handleDeletePriceRule(r.id)}>Удалить</button>
@@ -628,7 +628,7 @@ export default function AdminPage() {
                       </select>
                     </label>
                     <label>
-                      Значение {priceForm.adjustmentType === "percentage" ? "(%, напр. 10 или −15)" : "($, напр. 5 или −3)"}
+                      Значение {priceForm.adjustmentType === "percentage" ? "(%, напр. 10 или -15)" : "($, напр. 5 или -3)"}
                       <input className="adm-input" type="number" step="0.01" placeholder={priceForm.adjustmentType === "percentage" ? "10" : "5.00"} value={priceForm.adjustmentValue} onChange={(e) => setPriceForm({ ...priceForm, adjustmentValue: e.target.value })} />
                       <span style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>
                         {priceForm.adjustmentType === "percentage"
@@ -664,13 +664,13 @@ export default function AdminPage() {
                 <tbody>
                   {filteredBalanceUsers.length > 0 ? filteredBalanceUsers.map((u: any) => (
                     <tr key={u.id}>
-                      <td className="adm-bold">{u.steamLogin ?? "—"}</td>
-                      <td className="adm-mono">{u.steamId ?? "—"}</td>
+                      <td className="adm-bold">{u.steamLogin ?? "-"}</td>
+                      <td className="adm-mono">{u.steamId ?? "-"}</td>
                       <td className="adm-bold">{parseFloat(u.balance ?? 0).toFixed(2)}$</td>
-                      <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString("ru-RU") : "—"}</td>
+                      <td>{u.createdAt ? new Date(u.createdAt).toLocaleDateString("ru-RU") : "-"}</td>
                       <td className="adm-actions-cell">
                         <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={() => setBalanceModal({ userId: u.id, username: u.steamLogin ?? u.steamId, action: "CREDIT" })}>+</button>
-                        <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => setBalanceModal({ userId: u.id, username: u.steamLogin ?? u.steamId, action: "DEBIT" })}>−</button>
+                        <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => setBalanceModal({ userId: u.id, username: u.steamLogin ?? u.steamId, action: "DEBIT" })}>-</button>
                       </td>
                     </tr>
                   )) : <tr><td colSpan={5} className="adm-empty">Нет пользователей</td></tr>}
@@ -680,7 +680,7 @@ export default function AdminPage() {
             {balanceModal && (
               <div className="adm-overlay" onClick={() => setBalanceModal(null)}>
                 <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
-                  <h2>{balanceModal.action === "CREDIT" ? "Пополнить" : "Списать"} — {balanceModal.username}</h2>
+                  <h2>{balanceModal.action === "CREDIT" ? "Пополнить" : "Списать"} - {balanceModal.username}</h2>
                   <div className="adm-form">
                     <label>Сумма ($)<input className="adm-input" type="number" min="0" step="0.01" placeholder="0.00" value={balanceAmount} onChange={(e) => setBalanceAmount(e.target.value)} /></label>
                     <label>Комментарий<input className="adm-input" placeholder="Причина..." value={balanceComment} onChange={(e) => setBalanceComment(e.target.value)} /></label>
@@ -718,11 +718,11 @@ export default function AdminPage() {
                   {cashouts.length > 0 ? cashouts.map((c: any) => (
                     <tr key={c.id}>
                       <td className="adm-mono">#{c.id?.slice(0, 8)}</td>
-                      <td>{c.user?.steamLogin ?? "—"}</td>
+                      <td>{c.user?.steamLogin ?? "-"}</td>
                       <td className="adm-bold">{parseFloat(c.amount ?? 0).toFixed(2)}$</td>
-                      <td>{c.paymentMethod ?? "—"}</td>
+                      <td>{c.paymentMethod ?? "-"}</td>
                       <td><span className={`adm-badge adm-badge--${(c.status ?? "").toLowerCase()}`}>{c.status}</span></td>
-                      <td>{c.createdAt ? new Date(c.createdAt).toLocaleDateString("ru-RU") : "—"}</td>
+                      <td>{c.createdAt ? new Date(c.createdAt).toLocaleDateString("ru-RU") : "-"}</td>
                       <td className="adm-actions-cell">
                         {c.status === "PENDING" && <>
                           <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/cashouts/${c.id}`, { status: "APPROVED" }, "Одобрено", fetchCashouts)}>ОК</button>
@@ -749,8 +749,8 @@ export default function AdminPage() {
                   {bots.length > 0 ? bots.map((b: any, i: number) => (
                     <tr key={b.id ?? i}>
                       <td className="adm-bold">{b.name ?? `Bot #${i + 1}`}</td>
-                      <td className="adm-mono">{b.steamId ?? "—"}</td>
-                      <td>{b.steamProfileUrl ? <a href={b.steamProfileUrl} target="_blank" rel="noopener noreferrer" className="adm-link">Профиль</a> : "—"}</td>
+                      <td className="adm-mono">{b.steamId ?? "-"}</td>
+                      <td>{b.steamProfileUrl ? <a href={b.steamProfileUrl} target="_blank" rel="noopener noreferrer" className="adm-link">Профиль</a> : "-"}</td>
                       <td><span className={`adm-badge adm-badge--${b.active !== false ? "success" : "danger"}`}>{b.active !== false ? "Активен" : "Выкл"}</span></td>
                       <td><button className="adm-btn adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/bots/${b.id}`, { active: !b.active }, b.active ? "Выключен" : "Включён")}>{b.active ? "Выкл" : "Вкл"}</button></td>
                     </tr>
@@ -771,11 +771,11 @@ export default function AdminPage() {
                 <tbody>
                   {referrals.length > 0 ? referrals.map((r: any) => (
                     <tr key={r.id}>
-                      <td className="adm-bold">{r.name ?? "—"}</td>
-                      <td className="adm-mono">{r.code ?? "—"}</td>
+                      <td className="adm-bold">{r.name ?? "-"}</td>
+                      <td className="adm-mono">{r.code ?? "-"}</td>
                       <td>{r.userCount ?? 0}</td>
                       <td><span className={`adm-badge adm-badge--${r.active !== false ? "success" : "danger"}`}>{r.active !== false ? "Да" : "Нет"}</span></td>
-                      <td>{r.createdAt ? new Date(r.createdAt).toLocaleDateString("ru-RU") : "—"}</td>
+                      <td>{r.createdAt ? new Date(r.createdAt).toLocaleDateString("ru-RU") : "-"}</td>
                     </tr>
                   )) : <tr><td colSpan={5} className="adm-empty">Нет рефералов</td></tr>}
                 </tbody>
@@ -800,11 +800,11 @@ export default function AdminPage() {
                 <tbody>
                   {auditLogs.length > 0 ? auditLogs.map((l: any) => (
                     <tr key={l.id}>
-                      <td>{l.createdAt ? new Date(l.createdAt).toLocaleString("ru-RU") : "—"}</td>
+                      <td>{l.createdAt ? new Date(l.createdAt).toLocaleString("ru-RU") : "-"}</td>
                       <td className="adm-mono">{l.actorId?.slice(0, 8) ?? "system"}</td>
-                      <td>{l.action ?? "—"}</td>
+                      <td>{l.action ?? "-"}</td>
                       <td>{l.entityType}{l.entityId ? ` #${l.entityId.slice(0, 8)}` : ""}</td>
-                      <td className="adm-truncate">{typeof l.details === "object" ? JSON.stringify(l.details) : (l.details ?? "—")}</td>
+                      <td className="adm-truncate">{typeof l.details === "object" ? JSON.stringify(l.details) : (l.details ?? "-")}</td>
                     </tr>
                   )) : <tr><td colSpan={5} className="adm-empty">Нет логов</td></tr>}
                 </tbody>

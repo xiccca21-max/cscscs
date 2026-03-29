@@ -61,7 +61,7 @@ export async function PATCH(
               type: "UNFREEZE",
               amount: new Prisma.Decimal(amount.toFixed(2)),
               balanceAfter: new Prisma.Decimal(nextBal.toFixed(2)),
-              comment: `Cashout ${id} rejected — balance restored`,
+              comment: `Cashout ${id} rejected - balance restored`,
               cashoutRequestId: id,
             },
           });

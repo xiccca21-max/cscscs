@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   ORDERS LIST PAGE — v2 redesign
+   ORDERS LIST PAGE - v2 redesign
    ═══════════════════════════════════════════════ */
 
 .ord {
@@ -175,7 +175,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   TOOLBAR (filters + search) — pushed down for hero overlap
+   TOOLBAR (filters + search) - pushed down for hero overlap
    ══════════════════════════════════════════════ */
 .ord-toolbar {
   display: flex;
@@ -467,7 +467,7 @@
   transform: translateX(2px);
 }
 
-/* Legacy arrow — hide */
+/* Legacy arrow - hide */
 .ord-row__arrow { display: none; }
 
 /* ══════════════════════════════════════════════
@@ -760,7 +760,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   OLD SECTION TITLE — hidden
+   OLD SECTION TITLE - hidden
    ══════════════════════════════════════════════ */
 .ord-section-title { display: none; }
 .ord-stats-wrap { display: none; }
@@ -784,7 +784,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   MINI PROGRESS STEPPER — legacy, keep for compat
+   MINI PROGRESS STEPPER - legacy, keep for compat
    ══════════════════════════════════════════════ */
 .ord-step {
   display: inline-flex;

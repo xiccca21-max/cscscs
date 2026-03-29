@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   SKINWAWE — Base Styles (Light Theme)
+   SKINWAWE - Base Styles (Light Theme)
    Font loaded via globals.css @import
    ═══════════════════════════════════════════════ */
 
@@ -246,8 +246,7 @@ input, select, textarea { font: inherit; }
   backdrop-filter: blur(40px) saturate(1.8);
   -webkit-backdrop-filter: blur(40px) saturate(1.8);
   border-bottom: none;
-  transition: height 0.35s cubic-bezier(0.4,0,0.2,1), background 0.4s, box-shadow 0.4s, backdrop-filter 0.4s;
-  animation: headerSlideIn 0.6s ease forwards;
+  transition: height 0.35s cubic-bezier(0.4,0,0.2,1), background 0.4s, box-shadow 0.4s;
 }
 .header::after {
   content: "";
@@ -270,10 +269,6 @@ input, select, textarea { font: inherit; }
 @keyframes headerBorderFlow {
   0%   { background-position: 100% 0; }
   100% { background-position: -100% 0; }
-}
-@keyframes headerSlideIn {
-  from { opacity: 0; transform: translateY(-100%); }
-  to   { opacity: 1; transform: translateY(0); }
 }
 .header.is-scrolled {
   height: calc(var(--header-h) - 6px);
@@ -404,7 +399,7 @@ input, select, textarea { font: inherit; }
   transition: none;
 }
 
-/* Nav — center (glass pill) */
+/* Nav - center (glass pill) */
 .header__nav {
   display: flex;
   align-items: center;

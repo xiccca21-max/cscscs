@@ -387,10 +387,10 @@ export default function BalancePage() {
                           <td>
                             <span className="bal-row__desc">
                               {tx.type === "CREDIT"
-                                ? <>{t("skinSale")} — <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
-                                : <>{t("withdrawal")} — <strong>{cashoutMethod ?? t("payout")}</strong></>
+                                ? <>{t("skinSale")} - <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
+                                : <>{t("withdrawal")} - <strong>{cashoutMethod ?? t("payout")}</strong></>
                               }
-                              {tx.comment && <> — {tx.comment}</>}
+                              {tx.comment && <> - {tx.comment}</>}
                             </span>
                           </td>
                           <td>

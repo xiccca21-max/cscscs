@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   SELL PAGE — Styles
+   SELL PAGE - Styles
    ═══════════════════════════════════════════════ */
 
 /* Page wrapper */
@@ -52,7 +52,7 @@
   border-radius: 0 0 16px 16px;
 }
 
-/* Control panel — unified block */
+/* Control panel - unified block */
 .sell-controls {
   background: linear-gradient(160deg, rgba(255,255,255,0.95) 0%, rgba(248,247,253,0.88) 100%);
   backdrop-filter: blur(20px);
@@ -83,7 +83,7 @@
   pointer-events: none;
 }
 
-/* Stats banner — inline next to title */
+/* Stats banner - inline next to title */
 .sell-stats {
   display: flex;
   align-items: center;
@@ -1285,7 +1285,7 @@
   50% { opacity: 1; }
 }
 
-/* Offer cards — enlarged versions */
+/* Offer cards - enlarged versions */
 .offer-card {
   --rarity: var(--accent);
   flex-shrink: 0;
@@ -1764,7 +1764,7 @@
   width: 40%;
 }
 
-/* Selection feedback — bounce + highlight flash */
+/* Selection feedback - bounce + highlight flash */
 .inv-card.select-pulse {
   animation: selectBounce 0.35s cubic-bezier(.34,1.56,.64,1);
 }
@@ -2161,7 +2161,7 @@
   50% { opacity: 1; }
 }
 
-/* Inactive step — on dark bg */
+/* Inactive step - on dark bg */
 .sell-step__num {
   background: rgba(255,255,255,0.08);
   color: rgba(255,255,255,0.4);
@@ -2206,7 +2206,7 @@
   font-weight: 800;
 }
 
-/* Done step — green checkmark */
+/* Done step - green checkmark */
 .sell-step.done .sell-step__num {
   background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
   color: #fff;
@@ -2443,7 +2443,7 @@
   z-index: 1;
 }
 
-/* Payment method grid — responsive, auto-fit */
+/* Payment method grid - responsive, auto-fit */
 .pay-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
@@ -3150,7 +3150,7 @@
   background: rgba(99,102,241,0.3);
 }
 /* Unified sidebar panel */
-/* (old panel/progress/selected/payment styles removed — replaced by .sell-pay, .pay-btn etc above) */
+/* (old panel/progress/selected/payment styles removed - replaced by .sell-pay, .pay-btn etc above) */
 
 /* Empty state */
 .sell-empty {

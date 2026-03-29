@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
             type: "FREEZE",
             amount: new Prisma.Decimal(totalAmount.toFixed(2)),
             balanceAfter: new Prisma.Decimal("0"),
-            comment: `Order ${orderNumber} — payout frozen until trade complete`,
+            comment: `Order ${orderNumber} - payout frozen until trade complete`,
             orderId: created.id,
           },
         });

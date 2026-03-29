@@ -3174,54 +3174,59 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 72px 24px;
   text-align: center;
 }
 .sell-empty__icon {
-  width: 88px;
-  height: 88px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(139,92,246,0.08) 100%);
-  border: 2px solid rgba(99,102,241,0.12);
+  background: linear-gradient(145deg, #eef2ff, #e0e7ff);
+  border: 1px solid rgba(99,102,241,0.15);
+  box-shadow: 0 8px 32px rgba(99,102,241,0.10), 0 0 0 6px rgba(99,102,241,0.04);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
-  color: var(--accent);
-  animation: emptyFloat 3s ease-in-out infinite;
+  margin-bottom: 28px;
+  color: #6366f1;
 }
-@keyframes emptyFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+.sell-empty__icon--search {
+  background: linear-gradient(145deg, #fef3c7, #fde68a);
+  border-color: rgba(245,158,11,0.2);
+  box-shadow: 0 8px 32px rgba(245,158,11,0.10), 0 0 0 6px rgba(245,158,11,0.04);
+  color: #d97706;
 }
 .sell-empty h4 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
-  background: linear-gradient(135deg, #4b5563, #1f2937);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 6px;
+  color: #0f172a;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
 }
 .sell-empty p {
-  font-size: 13px;
-  color: var(--text-muted);
-  max-width: 340px;
-  line-height: 1.5;
+  font-size: 14px;
+  color: #64748b;
+  max-width: 360px;
+  line-height: 1.6;
+  margin: 0;
 }
 .sell-empty__reload {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 20px;
-  padding: 12px 28px;
+  margin-top: 24px;
+  padding: 13px 32px;
   font-size: 14px;
   font-weight: 700;
   color: #fff;
   background: linear-gradient(135deg, #6366f1, #818cf8);
   border: none;
+  border-radius: 12px;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+  box-shadow: 0 4px 14px rgba(99,102,241,0.25);
 }
 .sell-empty__reload::after {
   content: '';
@@ -3230,27 +3235,21 @@
   left: -100%;
   width: 60%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
   animation: sellShimmer 3s ease-in-out infinite;
   pointer-events: none;
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: background 0.15s, transform 0.15s;
 }
 .sell-empty__reload:hover {
   background: linear-gradient(135deg, #4f46e5, #6366f1);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99,102,241,0.35);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.4);
 }
 .sell-empty__reload:active {
   transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(99,102,241,0.25);
 }
 .sell-empty__reload svg {
-  animation: spin 2s linear infinite;
-}
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  flex-shrink: 0;
 }
 
 /* Skeleton loader */

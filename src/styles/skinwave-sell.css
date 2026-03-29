@@ -3614,6 +3614,11 @@
 
   /* ═══ MOBILE STEP FLOW ═══ */
 
+  /* Hide topbar on step 2 */
+  .sell-page-wrap--step2 .sell-topbar {
+    display: none;
+  }
+
   /* Show trade URL above inventory on mobile */
   .sell-tradeurl--mobile {
     display: block;
@@ -3641,6 +3646,13 @@
   /* Hide inventory on step 2 */
   .sell-inventory--hidden-mobile {
     display: none;
+  }
+
+  /* Show offer bar summary on step 2 at the top of sidebar */
+  .sell-sidebar--mobile-active .sell-pay {
+    border-radius: 16px;
+    margin: 0 12px;
+    overflow: hidden;
   }
 
   /* Back button */

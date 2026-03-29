@@ -369,7 +369,7 @@ export default function SellPage() {
 
   /* ================================================================ JSX */
   return (
-    <div className="sell-page-wrap">
+    <div className={`sell-page-wrap${mobilePayStep === 2 ? " sell-page-wrap--step2" : ""}`}>
 
       {isGuest && (
         <div className="sell-guest-overlay" id="guestOverlay">
@@ -685,7 +685,7 @@ export default function SellPage() {
                     value={priceMin}
                     onChange={(e) => setPriceMin(e.target.value)}
                   />
-                  <span className="sell-toolbar__dash">&mdash;</span>
+                  <span className="sell-toolbar__dash">-</span>
                   <input
                     type="number"
                     className="input input--sm"

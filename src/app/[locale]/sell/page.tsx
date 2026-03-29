@@ -258,8 +258,9 @@ export default function SellPage() {
   const step1Done = selectedItems.length > 0;
   const step2Done = tradeUrlValid;
   const step3Done = !!paymentMethod;
+  const step3Active = step1Done && step2Done && checkoutOpen;
   const progressPercent =
-    step1Done && step2Done && step3Done
+    step3Active
       ? 100
       : step1Done && step2Done
         ? 66
@@ -455,21 +456,21 @@ export default function SellPage() {
         </div>
 
         <div className="sell-steps" id="sellProgress">
-          <div className={`sell-step${step1Done ? " done" : " active"}`} data-step="1">
+          <div className={`sell-step${step1Done ? " active" : ""}`} data-step="1">
             <span className="sell-step__num">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4" /><circle cx="7.5" cy="20" r="1.5" /><circle cx="17.5" cy="20" r="1.5" /></svg>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4" /><circle cx="7.5" cy="20" r="1.5" /><circle cx="17.5" cy="20" r="1.5" /></svg>
             </span>
             <span className="sell-step__label">{t("stepSelect")}</span>
           </div>
-          <div className={`sell-step${step1Done && step2Done ? " done" : step1Done ? " active" : ""}`} data-step="2">
+          <div className={`sell-step${step1Done && step2Done ? " active" : ""}`} data-step="2">
             <span className="sell-step__num">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" /></svg>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" /></svg>
             </span>
             <span className="sell-step__label">{t("stepTradeUrl")}</span>
           </div>
-          <div className={`sell-step${step1Done && step2Done && step3Done ? " done" : step1Done && step2Done ? " active" : ""}`} data-step="3">
+          <div className={`sell-step${step3Active ? " active" : ""}`} data-step="3">
             <span className="sell-step__num">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /><path d="M6 16h4" /></svg>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /><path d="M6 16h4" /></svg>
             </span>
             <span className="sell-step__label">{t("stepGetPaid")}</span>
           </div>
@@ -1077,14 +1078,28 @@ export default function SellPage() {
       {/* ── Checkout Modal ── */}
       {checkoutOpen && (
         <div className="checkout-overlay" onClick={(e) => { if (e.target === e.currentTarget) setCheckoutOpen(false); }}>
-          <div className="checkout-modal">
+          <div className="checkout-modal" data-method={paymentMethod}>
             <button className="checkout-modal__close" onClick={() => setCheckoutOpen(false)}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
 
             <div className="checkout-modal__header">
               <div className="checkout-modal__icon">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                {paymentMethod === "balance" && (
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
+                )}
+                {paymentMethod === "card" && (
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                )}
+                {paymentMethod === "crypto" && (
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                )}
+                {paymentMethod === "bank" && (
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/></svg>
+                )}
+                {!["balance", "card", "crypto", "bank"].includes(paymentMethod) && (
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                )}
               </div>
               <h3 className="checkout-modal__title">{t("checkoutTitle")}</h3>
               <p className="checkout-modal__subtitle">{t("checkoutSub")}</p>

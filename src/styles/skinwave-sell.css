@@ -2125,9 +2125,9 @@
   min-width: 0;
 }
 .sell-step__num {
-  width: 50px;
-  height: 50px;
-  border-radius: 13px;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   font-size: 20px;
   font-weight: 900;
   display: flex;
@@ -2137,8 +2137,8 @@
   transition: all 0.3s;
 }
 .sell-step__num svg {
-  width: 21px;
-  height: 21px;
+  width: 24px;
+  height: 24px;
 }
 .sell-step__label {
   font-size: 10px;
@@ -2194,37 +2194,6 @@
   font-weight: 800;
 }
 
-/* Done step - green checkmark */
-.sell-step.done .sell-step__num {
-  background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
-  color: #fff;
-  border: 2px solid #34d399;
-  border-bottom: 4px solid #059669;
-  box-shadow:
-    0 2px 0 #047857,
-    0 4px 12px rgba(16,185,129,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.25);
-}
-.sell-step.done .sell-step__num svg {
-  display: none;
-}
-.sell-step.done .sell-step__num::after {
-  content: '';
-  width: 20px;
-  height: 20px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  animation: stepCheck 0.4s cubic-bezier(.34,1.56,.64,1);
-}
-@keyframes stepCheck {
-  from { transform: scale(0) rotate(-20deg); opacity: 0; }
-  to { transform: scale(1) rotate(0); opacity: 1; }
-}
-.sell-step.done .sell-step__label {
-  color: #6ee7b7;
-  font-weight: 700;
-}
 
 /* Steps progress bar */
 .sell-steps__progress {
@@ -2946,19 +2915,18 @@
   100% { left: 150%; }
 }
 .sell-btn:not(:disabled) {
-  animation: sellShimmer 3s ease-in-out infinite, sellPulseGlow 2s ease-in-out infinite;
+  animation: sellPulseGlow 2.5s ease-in-out infinite;
 }
 @keyframes sellPulseGlow {
   0%, 100% { box-shadow: 0 4px 24px rgba(99,102,241,0.35), inset 0 1px 0 rgba(255,255,255,0.2); }
   50% { box-shadow: 0 4px 32px rgba(99,102,241,0.55), 0 0 40px rgba(99,102,241,0.15), inset 0 1px 0 rgba(255,255,255,0.2); }
 }
 .sell-btn:hover:not(:disabled) {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 32px rgba(99,102,241,0.5), 0 0 48px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.25);
+  box-shadow: 0 6px 28px rgba(99,102,241,0.5), 0 0 40px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.25);
   filter: brightness(1.08);
 }
 .sell-btn:active:not(:disabled) {
-  transform: translateY(-1px) scale(0.98);
+  transform: scale(0.98);
   transition-duration: 0.1s;
 }
 .sell-btn:disabled {
@@ -4553,18 +4521,52 @@
 }
 
 .checkout-modal {
+  --ck-hue: 239;
+  --ck-color: #6366f1;
+  --ck-color-light: #818cf8;
+  --ck-color-pale: #a5b4fc;
+  --ck-glow: rgba(99,102,241,0.18);
+  --ck-glow-soft: rgba(99,102,241,0.06);
   position: relative;
   width: 100%;
   max-width: 420px;
   background: linear-gradient(170deg, #1a1740 0%, #13112b 40%, #0e0c22 100%);
-  border: 1px solid rgba(99,102,241,0.18);
+  border: 1px solid var(--ck-glow);
   border-radius: 24px;
   box-shadow:
     0 32px 80px rgba(0,0,0,0.5),
     0 0 0 1px rgba(99,102,241,0.08),
-    0 0 60px rgba(99,102,241,0.06);
+    0 0 60px var(--ck-glow-soft);
   overflow: hidden;
   animation: ckModalIn 0.4s cubic-bezier(.22,.61,.36,1);
+}
+.checkout-modal[data-method="balance"] {
+  --ck-color: #6366f1;
+  --ck-color-light: #818cf8;
+  --ck-color-pale: #a5b4fc;
+  --ck-glow: rgba(99,102,241,0.18);
+  --ck-glow-soft: rgba(99,102,241,0.06);
+}
+.checkout-modal[data-method="card"] {
+  --ck-color: #3b82f6;
+  --ck-color-light: #60a5fa;
+  --ck-color-pale: #93c5fd;
+  --ck-glow: rgba(59,130,246,0.2);
+  --ck-glow-soft: rgba(59,130,246,0.06);
+}
+.checkout-modal[data-method="crypto"] {
+  --ck-color: #f59e0b;
+  --ck-color-light: #fbbf24;
+  --ck-color-pale: #fcd34d;
+  --ck-glow: rgba(245,158,11,0.2);
+  --ck-glow-soft: rgba(245,158,11,0.06);
+}
+.checkout-modal[data-method="bank"] {
+  --ck-color: #10b981;
+  --ck-color-light: #34d399;
+  --ck-color-pale: #6ee7b7;
+  --ck-glow: rgba(16,185,129,0.2);
+  --ck-glow-soft: rgba(16,185,129,0.06);
 }
 @keyframes ckModalIn {
   from { opacity: 0; transform: translateY(24px) scale(0.95); }
@@ -4605,7 +4607,7 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, transparent 0%, #6366f1 30%, #818cf8 50%, #6366f1 70%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, var(--ck-color) 30%, var(--ck-color-light) 50%, var(--ck-color) 70%, transparent 100%);
 }
 
 .checkout-modal__icon {
@@ -4613,19 +4615,19 @@
   height: 52px;
   margin: 0 auto 14px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #4338ca, #6366f1);
+  background: linear-gradient(135deg, var(--ck-color), var(--ck-color-light));
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   box-shadow:
-    0 4px 20px rgba(99,102,241,0.35),
+    0 4px 20px var(--ck-glow),
     inset 0 1px 0 rgba(255,255,255,0.15);
   animation: ckIconPulse 3s ease-in-out infinite;
 }
 @keyframes ckIconPulse {
-  0%, 100% { box-shadow: 0 4px 20px rgba(99,102,241,0.3), inset 0 1px 0 rgba(255,255,255,0.15); }
-  50% { box-shadow: 0 6px 30px rgba(99,102,241,0.5), inset 0 1px 0 rgba(255,255,255,0.15); }
+  0%, 100% { box-shadow: 0 4px 20px var(--ck-glow), inset 0 1px 0 rgba(255,255,255,0.15); }
+  50% { box-shadow: 0 6px 30px var(--ck-glow), inset 0 1px 0 rgba(255,255,255,0.15); }
 }
 
 .checkout-modal__title {
@@ -4675,12 +4677,12 @@
   align-items: center;
   gap: 6px;
   padding: 4px 12px;
-  background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(129,140,248,0.1));
-  border: 1px solid rgba(99,102,241,0.2);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ck-color) 15%, transparent), color-mix(in srgb, var(--ck-color-light) 10%, transparent));
+  border: 1px solid var(--ck-glow);
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
-  color: #a5b4fc;
+  color: var(--ck-color-pale);
 }
 .checkout-modal__method-badge svg {
   flex-shrink: 0;
@@ -4754,7 +4756,7 @@
   transition: color 0.2s;
 }
 .checkout-modal__input-wrap:focus-within svg {
-  color: #818cf8;
+  color: var(--ck-color-light);
 }
 .checkout-modal__input-wrap input,
 .checkout-modal__input-wrap select {
@@ -4772,9 +4774,9 @@
 }
 .checkout-modal__input-wrap input:focus,
 .checkout-modal__input-wrap select:focus {
-  border-color: rgba(99,102,241,0.5);
-  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
-  background: rgba(99,102,241,0.06);
+  border-color: color-mix(in srgb, var(--ck-color) 50%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ck-color) 10%, transparent);
+  background: color-mix(in srgb, var(--ck-color) 6%, transparent);
 }
 .checkout-modal__input-wrap input::placeholder {
   color: rgba(255,255,255,0.2);
@@ -4783,7 +4785,7 @@
 .checkout-modal__input-wrap select {
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23818cf8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   padding-right: 36px;
@@ -4809,11 +4811,11 @@
   font-size: 14px;
   font-weight: 800;
   color: #fff;
-  background: linear-gradient(135deg, #4338ca, #6366f1);
+  background: linear-gradient(135deg, var(--ck-color), var(--ck-color-light));
   cursor: pointer;
   transition: all 0.25s cubic-bezier(.25,.46,.45,.94);
   box-shadow:
-    0 4px 20px rgba(99,102,241,0.3),
+    0 4px 20px var(--ck-glow),
     inset 0 1px 0 rgba(255,255,255,0.1);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -4830,8 +4832,9 @@
   pointer-events: none;
 }
 .checkout-modal__submit:hover:not(:disabled) {
-  background: linear-gradient(135deg, #3730a3, #4f46e5);
-  box-shadow: 0 8px 28px rgba(99,102,241,0.45);
+  background: linear-gradient(135deg, var(--ck-color), var(--ck-color-light));
+  box-shadow: 0 8px 28px var(--ck-glow);
+  filter: brightness(1.15);
   transform: translateY(-2px);
 }
 .checkout-modal__submit:active:not(:disabled) {

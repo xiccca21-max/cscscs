@@ -1079,51 +1079,66 @@ export default function SellPage() {
         <div className="checkout-overlay" onClick={(e) => { if (e.target === e.currentTarget) setCheckoutOpen(false); }}>
           <div className="checkout-modal">
             <button className="checkout-modal__close" onClick={() => setCheckoutOpen(false)}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
 
             <div className="checkout-modal__header">
               <div className="checkout-modal__icon">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
-              <h3 className="checkout-modal__title">{t("sellNow")}</h3>
-              <p className="checkout-modal__subtitle">
-                {selectedItems.length} {t("itemsCount")} &middot; {format(youReceive)}
-              </p>
+              <h3 className="checkout-modal__title">{t("checkoutTitle")}</h3>
+              <p className="checkout-modal__subtitle">{t("checkoutSub")}</p>
             </div>
 
-            <div className="checkout-modal__method">
-              <span className="checkout-modal__method-label">{t("paymentMethod")}:</span>
-              <span className="checkout-modal__method-value">
-                {paymentMethod === "balance" && "Balance"}
-                {paymentMethod === "card" && "Debit Card"}
-                {paymentMethod === "crypto" && "Crypto"}
-                {paymentMethod === "bank" && "Bank Transfer"}
-                {!["balance", "card", "crypto", "bank"].includes(paymentMethod) && paymentMethod}
-              </span>
+            <div className="checkout-modal__summary">
+              <div className="checkout-modal__summary-row">
+                <span>{selectedItems.length} {t("itemsCount")}</span>
+                <span className="checkout-modal__summary-price">{format(youReceive)}</span>
+              </div>
+              <div className="checkout-modal__summary-row checkout-modal__summary-method">
+                <span>{t("paymentMethod")}</span>
+                <span className="checkout-modal__method-badge">
+                  {paymentMethod === "balance" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg> Balance</>)}
+                  {paymentMethod === "card" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> {t("payCard")}</>)}
+                  {paymentMethod === "crypto" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> {t("payCrypto")}</>)}
+                  {paymentMethod === "bank" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/></svg> {t("payBank")}</>)}
+                  {!["balance", "card", "crypto", "bank"].includes(paymentMethod) && paymentMethod}
+                </span>
+              </div>
             </div>
 
             <div className="checkout-modal__fields">
               {paymentMethod === "balance" && (
-                <p className="checkout-modal__info">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                  Funds will be credited to your SKINWAVE balance instantly.
-                </p>
+                <div className="checkout-modal__info">
+                  <div className="checkout-modal__info-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  </div>
+                  <div>
+                    <strong>Instant Payout</strong>
+                    <p>Funds will be credited to your SKINWAVE balance instantly.</p>
+                  </div>
+                </div>
               )}
 
               {paymentMethod === "card" && (
                 <>
                   <label className="checkout-modal__field">
-                    <span>Card Number</span>
-                    <input type="text" placeholder="0000 0000 0000 0000" maxLength={19}
-                      value={payDetails.cardNumber || ""}
-                      onChange={(e) => setPayDetails(p => ({ ...p, cardNumber: e.target.value }))} />
+                    <span>{t("checkoutCardNumber")}</span>
+                    <div className="checkout-modal__input-wrap">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                      <input type="text" placeholder="0000 0000 0000 0000" maxLength={19}
+                        value={payDetails.cardNumber || ""}
+                        onChange={(e) => setPayDetails(p => ({ ...p, cardNumber: e.target.value }))} />
+                    </div>
                   </label>
                   <label className="checkout-modal__field">
-                    <span>Cardholder Name</span>
-                    <input type="text" placeholder="JOHN DOE"
-                      value={payDetails.cardName || ""}
-                      onChange={(e) => setPayDetails(p => ({ ...p, cardName: e.target.value }))} />
+                    <span>{t("checkoutFullName")}</span>
+                    <div className="checkout-modal__input-wrap">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      <input type="text" placeholder="JOHN DOE"
+                        value={payDetails.cardName || ""}
+                        onChange={(e) => setPayDetails(p => ({ ...p, cardName: e.target.value }))} />
+                    </div>
                   </label>
                 </>
               )}
@@ -1131,22 +1146,28 @@ export default function SellPage() {
               {paymentMethod === "crypto" && (
                 <>
                   <label className="checkout-modal__field">
-                    <span>Wallet Address</span>
-                    <input type="text" placeholder="0x... / bc1... / T..."
-                      value={payDetails.walletAddress || ""}
-                      onChange={(e) => setPayDetails(p => ({ ...p, walletAddress: e.target.value }))} />
+                    <span>{t("checkoutSelectCrypto")}</span>
+                    <div className="checkout-modal__input-wrap">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                      <select value={payDetails.network || ""}
+                        onChange={(e) => setPayDetails(p => ({ ...p, network: e.target.value }))}>
+                        <option value="">Select network...</option>
+                        <option value="BTC">Bitcoin (BTC)</option>
+                        <option value="ETH">Ethereum (ERC-20)</option>
+                        <option value="USDT-TRC20">USDT (TRC-20)</option>
+                        <option value="USDT-ERC20">USDT (ERC-20)</option>
+                        <option value="LTC">Litecoin (LTC)</option>
+                      </select>
+                    </div>
                   </label>
                   <label className="checkout-modal__field">
-                    <span>Network</span>
-                    <select value={payDetails.network || ""}
-                      onChange={(e) => setPayDetails(p => ({ ...p, network: e.target.value }))}>
-                      <option value="">Select network...</option>
-                      <option value="BTC">Bitcoin (BTC)</option>
-                      <option value="ETH">Ethereum (ERC-20)</option>
-                      <option value="USDT-TRC20">USDT (TRC-20)</option>
-                      <option value="USDT-ERC20">USDT (ERC-20)</option>
-                      <option value="LTC">Litecoin (LTC)</option>
-                    </select>
+                    <span>{t("checkoutWalletAddr")}</span>
+                    <div className="checkout-modal__input-wrap">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
+                      <input type="text" placeholder="0x... / bc1... / T..."
+                        value={payDetails.walletAddress || ""}
+                        onChange={(e) => setPayDetails(p => ({ ...p, walletAddress: e.target.value }))} />
+                    </div>
                   </label>
                 </>
               )}
@@ -1154,39 +1175,54 @@ export default function SellPage() {
               {paymentMethod === "bank" && (
                 <>
                   <label className="checkout-modal__field">
-                    <span>Bank Name</span>
-                    <input type="text" placeholder="Sberbank, Tinkoff..."
-                      value={payDetails.bankName || ""}
-                      onChange={(e) => setPayDetails(p => ({ ...p, bankName: e.target.value }))} />
+                    <span>{t("checkoutIban")}</span>
+                    <div className="checkout-modal__input-wrap">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/></svg>
+                      <input type="text" placeholder="DE89 3704 0044 0532 0130 00"
+                        value={payDetails.iban || ""}
+                        onChange={(e) => setPayDetails(p => ({ ...p, iban: e.target.value }))} />
+                    </div>
                   </label>
                   <label className="checkout-modal__field">
-                    <span>Account / Card Number</span>
-                    <input type="text" placeholder="0000 0000 0000 0000"
-                      value={payDetails.accountNumber || ""}
-                      onChange={(e) => setPayDetails(p => ({ ...p, accountNumber: e.target.value }))} />
+                    <span>{t("checkoutSwift")}</span>
+                    <div className="checkout-modal__input-wrap">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                      <input type="text" placeholder="COBADEFFXXX"
+                        value={payDetails.swift || ""}
+                        onChange={(e) => setPayDetails(p => ({ ...p, swift: e.target.value }))} />
+                    </div>
                   </label>
                   <label className="checkout-modal__field">
-                    <span>Recipient Name</span>
-                    <input type="text" placeholder="Full name"
-                      value={payDetails.recipientName || ""}
-                      onChange={(e) => setPayDetails(p => ({ ...p, recipientName: e.target.value }))} />
+                    <span>{t("checkoutFullName")}</span>
+                    <div className="checkout-modal__input-wrap">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      <input type="text" placeholder="Full name"
+                        value={payDetails.recipientName || ""}
+                        onChange={(e) => setPayDetails(p => ({ ...p, recipientName: e.target.value }))} />
+                    </div>
                   </label>
                 </>
               )}
             </div>
 
-            <button
-              className="checkout-modal__submit"
-              disabled={submitting}
-              onClick={() => { setCheckoutOpen(false); handleSubmit(); }}
-            >
-              {submitting ? (
-                <span className="checkout-modal__spinner" />
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-              )}
-              {submitting ? "Processing..." : "Confirm & Sell"}
-            </button>
+            <div className="checkout-modal__footer">
+              <button
+                className="checkout-modal__submit"
+                disabled={submitting}
+                onClick={() => { setCheckoutOpen(false); handleSubmit(); }}
+              >
+                {submitting ? (
+                  <span className="checkout-modal__spinner" />
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                )}
+                {submitting ? "Processing..." : t("checkoutConfirm")}
+              </button>
+              <p className="checkout-modal__disclaimer">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                {t("checkoutDisclaimer")}
+              </p>
+            </div>
           </div>
         </div>
       )}

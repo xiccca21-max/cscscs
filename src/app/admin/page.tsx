@@ -38,6 +38,8 @@ export default function AdminPage() {
   const [balanceComment, setBalanceComment] = useState("");
 
   const [orderDetail, setOrderDetail] = useState<any>(null);
+  const [botNameInput, setBotNameInput] = useState("");
+  const [botUrlInput, setBotUrlInput] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
   const [adminReady, setAdminReady] = useState(false);
 
@@ -307,26 +309,76 @@ export default function AdminPage() {
             </div>
             {orderDetail && (
               <div className="adm-overlay" onClick={() => setOrderDetail(null)}>
-                <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="adm-modal adm-modal--wide" onClick={(e) => e.stopPropagation()}>
                   <h2>Заказ #{orderDetail.orderNumber ?? orderDetail.id?.slice(0, 8)}</h2>
+
                   <div className="adm-modal__grid">
                     <div><span className="adm-label">Статус</span><span className={`adm-badge adm-badge--${(orderDetail.status ?? "").toLowerCase().replace(/_/g, "-")}`}>{orderDetail.status}</span></div>
-                    <div><span className="adm-label">Юзер</span>{orderDetail.user?.steamLogin} ({orderDetail.user?.steamId})</div>
-                    <div><span className="adm-label">Сумма</span>{parseFloat(orderDetail.totalAmount ?? 0).toFixed(2)}$</div>
-                    <div><span className="adm-label">Метод</span>{orderDetail.paymentMethod?.name ?? "—"}</div>
-                    <div><span className="adm-label">Бот</span>{orderDetail.botAccount?.name ?? "Не назначен"}</div>
-                    <div><span className="adm-label">Предметы</span>{orderDetail.items?.length ?? 0}</div>
-                    {orderDetail.items?.map((it: any, idx: number) => (
-                      <div key={idx} style={{ paddingLeft: 16, gridColumn: "1/-1" }}>• {it.name} — {parseFloat(it.price ?? 0).toFixed(2)}$</div>
-                    ))}
+                    <div><span className="adm-label">Юзер</span><a href={orderDetail.steamProfileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>{orderDetail.user?.steamLogin ?? "—"}</a> <span style={{ color: "var(--text-muted)", fontSize: 12 }}>({orderDetail.user?.steamId})</span></div>
+                    <div><span className="adm-label">Профиль Steam</span><a href={orderDetail.steamProfileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", wordBreak: "break-all", fontSize: 12 }}>{orderDetail.steamProfileUrl ?? "—"}</a></div>
+                    <div><span className="adm-label">Trade URL</span><a href={orderDetail.tradeUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", wordBreak: "break-all", fontSize: 12 }}>{orderDetail.tradeUrl ?? "—"}</a></div>
+                    <div><span className="adm-label">Сумма</span><span style={{ fontWeight: 700, fontSize: 16 }}>{parseFloat(orderDetail.totalAmount ?? 0).toFixed(2)}$</span></div>
+                    <div><span className="adm-label">Метод выплаты</span>{orderDetail.paymentMethod?.name ?? "—"} <span style={{ color: "var(--text-muted)", fontSize: 12 }}>({orderDetail.paymentMethod?.type})</span></div>
+                    <div><span className="adm-label">Бот</span>{orderDetail.botAccount ? <><span style={{ fontWeight: 600 }}>{orderDetail.botAccount.name}</span> — <a href={orderDetail.botAccount.steamProfileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: 12 }}>{orderDetail.botAccount.steamProfileUrl}</a></> : <span style={{ color: "var(--text-muted)" }}>Не назначен</span>}</div>
                     <div><span className="adm-label">Создан</span>{new Date(orderDetail.createdAt).toLocaleString("ru-RU")}</div>
                   </div>
-                  <div className="adm-modal__actions">
-                    {orderDetail.status === "CREATED" && <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_SENT" }, "→ TRADE_SENT", () => { fetchOrders(); setOrderDetail(null); })}>Trade Sent</button>}
-                    {orderDetail.status === "TRADE_SENT" && <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_COMPLETED" }, "→ COMPLETED", () => { fetchOrders(); setOrderDetail(null); })}>Completed</button>}
-                    {(orderDetail.status === "TRADE_COMPLETED" || orderDetail.status === "PAYMENT_PENDING") && <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "PAID" }, "→ PAID", () => { fetchOrders(); setOrderDetail(null); })}>Paid</button>}
-                    {orderDetail.status !== "TRADE_CANCELLED" && orderDetail.status !== "PAID" && <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_CANCELLED" }, "Отменён", () => { fetchOrders(); setOrderDetail(null); })}>Отменить</button>}
-                    <button className="adm-btn adm-btn--ghost adm-btn--sm" onClick={() => setOrderDetail(null)}>Закрыть</button>
+
+                  <div style={{ marginTop: 12 }}>
+                    <span className="adm-label" style={{ display: "block", marginBottom: 6 }}>Предметы ({orderDetail.items?.length ?? 0})</span>
+                    <div style={{ maxHeight: 200, overflowY: "auto", background: "rgba(0,0,0,0.02)", borderRadius: 8, padding: "6px 10px" }}>
+                      {orderDetail.items?.map((it: any, idx: number) => (
+                        <div key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: idx < (orderDetail.items?.length ?? 0) - 1 ? "1px solid rgba(0,0,0,0.06)" : "none", fontSize: 13 }}>
+                          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            {it.imageUrl && <img src={it.imageUrl} alt="" style={{ width: 32, height: 24, objectFit: "contain", borderRadius: 4 }} />}
+                            <span>{it.name}</span>
+                            {it.condition && <span style={{ color: "var(--text-muted)", fontSize: 11 }}>({it.condition})</span>}
+                          </span>
+                          <span style={{ fontWeight: 600, whiteSpace: "nowrap" }}>{parseFloat(it.buyoutPrice ?? it.basePrice ?? 0).toFixed(2)}$</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {orderDetail.status === "CREATED" && !orderDetail.botAccount && (
+                    <div style={{ marginTop: 16, padding: 14, background: "rgba(99,102,241,0.06)", borderRadius: 10, border: "1px solid rgba(99,102,241,0.15)" }}>
+                      <span className="adm-label" style={{ display: "block", marginBottom: 8 }}>Назначить бота для обмена</span>
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <input className="adm-input" placeholder="Ник бота в Steam" value={botNameInput} onChange={(e) => setBotNameInput(e.target.value)} style={{ flex: 1, minWidth: 160 }} />
+                        <input className="adm-input" placeholder="https://steamcommunity.com/profiles/..." value={botUrlInput} onChange={(e) => setBotUrlInput(e.target.value)} style={{ flex: 2, minWidth: 240 }} />
+                      </div>
+                      <button className="adm-btn adm-btn--primary adm-btn--sm" style={{ marginTop: 10 }} disabled={!botNameInput.trim() || !botUrlInput.trim()} onClick={async () => {
+                        const res = await handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { botName: botNameInput.trim(), botSteamProfileUrl: botUrlInput.trim() }, "Бот назначен", async () => { fetchOrders(); });
+                        if (res?.data) { setOrderDetail(res.data); setBotNameInput(""); setBotUrlInput(""); }
+                      }}>Принять заказ</button>
+                    </div>
+                  )}
+
+                  <div className="adm-modal__actions" style={{ marginTop: 16 }}>
+                    {orderDetail.status === "CREATED" && orderDetail.botAccount && (
+                      <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={async () => {
+                        const res = await handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_SENT" }, "Трейд отправлен", () => { fetchOrders(); });
+                        if (res?.data) setOrderDetail(res.data);
+                      }}>Трейд отправлен</button>
+                    )}
+                    {orderDetail.status === "TRADE_SENT" && (
+                      <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={async () => {
+                        const res = await handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_COMPLETED" }, "Предметы получены", () => { fetchOrders(); });
+                        if (res?.data) setOrderDetail(res.data);
+                      }}>Предметы получены</button>
+                    )}
+                    {(orderDetail.status === "TRADE_COMPLETED" || orderDetail.status === "PAYMENT_PENDING") && (
+                      <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={async () => {
+                        const res = await handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "PAID" }, "Оплачено!", () => { fetchOrders(); });
+                        if (res?.data) setOrderDetail(res.data);
+                      }}>Оплатить</button>
+                    )}
+                    {orderDetail.status !== "TRADE_CANCELLED" && orderDetail.status !== "PAID" && (
+                      <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={async () => {
+                        const res = await handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_CANCELLED" }, "Заказ отменён", () => { fetchOrders(); });
+                        if (res?.data) setOrderDetail(res.data);
+                      }}>Отменить</button>
+                    )}
+                    <button className="adm-btn adm-btn--ghost adm-btn--sm" onClick={() => { setOrderDetail(null); setBotNameInput(""); setBotUrlInput(""); }}>Закрыть</button>
                   </div>
                 </div>
               </div>

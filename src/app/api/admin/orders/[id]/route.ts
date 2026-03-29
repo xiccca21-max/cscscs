@@ -38,6 +38,8 @@ function isValidStatusTransition(from: OrderStatus, to: OrderStatus): boolean {
 type PatchBody = {
   status?: OrderStatus;
   botAccountId?: string | null;
+  botName?: string;
+  botSteamProfileUrl?: string;
   adminComment?: string | null;
 };
 
@@ -77,14 +79,33 @@ export async function PATCH(
     }
 
     const data: Prisma.OrderUpdateInput = {};
-    if (body.botAccountId !== undefined) {
+
+    if (body.botName && body.botSteamProfileUrl) {
+      const steamIdMatch = body.botSteamProfileUrl.match(/\/(?:profiles|id)\/([^\/\s?]+)/);
+      const botSteamId = steamIdMatch?.[1] ?? `bot_${Date.now()}`;
+      let bot = await db.botAccount.findFirst({ where: { steamId: botSteamId } });
+      if (!bot) {
+        bot = await db.botAccount.create({
+          data: {
+            steamId: botSteamId,
+            steamProfileUrl: body.botSteamProfileUrl.trim(),
+            name: body.botName.trim(),
+            isActive: true,
+          },
+        });
+      }
+      data.botAccount = { connect: { id: bot.id } };
+    } else if (body.botAccountId !== undefined) {
       data.botAccount = body.botAccountId
         ? { connect: { id: body.botAccountId } }
         : { disconnect: true };
     }
+
     if (body.adminComment !== undefined) data.adminComment = body.adminComment;
     if (body.status) {
       data.status = body.status;
+      if (body.status === "TRADE_SENT") data.tradeSentAt = new Date();
+      if (body.status === "TRADE_COMPLETED") data.tradeCompletedAt = new Date();
       if (body.status === "PAID") data.paidAt = new Date();
       if (body.status === "TRADE_CANCELLED") data.cancelledAt = new Date();
     }

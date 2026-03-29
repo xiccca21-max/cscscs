@@ -414,6 +414,9 @@
   overflow-y: auto;
   box-shadow: var(--shadow-xl);
 }
+.adm-modal--wide {
+  max-width: 680px;
+}
 .adm-modal h2 {
   font-size: 18px;
   font-weight: 800;

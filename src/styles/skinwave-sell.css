@@ -3497,9 +3497,13 @@
   .sell-guest-overlay {
     position: relative;
     inset: auto;
-    min-height: 320px;
+    min-height: 300px;
     border-radius: 16px;
-    margin: 8px 0;
+    margin: 12px;
+    z-index: 10;
+    background: linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,27,75,0.9) 100%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
   .sell-guest-overlay__content {
     padding: 32px 24px;

@@ -1191,6 +1191,9 @@
 }
 
 @media (max-width: 480px) {
+  .odr {
+    padding: 16px 0 48px;
+  }
   .odr-tl__line {
     display: none;
   }
@@ -1205,6 +1208,9 @@
     flex-direction: column;
     gap: 8px;
   }
+  .odr-head h1 {
+    font-size: 18px;
+  }
   .odr-head__sub {
     flex-direction: column;
     gap: 4px;
@@ -1217,6 +1223,39 @@
   }
   .odr-crumbs {
     font-size: 12px;
+  }
+  .odr-card__title {
+    padding: 14px 16px !important;
+    font-size: 13px !important;
+  }
+  .odr-fields {
+    padding: 16px !important;
+  }
+  .odr-field__val--big {
+    font-size: 22px !important;
+    padding: 6px 12px !important;
+  }
+  .odr-field__val--big small {
+    font-size: 13px !important;
+  }
+  .odr-items {
+    padding: 0 16px !important;
+  }
+  .odr-state {
+    padding: 32px 16px !important;
+  }
+  .odr-state__icon {
+    width: 64px !important;
+    height: 64px !important;
+  }
+  .odr-state h3 {
+    font-size: 17px !important;
+  }
+  .odr-state p {
+    font-size: 13px;
+  }
+  .odr-fields--list {
+    padding: 8px 16px 0 !important;
   }
 }
 

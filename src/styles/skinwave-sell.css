@@ -3405,6 +3405,284 @@
     grid-template-columns: auto 60px 1fr auto;
   }
   .list-view .inv-card__float-bar { display: none; }
+
+  /* ── Offer bar ── */
+  .sell-offer {
+    margin: 6px 12px;
+    max-height: 180px;
+  }
+  .sell-offer__total {
+    font-size: 20px;
+  }
+  .sell-offer__empty {
+    width: 100%;
+    margin-left: 0;
+    margin-top: -40px;
+    padding: 50px 16px 16px;
+  }
+  .sell-page-wrap::after {
+    display: none;
+  }
+
+  /* ── Inventory title ── */
+  .sell-inventory__title {
+    font-size: 20px;
+    gap: 8px;
+  }
+  .sell-inventory__title::before {
+    height: 18px;
+  }
+
+  /* ── Game tabs - horizontal scroll ── */
+  .sell-inventory__game-tabs {
+    display: flex;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 3px;
+  }
+  .sell-inventory__game-tabs::-webkit-scrollbar { display: none; }
+  .game-tab {
+    padding: 5px 12px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .game-tab__icon {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .game-tab[data-game="cs2"] .game-tab__icon {
+    width: 28px !important;
+    height: 18px !important;
+  }
+
+  /* ── Wear filters - wrap ── */
+  .sell-toolbar__wear-filters {
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  /* ── Guest overlay ── */
+  .sell-guest-overlay__content {
+    padding: 32px 24px;
+    max-width: 340px;
+    margin: 0 16px;
+  }
+  .sell-guest-overlay__content h3 {
+    font-size: 19px;
+  }
+  .sell-guest-overlay__icon {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 16px;
+  }
+
+  /* ── Empty state ── */
+  .sell-empty {
+    padding: 40px 16px;
+  }
+  .sell-empty__icon {
+    width: 72px;
+    height: 72px;
+  }
+  .sell-empty h4 {
+    font-size: 16px;
+  }
+
+  /* ── Sidebar spacing ── */
+  .sell-sidebar {
+    padding: 16px 0 0;
+  }
+  .sidebar-tradeurl__label {
+    font-size: 15px;
+  }
+
+  /* ── Pay panel ── */
+  .sell-pay__title {
+    font-size: 16px;
+    padding: 16px 16px 12px;
+  }
+  .sell-pay__methods {
+    padding: 12px 12px 10px;
+  }
+  .pay-grid {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 6px;
+  }
+  .pay-btn {
+    padding: 12px 4px 10px;
+    gap: 6px;
+  }
+  .pay-btn__name {
+    font-size: 10px;
+  }
+
+  /* ── Pay summary ── */
+  .sell-pay__bottom {
+    padding: 16px 14px 16px;
+  }
+  .pay-summary-row {
+    font-size: 14px;
+  }
+  .pay-summary-row--total {
+    font-size: 16px;
+  }
+  .pay-summary-row--total span:last-child,
+  .pay-summary-row--total .pay-summary-row__value {
+    font-size: 22px;
+  }
+
+  /* ── Sell button ── */
+  .sell-btn {
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+
+  /* ── Trust badges ── */
+  .sell-pay__trust {
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    justify-content: center;
+  }
+
+  /* ── Hold warnings ── */
+  .sell-pay__hold-warn {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+
+  /* ── Progress checks ── */
+  .sell-pay__progress {
+    padding: 0 16px 12px;
+    gap: 0;
+  }
+  .sell-pay__check-label {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sell-offer {
+    margin: 4px 8px;
+    max-height: 150px;
+  }
+  .sell-offer__total {
+    font-size: 18px;
+  }
+  .sell-offer__toggle {
+    font-size: 12px;
+  }
+  .sell-controls {
+    padding: 10px 10px;
+  }
+  .sell-inventory__title {
+    font-size: 18px;
+  }
+  .sell-inventory__grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+  }
+  .inv-card__price {
+    font-size: 14px;
+  }
+  .sell-stats__item {
+    font-size: 12px;
+  }
+  .game-tab {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+  .sell-guest-overlay__content {
+    padding: 24px 18px;
+  }
+  .sell-guest-overlay__content h3 {
+    font-size: 17px;
+  }
+  .sell-empty {
+    padding: 32px 12px;
+  }
+  .sell-empty__icon {
+    width: 60px;
+    height: 60px;
+  }
+  .sell-empty__reload {
+    padding: 10px 22px;
+    font-size: 13px;
+  }
+  .sidebar-tradeurl__label {
+    font-size: 14px;
+  }
+  .sidebar-tradeurl__input {
+    height: 38px;
+    font-size: 11px;
+  }
+  .sell-pay__title {
+    font-size: 15px;
+    padding: 14px 12px 10px;
+  }
+  .sell-pay__methods {
+    padding: 10px 10px 8px;
+  }
+  .pay-grid {
+    grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+    gap: 5px;
+  }
+  .pay-btn {
+    padding: 10px 3px 8px;
+    gap: 5px;
+    border-radius: 10px;
+  }
+  .pay-btn__icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+  }
+  .pay-btn__name {
+    font-size: 9px;
+  }
+  .pay-btn__fee {
+    font-size: 8px;
+  }
+  .sell-pay__bottom {
+    padding: 14px 12px 14px;
+  }
+  .pay-summary-row {
+    font-size: 13px;
+    padding: 8px 0;
+  }
+  .pay-summary-row--total span:last-child,
+  .pay-summary-row--total .pay-summary-row__value {
+    font-size: 20px;
+  }
+  .sell-btn {
+    padding: 12px 14px;
+    font-size: 14px;
+    border-radius: 12px;
+  }
+  .sell-pay__promo {
+    padding-top: 10px;
+  }
+  .sell-pay__trust {
+    gap: 8px 10px;
+    padding: 10px 0 2px;
+  }
+  .trust-badge {
+    font-size: 9px;
+    gap: 3px;
+  }
+  .sell-pay__check-label {
+    font-size: 9px;
+  }
+  .sell-pay__progress {
+    padding: 0 12px 10px;
+  }
+  .sell-steps {
+    padding: 6px 10px;
+  }
+  .sell-step__label {
+    font-size: 11px;
+  }
 }
 
 /* ══════════════════════════════════════════════

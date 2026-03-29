@@ -1382,11 +1382,21 @@ section + section::before {
 }
 
 @media (max-width: 768px) {
-  .hero__inner { grid-template-columns: 1fr; }
+  .hero__inner { grid-template-columns: 1fr; gap: 24px; }
   .hero__visual { display: none; }
-  .hero__sub { max-width: none; }
-  .hero__cta { flex-direction: column; }
+  .hero__sub { max-width: none; font-size: 14px; }
+  .hero__cta { flex-direction: column; gap: 10px; }
+  .hero__cta .btn { width: 100%; justify-content: center; }
+  .hero__stats-bar { margin-top: 32px; }
+  .hero__stats-inner { flex-wrap: wrap; gap: 10px; font-size: 12px; }
+  .payouts-section { padding: 48px 0; }
+  .payouts-section__sub { font-size: 13px; margin-bottom: 28px; }
+  .steps-section { padding: 48px 0; }
+  .steps-section__sub { font-size: 14px; margin-bottom: 36px; }
+  .features { padding: 48px 0; }
   .features__grid { grid-template-columns: 1fr 1fr; }
+  .features__sub { font-size: 14px; margin-bottom: 32px; }
+  .reviews-section { padding: 48px 0; }
   .payouts-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
   .payout-card { height: 220px; }
   .carousel {
@@ -1403,6 +1413,14 @@ section + section::before {
 }
 
 @media (max-width: 480px) {
+  .hero__title-thin,
+  .hero__title-bold { font-size: clamp(36px, 10vw, 48px); }
+  .hero__sub { font-size: 13px; }
+  .hero__stats-inner { gap: 8px; font-size: 11px; }
+  .payouts-section { padding: 36px 0; }
+  .steps-section { padding: 36px 0; }
+  .features { padding: 36px 0; }
+  .reviews-section { padding: 36px 0; }
   .features__grid { grid-template-columns: 1fr; }
   .payouts-grid { grid-template-columns: 1fr; }
   .payout-card { height: 200px; }

@@ -817,6 +817,12 @@
   .bal-row:hover { background: transparent; }
 }
 @media (max-width: 480px) {
+  .bal { padding: 16px 0 48px; }
+  .bal-wallet__main { padding: 24px 16px 16px; }
   .bal-wallet__amount { font-size: 32px; }
+  .bal-wallet__amount small { font-size: 16px; }
+  .bal-wallet__stats { padding: 14px 16px; }
   .bal-methods { grid-template-columns: 1fr; }
+  .bal-history__title { font-size: 16px; }
+  .bal-row { padding: 12px; font-size: 13px; }
 }

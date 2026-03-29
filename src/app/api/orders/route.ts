@@ -26,6 +26,41 @@ type CreateOrderBody = {
   paymentDetails?: Prisma.InputJsonValue;
 };
 
+export async function GET() {
+  try {
+    const session = await requireAuth();
+    const orders = await db.order.findMany({
+      where: { userId: session.userId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        paymentMethod: { select: { name: true, type: true } },
+        _count: { select: { items: true } },
+      },
+    });
+
+    const data = orders.map((o) => ({
+      id: o.id,
+      orderNumber: o.orderNumber,
+      status: o.status,
+      totalAmount: o.totalAmount.toString(),
+      currency: o.currency,
+      createdAt: o.createdAt.toISOString(),
+      itemCount: o._count.items,
+      paymentMethod: o.paymentMethod
+        ? { name: o.paymentMethod.name, type: o.paymentMethod.type }
+        : null,
+    }));
+
+    return NextResponse.json({ success: true, data });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Unknown error";
+    if (message === "Unauthorized") {
+      return NextResponse.json({ success: false, error: message }, { status: 401 });
+    }
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth();

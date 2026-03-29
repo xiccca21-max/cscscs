@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 
 import "@/styles/skinwave-order.css";
@@ -80,23 +80,48 @@ export default function OrderPage({
   const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchOrder = useCallback(async (id: string) => {
+    try {
+      const r = await fetch(`/api/orders/${id}`);
+      const json = await r.json();
+      if (json.success) {
+        setOrder(json.data);
+        return json.data as OrderData;
+      } else {
+        setError(json.error ?? "Not found");
+      }
+    } catch {
+      setError("Network error");
+    } finally {
+      setLoading(false);
+    }
+    return null;
+  }, []);
 
   useEffect(() => {
     params.then((p) => {
       setOrderId(p.id);
-      fetch(`/api/orders/${p.id}`)
-        .then((r) => r.json())
-        .then((json) => {
-          if (json.success) {
-            setOrder(json.data);
-          } else {
-            setError(json.error ?? "Not found");
-          }
-        })
-        .catch(() => setError("Network error"))
-        .finally(() => setLoading(false));
+      fetchOrder(p.id);
     });
-  }, [params]);
+  }, [params, fetchOrder]);
+
+  useEffect(() => {
+    if (!orderId || !order) return;
+    const shouldPoll =
+      order.status === "CREATED" ||
+      order.status === "TRADE_SENT" ||
+      order.status === "TRADE_COMPLETED" ||
+      order.status === "PAYMENT_PENDING";
+
+    if (shouldPoll) {
+      pollRef.current = setInterval(() => fetchOrder(orderId), 5000);
+    }
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [orderId, order?.status, fetchOrder]);
 
   const handleCopyOrderId = () => {
     navigator.clipboard.writeText(order?.orderNumber ?? orderId);

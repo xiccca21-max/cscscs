@@ -106,6 +106,8 @@ export default function SellPage() {
   const [paymentMethod, setPaymentMethod] = useState("balance");
   const [submitting, setSubmitting] = useState(false);
   const [dbPaymentMethods, setDbPaymentMethods] = useState<any[]>([]);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [payDetails, setPayDetails] = useState<Record<string, string>>({});
 
   const offerItemsRef = useRef<HTMLDivElement>(null);
 
@@ -377,7 +379,7 @@ export default function SellPage() {
             </span>
             <span className="sell-offer__toggle">
               {t("offerLabel")}
-              <span className="sell-offer__count" id="offerCount">
+              <span className={`sell-offer__count${selectedItems.length > 0 ? ' has-items' : ''}`} id="offerCount">
                 {selectedItems.length}
               </span>
             </span>
@@ -434,25 +436,25 @@ export default function SellPage() {
         </div>
 
         <div className="sell-steps" id="sellProgress">
-          <div className={`sell-step active`} data-step="1">
+          <div className={`sell-step${step1Done ? " done" : " active"}`} data-step="1">
             <span className="sell-step__num">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4" /><circle cx="7.5" cy="20" r="1.5" /><circle cx="17.5" cy="20" r="1.5" /></svg>
             </span>
             <span className="sell-step__label">{t("stepSelect")}</span>
           </div>
           <div className="sell-step__line">
-            <span className="sell-step__line-fill" />
+            <span className="sell-step__line-fill" style={{ width: step1Done ? '100%' : '0%' }} />
           </div>
-          <div className={`sell-step${step1Done ? " active" : ""}`} data-step="2">
+          <div className={`sell-step${step1Done && step2Done ? " done" : step1Done ? " active" : ""}`} data-step="2">
             <span className="sell-step__num">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" /></svg>
             </span>
             <span className="sell-step__label">{t("stepTradeUrl")}</span>
           </div>
           <div className="sell-step__line">
-            <span className="sell-step__line-fill" />
+            <span className="sell-step__line-fill" style={{ width: step1Done && step2Done ? '100%' : '0%' }} />
           </div>
-          <div className={`sell-step${step1Done && step2Done ? " active" : ""}`} data-step="3">
+          <div className={`sell-step${step1Done && step2Done && step3Done ? " done" : step1Done && step2Done ? " active" : ""}`} data-step="3">
             <span className="sell-step__num">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /><path d="M6 16h4" /></svg>
             </span>
@@ -584,23 +586,30 @@ export default function SellPage() {
               </div>
               <div className="sell-toolbar__left">
                 <div className="sell-toolbar__wear-filters" id="wearFilters">
-                  {(["all", "FN", "MW", "FT", "WW", "BS"] as const).map((w) => (
-                    <button
-                      key={w}
-                      className={`wear-pill${activeWear === w ? " active" : ""}`}
-                      data-wear={w}
-                      onClick={() => setActiveWear(w)}
-                    >
-                      {w === "all" ? t("all") : w}
-                    </button>
-                  ))}
+                  {(["all", "FN", "MW", "FT", "WW", "BS"] as const).map((w) => {
+                    const tooltips: Record<string, string> = { all: "All Conditions", FN: "Factory New", MW: "Minimal Wear", FT: "Field-Tested", WW: "Well-Worn", BS: "Battle-Scarred" };
+                    return (
+                      <button
+                        key={w}
+                        className={`wear-pill${activeWear === w ? " active" : ""}`}
+                        data-wear={w}
+                        data-tooltip={tooltips[w]}
+                        onClick={() => setActiveWear(w)}
+                      >
+                        {w === "all" ? t("all") : w}
+                      </button>
+                    );
+                  })}
                 </div>
                 <div className="sell-toolbar__price-range">
+                  <span className="sell-toolbar__price-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  </span>
                   <input
                     type="number"
                     className="input input--sm"
                     id="priceMin"
-                    placeholder={`${t("min")} ${symbol}`}
+                    placeholder={t("min")}
                     min={0}
                     step={0.01}
                     value={priceMin}
@@ -611,7 +620,7 @@ export default function SellPage() {
                     type="number"
                     className="input input--sm"
                     id="priceMax"
-                    placeholder={`${t("max")} ${symbol}`}
+                    placeholder={t("max")}
                     min={0}
                     step={0.01}
                     value={priceMax}
@@ -807,11 +816,11 @@ export default function SellPage() {
                 onChange={(e) => { setTradeUrl(e.target.value); setTradeUrlSaved(false); }}
               />
               {tradeUrlValid ? (
-                <button type="button" className={`sidebar-tradeurl__paste sidebar-tradeurl__paste--save${tradeUrlSaved ? " saved" : ""}`} onClick={saveTradeUrl}>
+                <button type="button" className={`sidebar-tradeurl__save${tradeUrlSaved ? " saved" : ""}`} onClick={saveTradeUrl}>
                   {tradeUrlSaved ? (
-                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg> {t("saved")}</>
+                    <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> {t("saved")}</>
                   ) : (
-                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> {t("save")}</>
+                    <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> {t("save")}</>
                   )}
                 </button>
               ) : (
@@ -822,17 +831,23 @@ export default function SellPage() {
               )}
             </div>
             <div className="sidebar-tradeurl__actions">
-              <div className="sell-tradeurl__status" id="tradeUrlStatus">
-                {tradeUrl && (tradeUrlValid ? `\u2713 ${t("validTradeUrl")}` : `\u2717 ${t("invalidTradeUrl")}`)}
+              <div className={`sell-tradeurl__status${tradeUrl ? (tradeUrlValid ? " valid" : " invalid") : ""}`} id="tradeUrlStatus">
+                {tradeUrl && tradeUrlValid && (
+                  <><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#22c55e"/><polyline points="8 12 11 15 16 9" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg> {t("validTradeUrl")}</>
+                )}
+                {tradeUrl && !tradeUrlValid && (
+                  <><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#ef4444"/><line x1="15" y1="9" x2="9" y2="15" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/><line x1="9" y1="9" x2="15" y2="15" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/></svg> {t("invalidTradeUrl")}</>
+                )}
               </div>
             </div>
           </div>
 
           <div className="sell-pay" id="sellPanel">
             <h3 className="sell-pay__title">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /></svg>
-              {t("paySidebarTitle")}
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span className="sell-pay__title-text">{t("paySidebarTitle")}<span className="sell-pay__subtitle">Secure & instant</span></span>
             </h3>
+
 
             <div className="sell-pay__methods" id="paymentMethods">
               <div className="pay-grid">
@@ -840,7 +855,6 @@ export default function SellPage() {
                   const icon = PAY_ICONS[pm.type] ?? PAY_ICONS.other;
                   const wrapCls = ICON_WRAP_CLS[pm.type] ?? "pay-btn__icon";
                   const commPct = parseFloat(pm.commission);
-                  const minAmt = parseFloat(pm.minAmount);
                   const isFirst = dbPaymentMethods[0]?.id === pm.id;
                   return (
                     <button
@@ -849,37 +863,47 @@ export default function SellPage() {
                       data-method={pm.type}
                       onClick={() => setPaymentMethod(pm.type)}
                     >
-                      {isFirst && commPct === 0 && <span className="pay-btn__badge">{t("bestRate")}</span>}
                       <span className={wrapCls}>
                         <img src={icon.src} alt={pm.name} className={icon.cls} />
                       </span>
-                      <span className="pay-btn__name">{pm.name}</span>
-                      <span className="pay-btn__fee">{t("feeLabel")}: {commPct}% · {t("minLabel")}: {format(minAmt)}</span>
+                      <span className="pay-btn__name">
+                        {pm.name}
+                        {isFirst && commPct === 0 && <span className="pay-btn__best-dot" />}
+                      </span>
                     </button>
                   );
                 }) : <>
-                  <button className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`} onClick={() => setPaymentMethod("balance")}>
-                    <span className="pay-btn__badge">{t("bestRate")}</span>
+                  <button className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`} data-method="balance" onClick={() => setPaymentMethod("balance")}>
                     <span className="pay-btn__icon"><img src="/icons/pay-balance.png" alt="Balance" className="pay-btn__img pay-btn__img--circle" /></span>
-                    <span className="pay-btn__name">{t("payBalance")}</span>
-                    <span className="pay-btn__fee">{t("fee0")} · {t("minLabel")}: {format(0)}</span>
+                    <span className="pay-btn__name">{t("payBalance")}<span className="pay-btn__best-dot" /></span>
                   </button>
-                  <button className={`pay-btn${paymentMethod === "card" ? " active" : ""}`} onClick={() => setPaymentMethod("card")}>
+                  <button className={`pay-btn${paymentMethod === "card" ? " active" : ""}`} data-method="card" onClick={() => setPaymentMethod("card")}>
                     <span className="pay-btn__icon pay-btn__icon--card"><img src="/icons/pay-card.png" alt="Card" className="pay-btn__img" /></span>
                     <span className="pay-btn__name">{t("payCard")}</span>
-                    <span className="pay-btn__fee">{t("fee25")} · {t("minLabel")}: {format(1)}</span>
                   </button>
-                  <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} onClick={() => setPaymentMethod("crypto")}>
+                  <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" onClick={() => setPaymentMethod("crypto")}>
                     <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
                     <span className="pay-btn__name">{t("payCrypto")}</span>
-                    <span className="pay-btn__fee">{t("fee1")} · {t("minLabel")}: {format(5)}</span>
                   </button>
-                  <button className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`} onClick={() => setPaymentMethod("bank")}>
+                  <button className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`} data-method="bank" onClick={() => setPaymentMethod("bank")}>
                     <span className="pay-btn__icon pay-btn__icon--bank"><img src="/icons/pay-bank.png" alt="Bank" className="pay-btn__img" /></span>
                     <span className="pay-btn__name">{t("payBank")}</span>
-                    <span className="pay-btn__fee">{t("fee3")} · {t("minLabel")}: {format(10)}</span>
                   </button>
                 </>}
+              </div>
+              <div className="pay-info-bar" data-method={paymentMethod}>
+                <span className="pay-info-bar__icon">%</span>
+                {paymentMethod === "balance" && <span>{t("fee0")}</span>}
+                {paymentMethod === "card" && <span>{t("fee25")} · {t("minLabel")}: {format(1)}</span>}
+                {paymentMethod === "crypto" && <span>{t("fee1")} · {t("minLabel")}: {format(5)}</span>}
+                {paymentMethod === "bank" && <span>{t("fee3")} · {t("minLabel")}: {format(10)}</span>}
+                {dbPaymentMethods.length > 0 && (() => {
+                  const pm = dbPaymentMethods.find((m: any) => m.type === paymentMethod);
+                  if (!pm) return null;
+                  const commPct = parseFloat(pm.commission);
+                  const minAmt = parseFloat(pm.minAmount);
+                  return <span>{t("feeLabel")}: {commPct}% · {t("minLabel")}: {format(minAmt)}</span>;
+                })()}
               </div>
             </div>
 
@@ -887,17 +911,26 @@ export default function SellPage() {
               <div className="sell-pay__summary">
                 <div className="pay-summary-row">
                   <span className="pay-summary-row__label">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v12" /><path d="M15.5 9.5a3 3 0 00-3-2.5H11a3 3 0 000 6h2a3 3 0 010 6h-.5a3 3 0 01-3-2.5" /></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v12" /><path d="M15.5 9.5a3 3 0 00-3-2.5H11a3 3 0 000 6h2a3 3 0 010 6h-.5a3 3 0 01-3-2.5" /></svg>
                     {t("summaryAmount")}
                   </span>
-                  <span id="summaryItems">{format(selectedTotal)}</span>
+                  <span className="pay-summary-row__value" id="summaryItems">{format(selectedTotal)}</span>
+                </div>
+                <div className="pay-summary-row pay-summary-row--fee">
+                  <span className="pay-summary-row__label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    Commission
+                  </span>
+                  <span className="pay-summary-row__value pay-summary-row__value--fee">
+                    -{format(selectedTotal - youReceive)}
+                  </span>
                 </div>
                 <div className="pay-summary-row pay-summary-row--total">
                   <span className="pay-summary-row__label">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /><path d="M20 21H4" /></svg>
                     {t("youReceive")}
                   </span>
-                  <span id="summaryTotal">{format(youReceive)}</span>
+                  <span className="pay-summary-row__value" id="summaryTotal">{format(youReceive)}</span>
                 </div>
               </div>
 
@@ -918,10 +951,10 @@ export default function SellPage() {
                 className="sell-btn"
                 id="submitOrder"
                 disabled={!canSubmit}
-                onClick={handleSubmit}
+                onClick={() => { setPayDetails({}); setCheckoutOpen(true); }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
-                {submitting ? "..." : t("sellNow")}
+                {t("sellNow")}
               </button>
 
               <div className="sell-pay__promo">
@@ -938,11 +971,143 @@ export default function SellPage() {
                   }}>{t("promoApply")}</button>
                 </div>
               </div>
+
+              <div className="sell-pay__trust">
+                <div className="trust-badge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span>SSL Secure</span>
+                </div>
+                <div className="trust-badge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  <span>Verified</span>
+                </div>
+                <div className="trust-badge">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>24/7 Support</span>
+                </div>
+              </div>
             </div>
           </div>
 
         </div>
       </div>
+
+      {/* ── Checkout Modal ── */}
+      {checkoutOpen && (
+        <div className="checkout-overlay" onClick={(e) => { if (e.target === e.currentTarget) setCheckoutOpen(false); }}>
+          <div className="checkout-modal">
+            <button className="checkout-modal__close" onClick={() => setCheckoutOpen(false)}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+
+            <div className="checkout-modal__header">
+              <div className="checkout-modal__icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <h3 className="checkout-modal__title">{t("sellNow")}</h3>
+              <p className="checkout-modal__subtitle">
+                {selectedItems.length} {t("itemsCount")} &middot; {format(youReceive)}
+              </p>
+            </div>
+
+            <div className="checkout-modal__method">
+              <span className="checkout-modal__method-label">{t("paymentMethod")}:</span>
+              <span className="checkout-modal__method-value">
+                {paymentMethod === "balance" && "Balance"}
+                {paymentMethod === "card" && "Debit Card"}
+                {paymentMethod === "crypto" && "Crypto"}
+                {paymentMethod === "bank" && "Bank Transfer"}
+                {!["balance", "card", "crypto", "bank"].includes(paymentMethod) && paymentMethod}
+              </span>
+            </div>
+
+            <div className="checkout-modal__fields">
+              {paymentMethod === "balance" && (
+                <p className="checkout-modal__info">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  Funds will be credited to your SKINWAVE balance instantly.
+                </p>
+              )}
+
+              {paymentMethod === "card" && (
+                <>
+                  <label className="checkout-modal__field">
+                    <span>Card Number</span>
+                    <input type="text" placeholder="0000 0000 0000 0000" maxLength={19}
+                      value={payDetails.cardNumber || ""}
+                      onChange={(e) => setPayDetails(p => ({ ...p, cardNumber: e.target.value }))} />
+                  </label>
+                  <label className="checkout-modal__field">
+                    <span>Cardholder Name</span>
+                    <input type="text" placeholder="JOHN DOE"
+                      value={payDetails.cardName || ""}
+                      onChange={(e) => setPayDetails(p => ({ ...p, cardName: e.target.value }))} />
+                  </label>
+                </>
+              )}
+
+              {paymentMethod === "crypto" && (
+                <>
+                  <label className="checkout-modal__field">
+                    <span>Wallet Address</span>
+                    <input type="text" placeholder="0x... / bc1... / T..."
+                      value={payDetails.walletAddress || ""}
+                      onChange={(e) => setPayDetails(p => ({ ...p, walletAddress: e.target.value }))} />
+                  </label>
+                  <label className="checkout-modal__field">
+                    <span>Network</span>
+                    <select value={payDetails.network || ""}
+                      onChange={(e) => setPayDetails(p => ({ ...p, network: e.target.value }))}>
+                      <option value="">Select network...</option>
+                      <option value="BTC">Bitcoin (BTC)</option>
+                      <option value="ETH">Ethereum (ERC-20)</option>
+                      <option value="USDT-TRC20">USDT (TRC-20)</option>
+                      <option value="USDT-ERC20">USDT (ERC-20)</option>
+                      <option value="LTC">Litecoin (LTC)</option>
+                    </select>
+                  </label>
+                </>
+              )}
+
+              {paymentMethod === "bank" && (
+                <>
+                  <label className="checkout-modal__field">
+                    <span>Bank Name</span>
+                    <input type="text" placeholder="Sberbank, Tinkoff..."
+                      value={payDetails.bankName || ""}
+                      onChange={(e) => setPayDetails(p => ({ ...p, bankName: e.target.value }))} />
+                  </label>
+                  <label className="checkout-modal__field">
+                    <span>Account / Card Number</span>
+                    <input type="text" placeholder="0000 0000 0000 0000"
+                      value={payDetails.accountNumber || ""}
+                      onChange={(e) => setPayDetails(p => ({ ...p, accountNumber: e.target.value }))} />
+                  </label>
+                  <label className="checkout-modal__field">
+                    <span>Recipient Name</span>
+                    <input type="text" placeholder="Full name"
+                      value={payDetails.recipientName || ""}
+                      onChange={(e) => setPayDetails(p => ({ ...p, recipientName: e.target.value }))} />
+                  </label>
+                </>
+              )}
+            </div>
+
+            <button
+              className="checkout-modal__submit"
+              disabled={submitting}
+              onClick={() => { setCheckoutOpen(false); handleSubmit(); }}
+            >
+              {submitting ? (
+                <span className="checkout-modal__spinner" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              )}
+              {submitting ? "Processing..." : "Confirm & Sell"}
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

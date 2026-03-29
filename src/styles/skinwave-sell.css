@@ -3330,6 +3330,17 @@
   margin-top: -40px;
 }
 
+/* ═══ MOBILE STEP FLOW ═══ */
+.sell-tradeurl--mobile {
+  display: none;
+}
+.sell-mobile-continue {
+  display: none;
+}
+.sell-mobile-back {
+  display: none;
+}
+
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 1024px) {
   .sell-topbar {
@@ -3599,6 +3610,109 @@
   }
   .sell-pay__check-label {
     font-size: 10px;
+  }
+
+  /* ═══ MOBILE STEP FLOW ═══ */
+
+  /* Show trade URL above inventory on mobile */
+  .sell-tradeurl--mobile {
+    display: block;
+    padding: 0 0 8px;
+  }
+  .sell-tradeurl--mobile .sidebar-tradeurl {
+    border-radius: 14px;
+  }
+
+  /* Hide trade URL inside sidebar on mobile */
+  .sidebar-tradeurl--desktop {
+    display: none;
+  }
+
+  /* Hide sidebar by default on mobile (shown on step 2) */
+  .sell-sidebar {
+    display: none;
+  }
+  .sell-sidebar--mobile-active {
+    display: flex;
+    border-top: none;
+    padding: 0;
+  }
+
+  /* Hide inventory on step 2 */
+  .sell-inventory--hidden-mobile {
+    display: none;
+  }
+
+  /* Back button */
+  .sell-mobile-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    color: var(--primary, #6366f1);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Continue to payment button */
+  .sell-mobile-continue {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: calc(100% - 24px);
+    margin: 12px auto;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .sell-mobile-continue:active {
+    transform: scale(0.98);
+  }
+
+  /* ═══ FILTER FIXES ═══ */
+
+  /* Toolbar top row: search + select all */
+  .sell-toolbar__top {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sell-inventory__search {
+    width: 100%;
+  }
+  .sell-toolbar__right {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .toolbar-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  .sell-toolbar__count {
+    font-size: 11px;
+  }
+
+  /* Wear filter pills */
+  .sell-toolbar__wear-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+  }
+  .wear-pill {
+    padding: 5px 10px;
+    font-size: 11px;
+    border-radius: 8px;
   }
 }
 

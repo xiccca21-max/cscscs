@@ -108,6 +108,7 @@ export default function SellPage() {
   const [dbPaymentMethods, setDbPaymentMethods] = useState<any[]>([]);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [payDetails, setPayDetails] = useState<Record<string, string>>({});
+  const [mobilePayStep, setMobilePayStep] = useState<1 | 2>(1);
 
   const offerItemsRef = useRef<HTMLDivElement>(null);
 
@@ -491,7 +492,58 @@ export default function SellPage() {
       <div className="sell-layout">
 
         {/* ── LEFT: Inventory ── */}
-        <div className="sell-inventory">
+        <div className={`sell-inventory${mobilePayStep === 2 ? " sell-inventory--hidden-mobile" : ""}`}>
+
+          {/* Trade URL - mobile only (above inventory) */}
+          <div className="sell-tradeurl--mobile">
+            <div className="sidebar-tradeurl">
+              <div className="sidebar-tradeurl__header">
+                <span className="sidebar-tradeurl__label">{t("tradeUrl")}</span>
+                <a
+                  href="https://steamcommunity.com/my/tradeoffers/privacy#trade_offer_access_url"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="sidebar-tradeurl__find"
+                >
+                  {t("findTradeUrl")}
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+              </div>
+              <div className="sidebar-tradeurl__input-wrap">
+                <input
+                  type="text"
+                  className="sidebar-tradeurl__input"
+                  placeholder={t("tradeUrlPlaceholder")}
+                  value={tradeUrl}
+                  onChange={(e) => { setTradeUrl(e.target.value); setTradeUrlSaved(false); }}
+                />
+                {tradeUrlValid ? (
+                  <button type="button" className={`sidebar-tradeurl__save${tradeUrlSaved ? " saved" : ""}`} onClick={saveTradeUrl}>
+                    {tradeUrlSaved ? (
+                      <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> {t("saved")}</>
+                    ) : (
+                      <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> {t("save")}</>
+                    )}
+                  </button>
+                ) : (
+                  <button type="button" className="sidebar-tradeurl__paste" onClick={pasteTradeUrl}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                    {t("paste")}
+                  </button>
+                )}
+              </div>
+              <div className="sidebar-tradeurl__actions">
+                <div className={`sell-tradeurl__status${tradeUrl ? (tradeUrlValid ? " valid" : " invalid") : ""}`}>
+                  {tradeUrl && tradeUrlValid && (
+                    <><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#22c55e"/><polyline points="8 12 11 15 16 9" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg> {t("validTradeUrl")}</>
+                  )}
+                  {tradeUrl && !tradeUrlValid && (
+                    <><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#ef4444"/><line x1="15" y1="9" x2="9" y2="15" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/><line x1="9" y1="9" x2="15" y2="15" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/></svg> {t("invalidTradeUrl")}</>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="sell-controls">
             <div className="sell-inventory__header">
@@ -804,12 +856,32 @@ export default function SellPage() {
               })}
             </div>
           </div>{/* /.sell-inventory__scroll */}
+
+          {/* Continue button - mobile only */}
+          {selectedItems.length > 0 && (
+            <button
+              className="sell-mobile-continue"
+              onClick={() => setMobilePayStep(2)}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              {t("continueToPayment")} ({selectedItems.length} {t("itemsCount")} - {format(selectedTotal)})
+            </button>
+          )}
         </div>
 
         {/* ── RIGHT: Payment Details ── */}
-        <div className="sell-sidebar">
+        <div className={`sell-sidebar${mobilePayStep === 2 ? " sell-sidebar--mobile-active" : ""}`}>
 
-          <div className="sidebar-tradeurl">
+          {/* Back button - mobile step 2 */}
+          <button
+            className="sell-mobile-back"
+            onClick={() => setMobilePayStep(1)}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            {t("backToItems")}
+          </button>
+
+          <div className="sidebar-tradeurl sidebar-tradeurl--desktop">
             <div className="sidebar-tradeurl__header">
               <span className="sidebar-tradeurl__label">{t("tradeUrl")}</span>
               <a

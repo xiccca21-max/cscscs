@@ -3313,6 +3313,29 @@
   display: none;
 }
 
+/* Desktop safety: ensure mobile step classes never affect desktop */
+@media (min-width: 769px) {
+  .sell-tradeurl--mobile,
+  .sell-mobile-continue,
+  .sell-mobile-back {
+    display: none !important;
+  }
+  .sell-sidebar,
+  .sell-sidebar--mobile-active {
+    display: flex !important;
+  }
+  .sell-inventory,
+  .sell-inventory--hidden-mobile {
+    display: flex !important;
+  }
+  .sell-page-wrap--step2 .sell-topbar {
+    display: grid !important;
+  }
+  .sidebar-tradeurl--desktop {
+    display: block !important;
+  }
+}
+
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 1024px) {
   .sell-topbar {

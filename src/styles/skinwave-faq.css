@@ -10,60 +10,81 @@
   margin-top: 0;
 }
 
-/* ── Dark header on FAQ ── */
-.faq-body .header {
-  background: rgba(17,17,24,0.75);
-  backdrop-filter: blur(40px) saturate(1.6);
-  -webkit-backdrop-filter: blur(40px) saturate(1.6);
+/* ── Dark header on FAQ & Referral ── */
+.faq-body .header::before,
+.page-dark .header::before {
+  background: rgba(17,17,24,0.85) !important;
+  backdrop-filter: blur(40px) saturate(1.6) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(1.6) !important;
+  border-bottom-color: rgba(99,102,241,0.15) !important;
 }
-.faq-body .header::after {
+.faq-body .header::after,
+.page-dark .header::after {
   background: linear-gradient(90deg, transparent, rgba(99,102,241,0.2), transparent);
 }
-.faq-body .header.is-scrolled {
-  background: rgba(17,17,24,0.85);
-  backdrop-filter: blur(50px) saturate(2);
-  -webkit-backdrop-filter: blur(50px) saturate(2);
+.faq-body .header.is-scrolled::before,
+.page-dark .header.is-scrolled::before {
+  background: rgba(17,17,24,0.92) !important;
+  backdrop-filter: blur(50px) saturate(2) !important;
+  -webkit-backdrop-filter: blur(50px) saturate(2) !important;
+}
+.faq-body .header.is-scrolled,
+.page-dark .header.is-scrolled {
   box-shadow: 0 4px 32px rgba(0,0,0,0.3), 0 1px 0 rgba(99,102,241,0.15);
 }
-.faq-body .header__nav {
+.faq-body .header__nav,
+.page-dark .header__nav {
   background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%);
   border-color: rgba(99,102,241,0.2);
 }
-.faq-body .header__nav a {
+.faq-body .header__nav a,
+.page-dark .header__nav a {
   color: rgba(255,255,255,0.7) !important;
 }
-.faq-body .header__nav a:hover {
+.faq-body .header__nav a:hover,
+.page-dark .header__nav a:hover {
   color: #c7d2fe !important;
 }
-.faq-body .header__nav a.active {
+.faq-body .header__nav a.active,
+.page-dark .header__nav a.active {
   color: #fff !important;
 }
-.faq-body .header__nav a svg {
+.faq-body .header__nav a svg,
+.page-dark .header__nav a svg {
   background: rgba(99,102,241,0.15) !important;
   color: #a5b4fc !important;
 }
-.faq-body .header__nav a:hover svg {
+.faq-body .header__nav a:hover svg,
+.page-dark .header__nav a:hover svg {
   background: rgba(99,102,241,0.25) !important;
   color: #c7d2fe !important;
 }
 .faq-body .header__right .header__currency,
-.faq-body .header__right .header__lang {
+.faq-body .header__right .header__lang,
+.page-dark .header__right .header__currency,
+.page-dark .header__right .header__lang {
   color: rgba(255,255,255,0.7) !important;
 }
 .faq-body .header__right .header__currency:hover,
-.faq-body .header__right .header__lang:hover {
+.faq-body .header__right .header__lang:hover,
+.page-dark .header__right .header__currency:hover,
+.page-dark .header__right .header__lang:hover {
   color: #fff !important;
 }
-.faq-body .header__balance {
+.faq-body .header__balance,
+.page-dark .header__balance {
   color: rgba(255,255,255,0.85) !important;
 }
-.faq-body .header__avatar-name {
+.faq-body .header__avatar-name,
+.page-dark .header__avatar-name {
   color: rgba(255,255,255,0.9) !important;
 }
-.faq-body .header__avatar-wrap:hover .header__avatar-name {
+.faq-body .header__avatar-wrap:hover .header__avatar-name,
+.page-dark .header__avatar-wrap:hover .header__avatar-name {
   color: #a5b4fc !important;
 }
-.faq-body .header__avatar-chevron {
+.faq-body .header__avatar-chevron,
+.page-dark .header__avatar-chevron {
   color: rgba(255,255,255,0.5) !important;
 }
 

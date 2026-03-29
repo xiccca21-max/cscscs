@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useSession } from "@/components/session-provider";
 import { useTranslations } from "next-intl";
 
+import "@/styles/skinwave-referral.css";
+
 type ReferralUser = {
   id: string;
   steamLogin: string | null;
@@ -31,6 +33,11 @@ export default function ReferralPage() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
   const [perPage, setPerPage] = useState(10);
+
+  useEffect(() => {
+    document.body.classList.add("page-dark");
+    return () => document.body.classList.remove("page-dark");
+  }, []);
 
   let t: (key: string) => string;
   try {

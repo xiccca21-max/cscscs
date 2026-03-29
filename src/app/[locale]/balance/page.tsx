@@ -157,14 +157,34 @@ export default function BalancePage() {
     return (
       <main className="bal">
         <div className="container">
-          <h1 className="bal-title">{t("title")}</h1>
-          <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <p style={{ marginBottom: 16, color: "#64748b" }}>{t("signInPrompt")}</p>
-            <form action="/api/auth/steam" method="get">
-              <button type="submit" className="bal-wallet__cashout">
-                {t("signInBtn")}
-              </button>
-            </form>
+          <div className="bal-guest">
+            <div className="bal-guest__glow" aria-hidden />
+            <div className="bal-guest__card">
+              <div className="bal-guest__intro">
+                <h1 className="bal-title bal-title--onDark">{t("title")}</h1>
+                <p className="bal-subtitle bal-subtitle--onDark">{t("subtitle")}</p>
+              </div>
+              <div className="bal-guest__intro-sep" aria-hidden />
+              <div className="bal-guest__decor" aria-hidden>
+                <span className="bal-guest__circle bal-guest__circle--1" />
+                <span className="bal-guest__circle bal-guest__circle--2" />
+              </div>
+              <div className="bal-guest__steam">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                  <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524s4.524 2.031 4.524 4.527-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 12-5.372 12-12S18.606 0 11.979 0zm7.54 18.196-1.473-1.263c.407-.43.743-.935.99-1.496.25-.56.422-1.14.522-1.723l1.45-.335c.047-.366.127-.725.238-1.075l-1.725-.713c.065-.126.133-.25.204-.373.838-1.457 2.409-2.445 4.214-2.445 1.01 0 1.96.285 2.766.78l-1.01 1.463a3.5 3.5 0 0 0-1.756-.472c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5c.297 0 .584-.04.858-.114l1.58 1.354a5.478 5.478 0 0 1-3.438 1.228c-1.799 0-3.407-.885-4.396-2.244z" />
+                </svg>
+              </div>
+              <h2 className="bal-guest__headline">{t("guestHeadline")}</h2>
+              <p className="bal-guest__text">{t("signInPrompt")}</p>
+              <form action="/api/auth/steam" method="get">
+                <button type="submit" className="bal-guest__btn">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                    <path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524s4.524 2.031 4.524 4.527-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 12-5.372 12-12S18.606 0 11.979 0zm7.54 18.196-1.473-1.263c.407-.43.743-.935.99-1.496.25-.56.422-1.14.522-1.723l1.45-.335c.047-.366.127-.725.238-1.075l-1.725-.713c.065-.126.133-.25.204-.373.838-1.457 2.409-2.445 4.214-2.445 1.01 0 1.96.285 2.766.78l-1.01 1.463a3.5 3.5 0 0 0-1.756-.472c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5c.297 0 .584-.04.858-.114l1.58 1.354a5.478 5.478 0 0 1-3.438 1.228c-1.799 0-3.407-.885-4.396-2.244z" />
+                  </svg>
+                  {t("signInBtn")}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </main>
@@ -175,16 +195,56 @@ export default function BalancePage() {
     <main className="bal">
       <div className="container">
 
-        <h1 className="bal-title">{t("title")}</h1>
-
         {loading ? (
-          <div style={{ textAlign: "center", padding: "60px 0", color: "#94a3b8" }}>{t("loading")}</div>
+          <>
+            <div className="bal-wallet">
+              <div className="bal-wallet__glow" />
+              <div className="bal-wallet__main">
+                <h1 className="bal-wallet__page-title">{t("title")}</h1>
+                <div className="bal-skeleton__wallet bal-skeleton__wallet--in-stack" aria-hidden>
+                  <div className="bal-skeleton__line bal-skeleton__line--sm" />
+                  <div className="bal-skeleton__line bal-skeleton__line--xl" />
+                  <div className="bal-skeleton__actions">
+                    <div className="bal-skeleton__pill" />
+                    <div className="bal-skeleton__pill bal-skeleton__pill--narrow" />
+                  </div>
+                  <div className="bal-skeleton__stats">
+                    <div className="bal-skeleton__stat" />
+                    <div className="bal-skeleton__stat" />
+                    <div className="bal-skeleton__stat" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bal-skeleton bal-skeleton--below" aria-busy="true" aria-label={t("loading")}>
+              <div className="bal-skeleton__history">
+                <div className="bal-skeleton__history-head">
+                  <div className="bal-skeleton__line bal-skeleton__line--md" />
+                  <div className="bal-skeleton__filters">
+                    <div className="bal-skeleton__chip" />
+                    <div className="bal-skeleton__chip" />
+                    <div className="bal-skeleton__chip" />
+                  </div>
+                </div>
+                <div className="bal-skeleton__rows">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="bal-skeleton__row" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
         ) : (
           <>
             {/* Wallet card */}
             <div className="bal-wallet">
               <div className="bal-wallet__glow"></div>
               <div className="bal-wallet__main">
+                <div className="bal-wallet__decor" aria-hidden>
+                  <span className="bal-wallet__circle bal-wallet__circle--1" />
+                  <span className="bal-wallet__circle bal-wallet__circle--2" />
+                </div>
+                <h1 className="bal-wallet__page-title">{t("title")}</h1>
                 <div className="bal-wallet__top">
                   <span className="bal-wallet__label">{t("available")}</span>
                   <div className="bal-wallet__icon">
@@ -282,7 +342,7 @@ export default function BalancePage() {
                       onClick={() => setCashoutMethod("card")}
                     >
                       <div className="bal-method__icon">
-                        <img src="/icons/pay-card.png" alt="Card" width="28" height="28" style={{ objectFit: "contain" }} />
+                        <img src="/icons/pay-card.png" alt="Card" width="36" height="36" style={{ objectFit: "contain" }} />
                       </div>
                       <span className="bal-method__name">{t("debitCard")}</span>
                       <span className="bal-method__desc">{t("visaMc")}</span>
@@ -292,7 +352,7 @@ export default function BalancePage() {
                       onClick={() => setCashoutMethod("crypto")}
                     >
                       <div className="bal-method__icon">
-                        <img src="/icons/tether.png" alt="Crypto" width="28" height="28" style={{ objectFit: "contain" }} />
+                        <img src="/icons/tether.png" alt="Crypto" width="36" height="36" style={{ objectFit: "contain" }} />
                       </div>
                       <span className="bal-method__name">{t("cryptocurrency")}</span>
                       <span className="bal-method__desc">{t("cryptoDesc")}</span>
@@ -302,7 +362,7 @@ export default function BalancePage() {
                       onClick={() => setCashoutMethod("bank")}
                     >
                       <div className="bal-method__icon">
-                        <img src="/icons/pay-bank.png" alt="Bank" width="28" height="28" style={{ objectFit: "contain" }} />
+                        <img src="/icons/pay-bank.png" alt="Bank" width="36" height="36" style={{ objectFit: "contain" }} />
                       </div>
                       <span className="bal-method__name">{t("bankTransfer")}</span>
                       <span className="bal-method__desc">{t("ibanSwift")}</span>
@@ -385,12 +445,28 @@ export default function BalancePage() {
                             </span>
                           </td>
                           <td>
-                            <span className="bal-row__desc">
-                              {tx.type === "CREDIT"
-                                ? <>{t("skinSale")} - <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
-                                : <>{t("withdrawal")} - <strong>{cashoutMethod ?? t("payout")}</strong></>
-                              }
-                              {tx.comment && <> - {tx.comment}</>}
+                            <span className="bal-row__desc-wrap">
+                              <span
+                                className={`bal-row__type${tx.type === "CREDIT" ? " bal-row__type--credit" : " bal-row__type--debit"}`}
+                                aria-hidden
+                              >
+                                {tx.type === "CREDIT" ? (
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 19V5M5 12l7-7 7 7" />
+                                  </svg>
+                                ) : (
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M12 5v14M19 12l-7 7-7-7" />
+                                  </svg>
+                                )}
+                              </span>
+                              <span className="bal-row__desc">
+                                {tx.type === "CREDIT"
+                                  ? <>{t("skinSale")} - <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
+                                  : <>{t("withdrawal")} - <strong>{cashoutMethod ?? t("payout")}</strong></>
+                                }
+                                {tx.comment && <> - {tx.comment}</>}
+                              </span>
                             </span>
                           </td>
                           <td>
@@ -408,8 +484,11 @@ export default function BalancePage() {
                     </tbody>
                   </table>
                 ) : (
-                  <div style={{ padding: "40px 24px", textAlign: "center", color: "#94a3b8", fontSize: 14 }}>
-                    {t("noTransactions")}
+                  <div className="bal-empty">
+                    <div className="bal-empty__icon">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    </div>
+                    <p>{t("noTransactions")}</p>
                   </div>
                 )}
               </div>

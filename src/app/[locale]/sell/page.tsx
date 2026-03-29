@@ -265,6 +265,8 @@ export default function SellPage() {
           : 0;
 
   const canSubmit = step1Done && step2Done && step3Done && !submitting;
+  const hasCs2Items = selectedItems.some((i) => i.game === "cs2");
+  const isBalanceMethod = paymentMethod === "balance";
 
   const isLoggedIn = !sessionLoading && !!user;
   const isGuest = !sessionLoading && !user;
@@ -898,6 +900,19 @@ export default function SellPage() {
                   <span id="summaryTotal">{format(youReceive)}</span>
                 </div>
               </div>
+
+              {hasCs2Items && (
+                <div className="sell-pay__hold-warn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>{t("tradeHoldWarning")}</span>
+                </div>
+              )}
+              {isBalanceMethod && selectedItems.length > 0 && (
+                <div className="sell-pay__hold-warn sell-pay__hold-warn--info">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                  <span>{t("balanceFrozenNote")}</span>
+                </div>
+              )}
 
               <button
                 className="sell-btn"

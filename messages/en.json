@@ -244,7 +244,9 @@
     "feeLabel": "Fee",
     "minLabel": "Min",
     "min": "Min",
-    "max": "Max"
+    "max": "Max",
+    "tradeHoldWarning": "CS2 items have a mandatory 7-day trade hold by Valve. Payment will be processed after the hold period.",
+    "balanceFrozenNote": "The amount will be frozen on your balance until the trade is completed."
   },
   "faq": {
     "heroLabel": "Help Center",

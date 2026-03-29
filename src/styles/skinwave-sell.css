@@ -2376,6 +2376,30 @@
   letter-spacing: -0.5px;
 }
 
+/* Trade hold & balance freeze warnings */
+.sell-pay__hold-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #b45309;
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.2);
+  margin-bottom: 8px;
+}
+.sell-pay__hold-warn svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.sell-pay__hold-warn--info {
+  color: #4338ca;
+  background: rgba(99,102,241,0.06);
+  border-color: rgba(99,102,241,0.18);
+}
+
 /* Sell button */
 .sell-btn {
   width: 100%;

@@ -90,50 +90,55 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (paymentMethod.type === "balance") {
-      const user = await db.user.findUnique({ where: { id: session.userId } });
-      if (!user) {
-        return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
-      }
-      if (Number(user.balance) < totalAmount) {
-        return NextResponse.json(
-          { success: false, error: "Insufficient balance" },
-          { status: 400 },
-        );
-      }
-    }
-
     const orderNumber = generateOrderNumber();
-    const steamProfileUrl = getSteamProfileUrl(session.steamId);
+    const steamId = session.steamId;
+    const steamProfileUrl = getSteamProfileUrl(steamId);
     const paymentDetails = body.paymentDetails ?? {};
 
-    const order = await db.order.create({
-      data: {
-        orderNumber,
-        userId: session.userId,
-        steamId: session.steamId,
-        steamProfileUrl,
-        tradeUrl,
-        totalAmount: new Prisma.Decimal(totalAmount.toFixed(2)),
-        currency,
-        paymentMethodId,
-        paymentDetails,
-        items: {
-          create: items.map((i) => ({
-            game: i.game,
-            name: i.name,
-            externalId: i.externalId,
-            classId: i.classId,
-            instanceId: i.instanceId,
-            condition: i.condition,
-            quality: i.quality,
-            imageUrl: i.imageUrl,
-            basePrice: new Prisma.Decimal(Number(i.basePrice).toFixed(2)),
-            buyoutPrice: new Prisma.Decimal(Number(i.buyoutPrice).toFixed(2)),
-            currency: i.currency,
-          })),
+    const order = await db.$transaction(async (tx) => {
+      const created = await tx.order.create({
+        data: {
+          orderNumber,
+          userId: session.userId,
+          steamId,
+          steamProfileUrl,
+          tradeUrl,
+          totalAmount: new Prisma.Decimal(totalAmount.toFixed(2)),
+          currency,
+          paymentMethodId,
+          paymentDetails,
+          items: {
+            create: items.map((i) => ({
+              game: i.game,
+              name: i.name,
+              externalId: i.externalId,
+              classId: i.classId,
+              instanceId: i.instanceId,
+              condition: i.condition,
+              quality: i.quality,
+              imageUrl: i.imageUrl,
+              basePrice: new Prisma.Decimal(Number(i.basePrice).toFixed(2)),
+              buyoutPrice: new Prisma.Decimal(Number(i.buyoutPrice).toFixed(2)),
+              currency: i.currency,
+            })),
+          },
         },
-      },
+      });
+
+      if (paymentMethod.type === "balance") {
+        await tx.balanceTransaction.create({
+          data: {
+            userId: session.userId,
+            type: "FREEZE",
+            amount: new Prisma.Decimal(totalAmount.toFixed(2)),
+            balanceAfter: new Prisma.Decimal("0"),
+            comment: `Order ${orderNumber} — payout frozen until trade complete`,
+            orderId: created.id,
+          },
+        });
+      }
+
+      return created;
     });
 
     return NextResponse.json({

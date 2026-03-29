@@ -133,14 +133,12 @@ export async function PATCH(
           },
         });
 
-        if (
-          body.status === "PAID" &&
-          existing.paymentMethod.type === "balance"
-        ) {
-          const credit = Number(existing.totalAmount);
+        if (existing.paymentMethod.type === "balance") {
+          const amt = Number(existing.totalAmount);
           const user = await tx.user.findUnique({ where: { id: existing.userId } });
-          if (user) {
-            const nextBal = Number(user.balance) + credit;
+
+          if (body.status === "PAID" && user) {
+            const nextBal = Number(user.balance) + amt;
             await tx.user.update({
               where: { id: existing.userId },
               data: { balance: new Prisma.Decimal(nextBal.toFixed(2)) },
@@ -149,9 +147,32 @@ export async function PATCH(
               data: {
                 userId: existing.userId,
                 type: "CREDIT",
-                amount: new Prisma.Decimal(credit.toFixed(2)),
+                amount: new Prisma.Decimal(amt.toFixed(2)),
                 balanceAfter: new Prisma.Decimal(nextBal.toFixed(2)),
                 comment: `Order ${existing.orderNumber} paid (balance)`,
+                orderId: id,
+              },
+            });
+            await tx.balanceTransaction.create({
+              data: {
+                userId: existing.userId,
+                type: "UNFREEZE",
+                amount: new Prisma.Decimal(amt.toFixed(2)),
+                balanceAfter: new Prisma.Decimal(nextBal.toFixed(2)),
+                comment: `Order ${existing.orderNumber} — payout unfrozen`,
+                orderId: id,
+              },
+            });
+          }
+
+          if (body.status === "TRADE_CANCELLED" && user) {
+            await tx.balanceTransaction.create({
+              data: {
+                userId: existing.userId,
+                type: "UNFREEZE",
+                amount: new Prisma.Decimal(amt.toFixed(2)),
+                balanceAfter: new Prisma.Decimal(Number(user.balance).toFixed(2)),
+                comment: `Order ${existing.orderNumber} cancelled — payout unfrozen`,
                 orderId: id,
               },
             });

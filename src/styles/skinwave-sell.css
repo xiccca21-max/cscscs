@@ -841,24 +841,40 @@
 
 /* Guest overlay */
 .sell-guest-overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
-  background: rgba(245, 247, 250, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  z-index: 9999;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 .sell-guest-overlay__content {
   text-align: center;
   padding: 48px 40px;
   background: #fff;
   border-radius: 20px;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
   max-width: 420px;
   width: 90%;
+}
+.sell-guest-overlay__home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.sell-guest-overlay__home:hover {
+  color: #0f172a;
+  text-decoration: underline;
 }
 .sell-guest-overlay__icon {
   width: 64px; height: 64px;

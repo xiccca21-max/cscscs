@@ -370,6 +370,24 @@ export default function SellPage() {
   return (
     <div className="sell-page-wrap">
 
+      {isGuest && (
+        <div className="sell-guest-overlay" id="guestOverlay">
+          <div className="sell-guest-overlay__content">
+            <div className="sell-guest-overlay__icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
+            </div>
+            <h3>{t("loginOverlayTitle")}</h3>
+            <p>{t("loginOverlayDesc")}</p>
+            <a href="/api/auth/steam" className="btn btn--primary btn--lg" id="guestSignIn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+              {t("loginOverlayBtn")}
+            </a>
+            <a href="/" className="sell-guest-overlay__home">{t("loginOverlayHome")}</a>
+            <p className="sell-guest-overlay__note">{t("loginOverlayNote")}</p>
+          </div>
+        </div>
+      )}
+
       {/* ═══ TOP ROW: Offer + Steps ═══ */}
       <div className="sell-topbar">
         <div className="sell-offer" id="sellOffer">
@@ -659,22 +677,6 @@ export default function SellPage() {
 
           <div className="sell-inventory__scroll" id="inventoryScroll">
 
-            {isGuest && (
-              <div className="sell-guest-overlay" id="guestOverlay">
-                <div className="sell-guest-overlay__content">
-                  <div className="sell-guest-overlay__icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
-                  </div>
-                  <h3>{t("loginOverlayTitle")}</h3>
-                  <p>{t("loginOverlayDesc")}</p>
-                  <a href="/api/auth/steam" className="btn btn--primary btn--lg" id="guestSignIn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
-                    {t("loginOverlayBtn")}
-                  </a>
-                  <p className="sell-guest-overlay__note">{t("loginOverlayNote")}</p>
-                </div>
-              </div>
-            )}
 
             {isLoggedIn && loadingInventory && (
               <div className={`sell-inventory__grid`} id="inventoryGridSkeleton">

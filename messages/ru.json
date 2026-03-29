@@ -189,6 +189,7 @@
     "loginOverlayDesc": "Подключите аккаунт Steam, чтобы получить доступ к инвентарю и начать продавать скины.",
     "loginOverlayBtn": "Войти через Steam",
     "loginOverlayNote": "Мы никогда не видим и не храним ваш пароль Steam",
+    "loginOverlayHome": "Вернуться на главную",
     "selectGame": "Игра",
     "itemsCount": "предм.",
     "clearAll": "Сброс",

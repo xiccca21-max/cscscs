@@ -191,6 +191,7 @@
     "loginOverlayDesc": "Connect your Steam account to access your inventory and start selling skins instantly.",
     "loginOverlayBtn": "Sign In via Steam",
     "loginOverlayNote": "We never see or store your Steam password",
+    "loginOverlayHome": "Back to Home",
     "selectGame": "Game",
     "itemsCount": "items",
     "clearAll": "Clear",

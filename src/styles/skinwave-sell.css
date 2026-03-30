@@ -1064,7 +1064,7 @@
 
 /* Steps in topbar (right side) */
 .sell-topbar > .sell-steps {
-  margin: 0;
+  margin: 6px 24px 6px 0;
 }
 /* Offer header */
 .sell-offer__header {
@@ -2125,43 +2125,71 @@
   align-items: center;
   justify-content: center;
   gap: 0;
-  padding: 0 12px;
-  align-self: center;
+  padding: 12px 16px;
+  background: linear-gradient(160deg, #1e1b4b 0%, #252370 30%, #312e81 60%, #3730a3 100%);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2), inset 0 0 60px rgba(99,102,241,0.05), inset 0 1px 0 rgba(255,255,255,0.06);
+  align-self: stretch;
+  margin: 6px 24px 6px 0;
+}
+.sell-steps::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #818cf8, #a78bfa, #818cf8, #6366f1);
+  background-size: 200% 100%;
+  animation: panelTopLine 4s linear infinite;
+  border-radius: 14px 14px 0 0;
+}
+.sell-steps::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: repeating-linear-gradient(-45deg, transparent, transparent 14px, rgba(255,255,255,0.015) 14px, rgba(255,255,255,0.015) 28px);
+  pointer-events: none;
 }
 
 .sell-step {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border-radius: 8px;
+  gap: 8px;
+  padding: 0;
   background: transparent;
   border: none;
   transition: all 0.25s ease;
   cursor: default;
-  flex: 0 0 auto;
+  flex: 1 1 0;
   min-width: 0;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 .sell-step__icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: #c0bdd0;
-  background: #e8e6f0;
-  transition: all 0.25s;
+  color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all 0.3s;
 }
 .sell-step__icon svg {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
 }
 .sell-step__label {
   font-size: 10px;
   font-weight: 700;
-  color: #a09cb5;
+  color: rgba(255,255,255,0.3);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   white-space: nowrap;
@@ -2173,31 +2201,32 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding: 0 4px;
-  color: #d0cee0;
+  padding: 0 6px;
+  position: relative;
+  z-index: 1;
 }
 .sell-step__chev::before {
-  content: '›';
-  font-size: 14px;
-  font-weight: 300;
-  line-height: 1;
-  color: #c8c6d8;
+  content: '';
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: rgba(255,255,255,0.1);
+  transition: background 0.25s;
 }
 
 /* Done step */
-.sell-step.done {
-  background: rgba(99,102,241,0.08);
-}
 .sell-step.done .sell-step__icon {
   background: linear-gradient(135deg, #6366f1, #818cf8);
+  border-color: rgba(129,140,248,0.4);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+  box-shadow: 0 2px 10px rgba(99,102,241,0.35);
 }
 .sell-step.done .sell-step__label {
-  color: #4338ca;
+  color: #e0e7ff;
 }
 .sell-step.done + .sell-step__chev::before {
-  color: #818cf8;
+  background: rgba(129,140,248,0.35);
 }
 
 /* Payment panel */
@@ -3308,15 +3337,15 @@
     padding: 12px 14px;
   }
   .sell-topbar > .sell-steps {
-    margin: 0;
-    padding: 0 8px;
+    margin: 6px 12px 6px 0;
+    padding: 10px 12px;
   }
-  .sell-step { gap: 5px; padding: 5px 6px; }
-  .sell-step__icon { width: 22px; height: 22px; }
-  .sell-step__icon svg { width: 11px; height: 11px; }
+  .sell-step { gap: 5px; }
+  .sell-step__icon { width: 24px; height: 24px; border-radius: 6px; }
+  .sell-step__icon svg { width: 12px; height: 12px; }
   .sell-step__label { font-size: 8px; }
-  .sell-step__chev { padding: 0 2px; }
-  .sell-step__chev::before { font-size: 12px; }
+  .sell-step__chev { padding: 0 3px; }
+  .sell-step__chev::before { width: 10px; }
   .sell-offer {
     border-right: none;
   }
@@ -3811,11 +3840,11 @@
   .sell-pay__progress {
     padding: 0 12px 10px;
   }
-  .sell-step__icon { width: 20px; height: 20px; }
+  .sell-step__icon { width: 20px; height: 20px; border-radius: 5px; }
   .sell-step__icon svg { width: 10px; height: 10px; }
-  .sell-step__label { font-size: 7.5px; }
-  .sell-step__chev { padding: 0 1px; }
-  .sell-step__chev::before { font-size: 10px; }
+  .sell-step__label { font-size: 7px; }
+  .sell-step__chev { padding: 0 2px; }
+  .sell-step__chev::before { width: 6px; }
 }
 
 /* ══════════════════════════════════════════════

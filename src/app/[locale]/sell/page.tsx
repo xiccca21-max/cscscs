@@ -484,7 +484,7 @@ export default function SellPage() {
         <div className="sell-guest-overlay" id="guestOverlay">
           <div className="sell-guest-overlay__content">
             <div className="sell-guest-overlay__icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
             </div>
             <h3>{t("loginOverlayTitle")}</h3>
             <p>{t("loginOverlayDesc")}</p>

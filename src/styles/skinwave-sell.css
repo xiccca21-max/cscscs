@@ -4877,7 +4877,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 13px 16px;
+  padding: 10px 12px;
   border: 1.5px solid rgba(255,255,255,0.08);
   border-radius: 12px;
   background: rgba(255,255,255,0.04);
@@ -4902,8 +4902,8 @@
   gap: 10px;
 }
 .ck-crypto__dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -4922,14 +4922,14 @@
 }
 .ck-crypto__drop {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 4px);
   left: 0;
   right: 0;
   z-index: 50;
   background: #161430;
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 6px;
+  border-radius: 10px;
+  padding: 4px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.5);
   animation: ckDropIn 0.15s ease-out;
 }
@@ -4941,13 +4941,13 @@
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 12px;
+  gap: 8px;
+  padding: 8px 10px;
   border: none;
-  border-radius: 8px;
+  border-radius: 7px;
   background: none;
   color: rgba(255,255,255,0.7);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
@@ -4968,11 +4968,11 @@
   flex: 1;
 }
 .ck-crypto__opt-tag {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: rgba(255,255,255,0.3);
   background: rgba(255,255,255,0.05);
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 6px;
 }
 

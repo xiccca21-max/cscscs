@@ -1195,7 +1195,7 @@
   }
   .odr-tl__step {
     min-width: 0;
-    flex: 0 0 auto;
+    flex: 1 1 0;
     gap: 4px;
   }
   .odr-tl__dot {
@@ -1216,16 +1216,18 @@
   }
   .odr-tl__label {
     font-size: 9px !important;
-    max-width: 56px;
     text-align: center;
     line-height: 1.2;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
   }
   .odr-tl__time {
     display: none;
   }
   .odr-tl__line {
-    min-width: 12px;
-    flex: 1;
+    min-width: 8px;
+    flex: 0 0 8px;
     height: 2px !important;
     margin-top: 9px;
   }

@@ -4978,6 +4978,9 @@
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  font-family: inherit;
 }
 .checkout-modal__country-option:hover {
   background: rgba(255,255,255,0.06);

@@ -461,11 +461,12 @@ export default function SellPage() {
 
   useEffect(() => {
     if (!countryOpen) return;
-    const handler = (e: MouseEvent) => {
+    const handler = (e: Event) => {
       if (countryRef.current && !countryRef.current.contains(e.target as Node)) setCountryOpen(false);
     };
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => { document.removeEventListener("mousedown", handler); document.removeEventListener("touchstart", handler); };
   }, [countryOpen]);
 
   const filteredCountries = useMemo(() => {

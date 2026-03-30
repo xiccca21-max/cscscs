@@ -1222,7 +1222,149 @@ body.avatar-blur > .footer {
 }
 
 /* ── Mobile menu (hidden on desktop) ── */
-.mob { display: none; }
+.mob {
+  display: none;
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 300px;
+  max-width: 82vw;
+  background: #10111b;
+  border-left: 1px solid rgba(255,255,255,0.06);
+  box-shadow: -4px 0 30px rgba(0,0,0,0.4);
+  z-index: 9999;
+  flex-direction: column;
+  padding: 56px 0 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(.4,0,.2,1), visibility 0.32s;
+}
+.mob--open {
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+/* ── Mob inner styles ── */
+.mob__profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  margin-bottom: 16px;
+}
+.mob__avatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #1e1f2e;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; color: #fff; font-size: 16px;
+}
+.mob__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.mob__profile-info { display: flex; flex-direction: column; gap: 2px; }
+.mob__name { font-size: 15px; font-weight: 700; color: #fff; }
+.mob__bal { font-size: 13px; font-weight: 600; color: #6c72ff; }
+
+.mob__prefs {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px;
+  margin-bottom: 12px;
+}
+.mob__pill-group {
+  display: flex;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+.mob__pill {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255,255,255,0.35);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.mob__pill--on {
+  background: #6c72ff;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(108,114,255,0.35);
+}
+
+.mob__line {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  margin: 8px 20px;
+}
+
+.mob__nav {
+  display: flex;
+  flex-direction: column;
+}
+.mob__item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.mob__item svg {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  color: rgba(255,255,255,0.3);
+  transition: color 0.12s;
+}
+.mob__item:active {
+  background: rgba(108,114,255,0.08);
+  color: #fff;
+}
+.mob__item:active svg {
+  color: #6c72ff;
+}
+.mob__item--danger { color: #ff6b6b; }
+.mob__item--danger svg { color: #ff6b6b; }
+
+.mob__steam {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 12px 20px 0;
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  color: #fff;
+  background: #1b2838;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.mob__steam:active { background: #2a475e; }
+
 .header__nav-sep { display: none; }
 
 @media (max-width: 768px) {
@@ -1232,41 +1374,12 @@ body.avatar-blur > .footer {
   .header__left { flex: 1; }
   .header__inner { padding: 0 16px; }
 
-  /* ═══ MOBILE NAV PANEL ═══ */
-  .header__nav {
-    position: fixed;
-    top: 0; right: 0; bottom: 0;
-    left: auto;
-    width: 300px;
-    max-width: 82vw;
-    background: #10111b;
-    border-left: 1px solid rgba(255,255,255,0.06);
-    flex-direction: column;
-    padding: 0;
-    z-index: 9999;
-    display: flex;
-    visibility: hidden;
-    pointer-events: none;
-    transform: translateX(100%);
-    transition: transform 0.32s cubic-bezier(.4,0,.2,1), visibility 0.32s;
-    animation: none !important;
-    overflow-y: auto;
-    overflow-x: hidden;
-    border-radius: 0;
-    box-shadow: -4px 0 30px rgba(0,0,0,0.4);
-  }
-  .header__nav.open {
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateX(0);
-  }
-  .header__nav > a,
-  .header__nav > span.header__nav-sep {
-    display: none !important;
-  }
+  /* ═══ MOBILE — hide desktop nav, show mob ═══ */
+  .header__nav { display: none !important; }
   .header__nav-slider { display: none !important; }
 
-  /* Burger */
+  .mob { display: flex; }
+
   .header__burger {
     display: flex;
     color: var(--text);
@@ -1283,144 +1396,6 @@ body.avatar-blur > .footer {
   .header__left, .header__right { opacity: 1 !important; animation: none !important; }
   .header__right { display: flex; align-items: center; gap: 4px; }
   .header__dropdown-wrap, .header__divider, .header__user, .header__login-btn { display: none !important; }
-
-  /* ═══ .mob — entire mobile menu content ═══ */
-  .mob {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    padding: 56px 0 20px;
-  }
-
-  /* ── Profile card ── */
-  .mob__profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 20px;
-    margin-bottom: 16px;
-  }
-  .mob__avatar {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex-shrink: 0;
-    background: #1e1f2e;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; color: #fff; font-size: 16px;
-  }
-  .mob__avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .mob__profile-info { display: flex; flex-direction: column; gap: 2px; }
-  .mob__name { font-size: 15px; font-weight: 700; color: #fff; }
-  .mob__bal { font-size: 13px; font-weight: 600; color: #6c72ff; }
-
-  /* ── Preference pills ── */
-  .mob__prefs {
-    display: flex;
-    gap: 8px;
-    padding: 0 20px;
-    margin-bottom: 12px;
-  }
-  .mob__pill-group {
-    display: flex;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px;
-    padding: 3px;
-    gap: 2px;
-  }
-  .mob__pill {
-    padding: 6px 12px;
-    font-size: 12px;
-    font-weight: 700;
-    font-family: inherit;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: rgba(255,255,255,0.35);
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-  .mob__pill--on {
-    background: #6c72ff;
-    color: #fff;
-    box-shadow: 0 2px 8px rgba(108,114,255,0.35);
-  }
-
-  /* ── Divider ── */
-  .mob__line {
-    height: 1px;
-    background: rgba(255,255,255,0.06);
-    margin: 8px 20px;
-  }
-
-  /* ── Nav items ── */
-  .mob__nav {
-    display: flex;
-    flex-direction: column;
-  }
-  .mob__item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 20px;
-    font-size: 15px;
-    font-weight: 500;
-    color: rgba(255,255,255,0.75);
-    text-decoration: none;
-    transition: background 0.12s, color 0.12s;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-  .mob__item svg {
-    width: 20px; height: 20px;
-    flex-shrink: 0;
-    color: rgba(255,255,255,0.3);
-    transition: color 0.12s;
-  }
-  .mob__item:active {
-    background: rgba(108,114,255,0.08);
-    color: #fff;
-  }
-  .mob__item:active svg {
-    color: #6c72ff;
-  }
-
-  /* Danger item */
-  .mob__item--danger {
-    color: #ff6b6b;
-  }
-  .mob__item--danger svg {
-    color: #ff6b6b;
-  }
-
-  /* Steam login */
-  .mob__steam {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin: 12px 20px 0;
-    padding: 13px;
-    font-size: 14px;
-    font-weight: 700;
-    font-family: inherit;
-    color: #fff;
-    background: #1b2838;
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-  .mob__steam:active {
-    background: #2a475e;
-  }
 
   .footer {
     padding: 36px 0 20px;

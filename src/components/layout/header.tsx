@@ -137,93 +137,6 @@ export function Header() {
             <Link href="/faq" className={isActive("/faq") ? "active" : ""} onClick={() => setMobileOpen(false)} onMouseEnter={handleNavMouseEnter}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg> {t("faq")}
             </Link>
-
-            {/* ══ Mobile menu ══ */}
-            <div className="mob">
-              {/* Profile card */}
-              {!loading && user && (
-                <div className="mob__profile">
-                  <div className="mob__avatar">
-                    {user.steamAvatar ? <img src={user.steamAvatar} alt="" /> : <span>{(user.steamLogin || "U")[0]}</span>}
-                  </div>
-                  <div className="mob__profile-info">
-                    <span className="mob__name">{user.steamLogin || "User"}</span>
-                    <span className="mob__bal">{format(Number(user.balance ?? 0))}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Preferences row */}
-              <div className="mob__prefs">
-                <div className="mob__pill-group">
-                  {(["USD", "EUR", "RUB"] as const).map(c => (
-                    <button key={c} className={`mob__pill${currency === c ? " mob__pill--on" : ""}`} onClick={() => handleCurrency(c)}>{c}</button>
-                  ))}
-                </div>
-                <div className="mob__pill-group">
-                  <button className={`mob__pill${lang === "EN" ? " mob__pill--on" : ""}`} onClick={() => handleLang("EN")}>EN</button>
-                  <button className={`mob__pill${lang === "RU" ? " mob__pill--on" : ""}`} onClick={() => handleLang("RU")}>RU</button>
-                </div>
-              </div>
-
-              <div className="mob__line" />
-
-              {/* Nav items */}
-              <div className="mob__nav">
-                {!loading && user && (
-                  <>
-                    <Link href="/sell" className="mob__item" onClick={() => setMobileOpen(false)}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                      {t("sellSkins")}
-                    </Link>
-                    <Link href="/balance" className="mob__item" onClick={() => setMobileOpen(false)}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
-                      {t("menuBalance")}
-                    </Link>
-                    <Link href="/orders" className="mob__item" onClick={() => setMobileOpen(false)}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                      {t("menuOrders")}
-                    </Link>
-                    <Link href="/referral" className="mob__item" onClick={() => setMobileOpen(false)}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                      {t("menuReferral")}
-                    </Link>
-
-                    <div className="mob__line" />
-
-                    <Link href="/#reviews" className="mob__item" onClick={() => setMobileOpen(false)}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                      {t("reviews")}
-                    </Link>
-                    <Link href="/faq" className="mob__item" onClick={() => setMobileOpen(false)}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
-                      {t("faq")}
-                    </Link>
-
-                    {user.isAdmin && (
-                      <NextLink href="/admin" className="mob__item" onClick={() => setMobileOpen(false)}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                        {t("admin")}
-                      </NextLink>
-                    )}
-
-                    <div className="mob__line" />
-
-                    <a href="/api/auth/logout" className="mob__item mob__item--danger" onClick={() => setMobileOpen(false)}>
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                      {t("menuLogout")}
-                    </a>
-                  </>
-                )}
-
-                {!loading && !user && (
-                  <a href="/api/auth/steam" className="mob__steam" onClick={() => setMobileOpen(false)}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-9.96 9.04l5.35 2.21a2.83 2.83 0 0 1 1.6-.49c.05 0 .1 0 .16.01l2.4-3.47v-.05a3.77 3.77 0 0 1 3.77-3.77 3.77 3.77 0 0 1 3.77 3.77 3.77 3.77 0 0 1-3.77 3.77h-.09l-3.41 2.44c0 .04.01.09.01.13a2.84 2.84 0 0 1-2.84 2.84 2.85 2.85 0 0 1-2.8-2.37L2.2 12.9A10 10 0 1 0 12 2z"/></svg>
-                    {t("signIn")}
-                  </a>
-                )}
-              </div>
-            </div>
           </nav>
 
           <div className="header__right">
@@ -303,6 +216,89 @@ export function Header() {
         </div>
       </header>
       <div className={`header__mob-backdrop${mobileOpen ? " active" : ""}`} onClick={() => setMobileOpen(false)} />
+      {/* Mobile menu — outside header to avoid stacking context */}
+      <div className={`mob${mobileOpen ? " mob--open" : ""}`}>
+        {!loading && user && (
+          <div className="mob__profile">
+            <div className="mob__avatar">
+              {user.steamAvatar ? <img src={user.steamAvatar} alt="" /> : <span>{(user.steamLogin || "U")[0]}</span>}
+            </div>
+            <div className="mob__profile-info">
+              <span className="mob__name">{user.steamLogin || "User"}</span>
+              <span className="mob__bal">{format(Number(user.balance ?? 0))}</span>
+            </div>
+          </div>
+        )}
+
+        <div className="mob__prefs">
+          <div className="mob__pill-group">
+            {(["USD", "EUR", "RUB"] as const).map(c => (
+              <button key={c} className={`mob__pill${currency === c ? " mob__pill--on" : ""}`} onClick={() => handleCurrency(c)}>{c}</button>
+            ))}
+          </div>
+          <div className="mob__pill-group">
+            <button className={`mob__pill${lang === "EN" ? " mob__pill--on" : ""}`} onClick={() => handleLang("EN")}>EN</button>
+            <button className={`mob__pill${lang === "RU" ? " mob__pill--on" : ""}`} onClick={() => handleLang("RU")}>RU</button>
+          </div>
+        </div>
+
+        <div className="mob__line" />
+
+        <div className="mob__nav">
+          {!loading && user && (
+            <>
+              <Link href="/sell" className="mob__item" onClick={() => setMobileOpen(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                {t("sellSkins")}
+              </Link>
+              <Link href="/balance" className="mob__item" onClick={() => setMobileOpen(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                {t("menuBalance")}
+              </Link>
+              <Link href="/orders" className="mob__item" onClick={() => setMobileOpen(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                {t("menuOrders")}
+              </Link>
+              <Link href="/referral" className="mob__item" onClick={() => setMobileOpen(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                {t("menuReferral")}
+              </Link>
+
+              <div className="mob__line" />
+
+              <Link href="/#reviews" className="mob__item" onClick={() => setMobileOpen(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                {t("reviews")}
+              </Link>
+              <Link href="/faq" className="mob__item" onClick={() => setMobileOpen(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+                {t("faq")}
+              </Link>
+
+              {user.isAdmin && (
+                <NextLink href="/admin" className="mob__item" onClick={() => setMobileOpen(false)}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                  {t("admin")}
+                </NextLink>
+              )}
+
+              <div className="mob__line" />
+
+              <a href="/api/auth/logout" className="mob__item mob__item--danger" onClick={() => setMobileOpen(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                {t("menuLogout")}
+              </a>
+            </>
+          )}
+
+          {!loading && !user && (
+            <a href="/api/auth/steam" className="mob__steam" onClick={() => setMobileOpen(false)}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-9.96 9.04l5.35 2.21a2.83 2.83 0 0 1 1.6-.49c.05 0 .1 0 .16.01l2.4-3.47v-.05a3.77 3.77 0 0 1 3.77-3.77 3.77 3.77 0 0 1 3.77 3.77 3.77 3.77 0 0 1-3.77 3.77h-.09l-3.41 2.44c0 .04.01.09.01.13a2.84 2.84 0 0 1-2.84 2.84 2.85 2.85 0 0 1-2.8-2.37L2.2 12.9A10 10 0 1 0 12 2z"/></svg>
+              {t("signIn")}
+            </a>
+          )}
+        </div>
+      </div>
       <div className={`avatar-menu-backdrop${avatarMenuOpen ? " active" : ""}`} onClick={() => setAvatarMenuOpen(false)} />
       {!loading && user && (
         <div className={`avatar-menu${avatarMenuOpen ? " active" : ""}`}>

@@ -2852,10 +2852,11 @@
   border-bottom: none;
   color: rgba(255,255,255,0.7);
   background: rgba(255,255,255,0.03);
-  margin: 4px -18px 0;
-  padding-left: 18px;
-  padding-right: 18px;
+  margin: 4px 0 0;
+  padding-left: 0;
+  padding-right: 0;
   border-radius: 10px;
+  overflow: hidden;
 }
 .pay-summary-row--total span:first-child {
   font-weight: 800;
@@ -3602,11 +3603,11 @@
     font-size: 14px;
   }
   .pay-summary-row--total {
-    font-size: 16px;
+    font-size: 15px;
   }
   .pay-summary-row--total span:last-child,
   .pay-summary-row--total .pay-summary-row__value {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   /* ── Sell button ── */
@@ -3857,7 +3858,7 @@
   }
   .pay-summary-row--total span:last-child,
   .pay-summary-row--total .pay-summary-row__value {
-    font-size: 20px;
+    font-size: 18px;
   }
   .sell-btn {
     padding: 12px 14px;

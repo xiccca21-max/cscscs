@@ -1142,31 +1142,92 @@
   .odr-grid {
     grid-template-columns: 1fr;
   }
+  .odr-head {
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px 18px !important;
+    margin: 0 -16px 20px !important;
+  }
   .odr-head h1 {
-    font-size: 20px;
+    font-size: 16px !important;
+    flex-wrap: nowrap;
+    gap: 6px;
+    line-height: 1.3;
+  }
+  .odr-head h1 > span:first-child {
+    display: none;
+  }
+  .odr-head__id {
+    font-size: 16px !important;
+    word-break: break-all;
+  }
+  .odr-head__sub {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+  .odr-head__date {
+    font-size: 12px !important;
+  }
+  .odr-status {
+    align-self: flex-start;
+    padding: 5px 14px !important;
+    font-size: 11px !important;
   }
   .odr-fields {
     grid-template-columns: 1fr;
   }
+
+  /* Timeline — single compact row */
   .odr-tl {
-    padding: 20px 16px;
+    padding: 16px 12px !important;
+    margin-bottom: 16px;
+  }
+  .odr-tl__progress {
+    font-size: 10px !important;
+    letter-spacing: 1px !important;
+    margin-bottom: 12px !important;
   }
   .odr-tl__steps {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
-    gap: 4px;
-  }
-  .odr-tl__line {
-    min-width: 16px;
+    gap: 0;
   }
   .odr-tl__step {
-    min-width: 60px;
+    min-width: 0;
+    flex: 0 0 auto;
+    gap: 4px;
+  }
+  .odr-tl__dot {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .odr-tl__step--done .odr-tl__dot,
+  .odr-tl__step--active .odr-tl__dot {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .odr-tl__step--active .odr-tl__dot {
+    box-shadow: 0 0 0 4px rgba(129,140,248,0.25), 0 0 8px rgba(129,140,248,0.15) !important;
+  }
+  .odr-tl__dot svg {
+    width: 10px;
+    height: 10px;
   }
   .odr-tl__label {
-    font-size: 10px;
+    font-size: 9px !important;
+    max-width: 56px;
+    text-align: center;
+    line-height: 1.2;
   }
   .odr-tl__time {
-    font-size: 9px;
+    display: none;
+  }
+  .odr-tl__line {
+    min-width: 12px;
+    flex: 1;
+    height: 2px !important;
+    margin-top: 9px;
   }
   .odr-state__actions {
     flex-direction: column;
@@ -1188,41 +1249,9 @@
     width: 100%;
     justify-content: center;
   }
-}
-
-@media (max-width: 480px) {
-  .odr {
-    padding: 16px 0 48px;
-  }
-  .odr-tl__line {
-    display: none;
-  }
-  .odr-tl__steps {
-    gap: 8px;
-  }
-  .odr-tl__step {
-    min-width: auto;
-    flex: 1;
-  }
-  .odr-head {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .odr-head h1 {
-    font-size: 18px;
-  }
-  .odr-head__sub {
-    flex-direction: column;
-    gap: 4px;
-    align-items: flex-start;
-  }
-  .odr-help {
-    flex-direction: column;
-    text-align: center;
-    padding: 16px;
-  }
   .odr-crumbs {
-    font-size: 12px;
+    font-size: 11px !important;
+    margin-bottom: 8px !important;
   }
   .odr-card__title {
     padding: 14px 16px !important;
@@ -1256,6 +1285,11 @@
   }
   .odr-fields--list {
     padding: 8px 16px 0 !important;
+  }
+  .odr-help {
+    flex-direction: column;
+    text-align: center;
+    padding: 16px;
   }
 }
 

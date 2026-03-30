@@ -2905,19 +2905,23 @@
   border-radius: 10px;
   font-size: 12px;
   line-height: 1.4;
-  color: #b45309;
-  background: rgba(245,158,11,0.08);
-  border: 1px solid rgba(245,158,11,0.2);
+  color: #fbbf24;
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.25);
   margin-bottom: 8px;
 }
 .sell-pay__hold-warn svg {
   flex-shrink: 0;
   margin-top: 1px;
+  color: #fbbf24;
 }
 .sell-pay__hold-warn--info {
-  color: #4338ca;
-  background: rgba(99,102,241,0.06);
-  border-color: rgba(99,102,241,0.18);
+  color: #c7d2fe;
+  background: rgba(99,102,241,0.1);
+  border-color: rgba(129,140,248,0.25);
+}
+.sell-pay__hold-warn--info svg {
+  color: #a5b4fc;
 }
 
 /* Sell button */

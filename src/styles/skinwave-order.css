@@ -1217,10 +1217,10 @@
   .odr-tl__label {
     font-size: 9px !important;
     text-align: center;
-    line-height: 1.2;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    hyphens: auto;
+    line-height: 1.25;
+    white-space: normal !important;
+    word-break: normal;
+    overflow-wrap: anywhere;
   }
   .odr-tl__time {
     display: none;

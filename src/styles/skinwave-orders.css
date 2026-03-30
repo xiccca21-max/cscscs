@@ -312,9 +312,6 @@
 .ord-chart-gap {
   margin-top: 80px;
 }
-.ord-toolbar--no-chart {
-  margin-top: 80px;
-}
 
 /* ══════════════════════════════════════════════
    TOOLBAR (filters + search) - pushed down for hero overlap
@@ -329,6 +326,9 @@
   flex-wrap: wrap;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(99,102,241,0.08);
+}
+.ord-toolbar.ord-toolbar--no-chart {
+  margin-top: 80px;
 }
 .ord-filters {
   display: flex;
@@ -1682,8 +1682,10 @@
   .ord-stats {
     grid-template-columns: repeat(2, 1fr);
   }
-  .ord-chart-gap,
-  .ord-toolbar--no-chart {
+  .ord-chart-gap {
+    margin-top: 130px;
+  }
+  .ord-toolbar.ord-toolbar--no-chart {
     margin-top: 130px;
   }
 }
@@ -1740,13 +1742,13 @@
   .ord-chart-gap {
     margin-top: 20px;
   }
-  .ord-toolbar--no-chart {
-    margin-top: 20px;
-  }
   .ord-toolbar {
     flex-direction: column;
     align-items: stretch;
     margin-top: 16px;
+  }
+  .ord-toolbar.ord-toolbar--no-chart {
+    margin-top: 20px;
   }
   .ord-toolbar__right {
     display: grid;

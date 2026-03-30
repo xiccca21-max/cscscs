@@ -1,12 +1,23 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef, Fragment } from "react";
 import { useTranslations, useLocale } from "next-intl";
 
 import "@/styles/skinwave-orders.css";
 
 import { useSession } from "@/components/session-provider";
 import { Link } from "@/i18n/navigation";
+
+type OrderItem = {
+  id: string;
+  name: string;
+  imageUrl: string | null;
+  condition: string | null;
+  quality: string | null;
+  buyoutPrice: string;
+  currency: string;
+  game: string;
+};
 
 type OrderRow = {
   id: string;
@@ -17,13 +28,21 @@ type OrderRow = {
   createdAt: string;
   itemCount: number;
   paymentMethod: { name: string; type: string } | null;
+  items?: OrderItem[];
+  tradeUrl?: string;
+  steamProfileUrl?: string;
+  botAccount?: {
+    steamProfileUrl: string;
+    steamId: string;
+    name?: string;
+  } | null;
 };
 
 const STATUS_BADGE: Record<string, string> = {
   CREATED: "ord-badge--created",
   TRADE_SENT: "ord-badge--sent",
   TRADE_COMPLETED: "ord-badge--paid",
-  PAYMENT_PENDING: "ord-badge--sent",
+  PAYMENT_PENDING: "ord-badge--processing",
   PAID: "ord-badge--paid",
   TRADE_CANCELLED: "ord-badge--cancelled",
 };
@@ -41,9 +60,37 @@ const STATUS_DATA_ATTR: Record<string, string> = {
   CREATED: "created",
   TRADE_SENT: "trade_sent",
   TRADE_COMPLETED: "paid",
-  PAYMENT_PENDING: "trade_sent",
+  PAYMENT_PENDING: "processing",
   PAID: "paid",
   TRADE_CANCELLED: "cancelled",
+};
+
+const STATUS_ICON: Record<string, JSX.Element> = {
+  CREATED: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+  ),
+  TRADE_SENT: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2 11 13" /><path d="m22 2-7 20-4-9-9-4 20-7z" /></svg>
+  ),
+  TRADE_COMPLETED: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+  ),
+  PAYMENT_PENDING: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
+  ),
+  PAID: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+  ),
+  TRADE_CANCELLED: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
+  ),
+};
+
+const PAYOUT_ESTIMATE: Record<string, string> = {
+  CREATED: "~15-30 min",
+  TRADE_SENT: "~10-20 min",
+  TRADE_COMPLETED: "~5-10 min",
+  PAYMENT_PENDING: "~2-5 min",
 };
 
 const FILTER_TABS = [
@@ -57,6 +104,19 @@ const FILTER_TABS = [
 type FilterKey = (typeof FILTER_TABS)[number]["key"];
 
 const ITEMS_PER_PAGE = 10;
+
+const TIMELINE_STEPS = ["CREATED", "TRADE_SENT", "TRADE_COMPLETED", "PAID"];
+const TIMELINE_LABELS: Record<string, string> = {
+  CREATED: "Created",
+  TRADE_SENT: "Trade Sent",
+  TRADE_COMPLETED: "Received",
+  PAID: "Paid",
+};
+
+function getTimelineIndex(status: string): number {
+  const idx = TIMELINE_STEPS.indexOf(status);
+  return idx >= 0 ? idx : 0;
+}
 
 function paymentIcon(type: string | undefined) {
   switch (type) {
@@ -87,12 +147,56 @@ function paymentIcon(type: string | undefined) {
   }
 }
 
-// formatRelativeDate moved inside component for i18n access
-
 function amtClass(status: string): string {
   if (status === "PAID" || status === "TRADE_COMPLETED") return "ord-row__amt ord-row__amt--paid";
   if (status === "TRADE_CANCELLED") return "ord-row__amt ord-row__amt--cancelled";
   return "ord-row__amt";
+}
+
+function MiniChart({ data, period, onToggle }: { data: number[]; period: "7d" | "30d"; onToggle: (p: "7d" | "30d") => void }) {
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const range = max - min || 1;
+  const w = 280;
+  const h = 60;
+  const pad = 2;
+
+  const points = data.map((v, i) => {
+    const x = pad + (i / (data.length - 1 || 1)) * (w - pad * 2);
+    const y = h - pad - ((v - min) / range) * (h - pad * 2);
+    return `${x},${y}`;
+  }).join(" ");
+
+  const areaPoints = `${pad},${h - pad} ${points} ${w - pad},${h - pad}`;
+  const total = data.reduce((s, v) => s + v, 0);
+
+  return (
+    <div className="ord-chart">
+      <div className="ord-chart__header">
+        <div className="ord-chart__info">
+          <span className="ord-chart__total">{total.toFixed(2)}<small>$</small></span>
+          <span className="ord-chart__label">Earnings</span>
+        </div>
+        <div className="ord-chart__toggle">
+          <button className={`ord-chart__btn${period === "7d" ? " active" : ""}`} onClick={() => onToggle("7d")}>7d</button>
+          <button className={`ord-chart__btn${period === "30d" ? " active" : ""}`} onClick={() => onToggle("30d")}>30d</button>
+        </div>
+      </div>
+      <svg viewBox={`0 0 ${w} ${h}`} className="ord-chart__svg" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="rgba(99,102,241,0.3)" />
+            <stop offset="100%" stopColor="rgba(99,102,241,0)" />
+          </linearGradient>
+        </defs>
+        <polygon points={areaPoints} fill="url(#chartGrad)" />
+        <polyline points={points} fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        {data.length > 0 && (
+          <circle cx={pad + ((data.length - 1) / (data.length - 1 || 1)) * (w - pad * 2)} cy={h - pad - ((data[data.length - 1] - min) / range) * (h - pad * 2)} r="3" fill="#6366f1" stroke="#fff" strokeWidth="2" />
+        )}
+      </svg>
+    </div>
+  );
 }
 
 export default function OrdersPage() {
@@ -109,45 +213,90 @@ export default function OrdersPage() {
     if (diff === 1) return { label: t("yesterday"), full };
     return { label: t("daysAgo", { count: diff }), full };
   }, [locale, t]);
+
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [methodFilter, setMethodFilter] = useState<string>("all");
+  const [chartPeriod, setChartPeriod] = useState<"7d" | "30d">("7d");
+  const [modalOrder, setModalOrder] = useState<OrderRow | null>(null);
+  const [modalDetail, setModalDetail] = useState<OrderRow | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [updatedRows, setUpdatedRows] = useState<Set<string>>(new Set());
+  const prevStatusRef = useRef<Record<string, string>>({});
+
+  const fetchOrders = useCallback(() => {
+    if (!user) return;
+    fetch("/api/orders")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success) {
+          const newOrders: OrderRow[] = json.data ?? [];
+          setOrders((prev) => {
+            const flash = new Set<string>();
+            for (const o of newOrders) {
+              const prevStatus = prevStatusRef.current[o.id];
+              if (prevStatus && prevStatus !== o.status) {
+                flash.add(o.id);
+              }
+              prevStatusRef.current[o.id] = o.status;
+            }
+            if (flash.size > 0) {
+              setUpdatedRows(flash);
+              setTimeout(() => setUpdatedRows(new Set()), 2000);
+            }
+            return newOrders;
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [user]);
 
   useEffect(() => {
     if (!sessionLoading && user) {
-      fetch("/api/orders")
-        .then((r) => r.json())
-        .then((json) => {
-          if (json.success) {
-            setOrders(json.data ?? []);
-          }
-        })
-        .catch(() => {})
-        .finally(() => setLoading(false));
+      fetchOrders();
     } else if (!sessionLoading && !user) {
       setLoading(false);
     }
-  }, [sessionLoading, user]);
+  }, [sessionLoading, user, fetchOrders]);
+
+  useEffect(() => {
+    if (!user) return;
+    const hasActive = orders.some((o) =>
+      o.status === "CREATED" || o.status === "TRADE_SENT" || o.status === "PAYMENT_PENDING" || o.status === "TRADE_COMPLETED"
+    );
+    if (hasActive) {
+      pollRef.current = setInterval(fetchOrders, 10000);
+    }
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [user, orders, fetchOrders]);
 
   const filtered = useMemo(() => {
     let result = orders;
     if (activeFilter !== "all") {
       result = result.filter((o) => o.status === activeFilter);
     }
+    if (methodFilter !== "all") {
+      result = result.filter((o) => o.paymentMethod?.type === methodFilter);
+    }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       result = result.filter((o) => o.orderNumber.toLowerCase().includes(q));
     }
     return result;
-  }, [orders, activeFilter, search]);
+  }, [orders, activeFilter, methodFilter, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
   const currentPage = Math.min(page, totalPages);
   const paginated = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  useEffect(() => { setPage(1); }, [activeFilter, search]);
+  useEffect(() => { setPage(1); }, [activeFilter, search, methodFilter]);
 
   const countByStatus = useMemo(() => {
     const m: Record<string, number> = {};
@@ -173,6 +322,45 @@ export default function OrdersPage() {
     orders.filter((o) => o.status === "PAID" || o.status === "TRADE_COMPLETED").length,
     [orders]
   );
+
+  const chartData = useMemo(() => {
+    const days = chartPeriod === "7d" ? 7 : 30;
+    const now = new Date();
+    const buckets = Array(days).fill(0);
+    for (const o of orders) {
+      if (o.status !== "PAID" && o.status !== "TRADE_COMPLETED") continue;
+      const d = new Date(o.createdAt);
+      const diffDays = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays >= 0 && diffDays < days) {
+        buckets[days - 1 - diffDays] += parseFloat(o.totalAmount);
+      }
+    }
+    return buckets;
+  }, [orders, chartPeriod]);
+
+  const handleStatClick = (filter: FilterKey) => {
+    setActiveFilter(filter);
+    setPage(1);
+  };
+
+  const openModal = async (order: OrderRow) => {
+    setModalOrder(order);
+    setModalDetail(null);
+    setModalLoading(true);
+    try {
+      const r = await fetch(`/api/orders/${order.id}`);
+      const json = await r.json();
+      if (json.success) {
+        setModalDetail(json.data);
+      }
+    } catch { /* ignore */ }
+    setModalLoading(false);
+  };
+
+  const closeModal = () => {
+    setModalOrder(null);
+    setModalDetail(null);
+  };
 
   if (!sessionLoading && !user) {
     return (
@@ -212,7 +400,11 @@ export default function OrdersPage() {
 
   const hasOrders = orders.length > 0;
   const hasResults = filtered.length > 0;
-  const isSearching = search.trim().length > 0 || activeFilter !== "all";
+  const isSearching = search.trim().length > 0 || activeFilter !== "all" || methodFilter !== "all";
+
+  const detail = modalDetail ?? modalOrder;
+  const isCancelled = detail?.status === "TRADE_CANCELLED";
+  const activeStep = detail ? getTimelineIndex(detail.status) : 0;
 
   return (
     <main className="ord">
@@ -235,9 +427,9 @@ export default function OrdersPage() {
             </Link>
           </div>
 
-          {/* Stats inside hero */}
+          {/* Stats inside hero — now clickable */}
           <div className="ord-stats">
-            <div className="ord-stat">
+            <button type="button" className={`ord-stat ord-stat--clickable${activeFilter === "all" ? " ord-stat--active" : ""}`} onClick={() => handleStatClick("all")}>
               <div className="ord-stat__icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></svg>
               </div>
@@ -245,8 +437,8 @@ export default function OrdersPage() {
                 <span className="ord-stat__label">{t("statsTotal")}</span>
                 <span className="ord-stat__val">{loading ? "-" : orders.length}</span>
               </div>
-            </div>
-            <div className="ord-stat">
+            </button>
+            <button type="button" className="ord-stat ord-stat--clickable" onClick={() => handleStatClick("PAID")}>
               <div className="ord-stat__icon ord-stat__icon--green">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
               </div>
@@ -254,8 +446,8 @@ export default function OrdersPage() {
                 <span className="ord-stat__label">{t("statsEarned")}</span>
                 <span className="ord-stat__val">{loading ? "-" : <>{totalEarned.toFixed(2)}<small>$</small></>}</span>
               </div>
-            </div>
-            <div className="ord-stat">
+            </button>
+            <button type="button" className={`ord-stat ord-stat--clickable${activeFilter === "CREATED" ? " ord-stat--active" : ""}`} onClick={() => handleStatClick("CREATED")}>
               <div className="ord-stat__icon ord-stat__icon--amber">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
               </div>
@@ -263,8 +455,8 @@ export default function OrdersPage() {
                 <span className="ord-stat__label">{t("statsPending")}</span>
                 <span className="ord-stat__val">{loading ? "-" : <>{pendingAmount.toFixed(2)}<small>$</small></>}</span>
               </div>
-            </div>
-            <div className="ord-stat">
+            </button>
+            <button type="button" className={`ord-stat ord-stat--clickable${activeFilter === "PAID" ? " ord-stat--active" : ""}`} onClick={() => handleStatClick("PAID")}>
               <div className="ord-stat__icon ord-stat__icon--emerald">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
               </div>
@@ -272,14 +464,21 @@ export default function OrdersPage() {
                 <span className="ord-stat__label">{t("statsCompleted")}</span>
                 <span className="ord-stat__val">{loading ? "-" : completedCount}</span>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </div>
 
       <div className="container">
-        {/* Toolbar: filters + search */}
-        <div className="ord-toolbar">
+        {/* Earnings chart */}
+        {hasOrders && (
+          <div style={{ marginTop: 68 }}>
+            <MiniChart data={chartData} period={chartPeriod} onToggle={setChartPeriod} />
+          </div>
+        )}
+
+        {/* Toolbar: filters + search + method filter */}
+        <div className="ord-toolbar" style={hasOrders ? {} : { marginTop: 68 }}>
           <div className="ord-filters">
             {FILTER_TABS.map((tab) => {
               const count = tab.key === "all" ? orders.length : (countByStatus[tab.key] ?? 0);
@@ -297,14 +496,25 @@ export default function OrdersPage() {
               );
             })}
           </div>
-          <div className="ord-search">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            <input
-              type="text"
-              placeholder={t("search")}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          <div className="ord-toolbar__right">
+            <div className="ord-method-filter">
+              <select value={methodFilter} onChange={(e) => setMethodFilter(e.target.value)}>
+                <option value="all">{t("colMethod")}</option>
+                <option value="crypto">Crypto</option>
+                <option value="card">Card</option>
+                <option value="balance">Balance</option>
+                <option value="bank">Bank</option>
+              </select>
+            </div>
+            <div className="ord-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+              <input
+                type="text"
+                placeholder={t("search")}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
@@ -337,17 +547,17 @@ export default function OrdersPage() {
                 <tbody>
                   {paginated.map((order) => {
                     const rel = formatRelativeDate(order.createdAt);
-                    const isPaid = order.status === "PAID" || order.status === "TRADE_COMPLETED";
+                    const estimate = PAYOUT_ESTIMATE[order.status];
+                    const isFlashing = updatedRows.has(order.id);
                     return (
                       <tr
                         key={order.id}
-                        className="ord-row"
+                        className={`ord-row${isFlashing ? " ord-row--flash" : ""}`}
                         data-status={STATUS_DATA_ATTR[order.status] ?? "created"}
+                        onClick={() => openModal(order)}
                       >
                         <td data-label={t("colOrder")}>
-                          <Link href={`/order/${order.id}` as `/order/${string}`}>
-                            <span className="ord-row__id">#{order.orderNumber}</span>
-                          </Link>
+                          <span className="ord-row__id">#{order.orderNumber}</span>
                         </td>
                         <td data-label={t("colDate")}>
                           <span className="ord-row__date" title={rel.full}>{rel.label}</span>
@@ -367,20 +577,28 @@ export default function OrdersPage() {
                           </span>
                         </td>
                         <td data-label={t("colStatus")}>
-                          <span className={`ord-badge ${STATUS_BADGE[order.status] ?? "ord-badge--created"}`}>
-                            {isPaid && (
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
-                            )}
-                            <span>{t(STATUS_I18N[order.status] ?? "statusCreated")}</span>
-                          </span>
+                          <div className="ord-status-cell">
+                            <span className={`ord-badge ${STATUS_BADGE[order.status] ?? "ord-badge--created"}`}>
+                              {STATUS_ICON[order.status]}
+                              <span>{t(STATUS_I18N[order.status] ?? "statusCreated")}</span>
+                            </span>
+                            {estimate && <span className="ord-row__estimate">{estimate}</span>}
+                          </div>
                         </td>
                         <td>
-                          <Link href={`/order/${order.id}` as `/order/${string}`}>
-                            <span className="ord-row__view">
-                              <span>{t("view")}</span>
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
-                            </span>
-                          </Link>
+                          <span className="ord-row__actions">
+                            <button className="ord-row__action-btn ord-row__action-btn--view" title={t("view")} onClick={(e) => { e.stopPropagation(); openModal(order); }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                            </button>
+                            {(order.status === "TRADE_CANCELLED") && (
+                              <Link href="/sell" className="ord-row__action-btn ord-row__action-btn--retry" title="Retry" onClick={(e) => e.stopPropagation()}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+                              </Link>
+                            )}
+                            <button className="ord-row__action-btn ord-row__action-btn--support" title="Support" onClick={(e) => { e.stopPropagation(); window.open("mailto:support@skinwave.com", "_blank"); }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                            </button>
+                          </span>
                         </td>
                       </tr>
                     );
@@ -429,13 +647,11 @@ export default function OrdersPage() {
             )}
           </>
         ) : hasOrders && !hasResults && isSearching ? (
-          /* No results for search/filter */
           <div className="ord-noresults">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="8" x2="14" y2="14" /><line x1="14" y1="8" x2="8" y2="14" /></svg>
             <p>{t("noResults")}</p>
           </div>
         ) : (
-          /* Empty state */
           <div className="ord-empty">
             <div className="ord-empty__icon">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -451,6 +667,131 @@ export default function OrdersPage() {
           </div>
         )}
       </div>
+
+      {/* ═══ ORDER DETAILS MODAL ═══ */}
+      {modalOrder && (
+        <div className="ord-modal-overlay" onClick={closeModal}>
+          <div className="ord-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="ord-modal__close" onClick={closeModal}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            </button>
+
+            {modalLoading && !modalDetail ? (
+              <div className="ord-modal__loading">
+                <div className="ord-modal__spinner" />
+                <span>{t("loading")}</span>
+              </div>
+            ) : detail ? (
+              <>
+                {/* Modal header */}
+                <div className="ord-modal__header">
+                  <div className="ord-modal__header-left">
+                    <h2>#{detail.orderNumber}</h2>
+                    <span className="ord-modal__date">
+                      {new Date(detail.createdAt).toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US", { month: "long", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                  <span className={`ord-badge ${STATUS_BADGE[detail.status] ?? "ord-badge--created"}`}>
+                    {STATUS_ICON[detail.status]}
+                    <span>{t(STATUS_I18N[detail.status] ?? "statusCreated")}</span>
+                  </span>
+                </div>
+
+                {/* Timeline */}
+                {!isCancelled && (
+                  <div className="ord-modal__timeline">
+                    {TIMELINE_STEPS.map((step, i) => {
+                      const isDone = i < activeStep;
+                      const isActive = i === activeStep;
+                      let cls = "ord-modal__tl-step";
+                      if (isDone) cls += " ord-modal__tl-step--done";
+                      else if (isActive) cls += " ord-modal__tl-step--active";
+                      return (
+                        <Fragment key={step}>
+                          <div className={cls}>
+                            <div className="ord-modal__tl-dot">
+                              {isDone && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>}
+                            </div>
+                            <span className="ord-modal__tl-label">{TIMELINE_LABELS[step]}</span>
+                          </div>
+                          {i < TIMELINE_STEPS.length - 1 && <div className={`ord-modal__tl-line${isDone ? " ord-modal__tl-line--done" : ""}`} />}
+                        </Fragment>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Summary row */}
+                <div className="ord-modal__summary">
+                  <div className="ord-modal__summary-item">
+                    <span className="ord-modal__summary-label">{t("colAmount")}</span>
+                    <span className="ord-modal__summary-val ord-modal__summary-val--big">
+                      {parseFloat(detail.totalAmount).toFixed(2)}<small>$</small>
+                    </span>
+                  </div>
+                  <div className="ord-modal__summary-item">
+                    <span className="ord-modal__summary-label">{t("colItems")}</span>
+                    <span className="ord-modal__summary-val">{detail.itemCount}</span>
+                  </div>
+                  <div className="ord-modal__summary-item">
+                    <span className="ord-modal__summary-label">{t("colMethod")}</span>
+                    <span className="ord-modal__summary-val">
+                      {paymentIcon(detail.paymentMethod?.type)}
+                      {detail.paymentMethod?.name ?? "—"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Items list */}
+                {(modalDetail?.items ?? []).length > 0 && (
+                  <div className="ord-modal__items">
+                    <h4 className="ord-modal__section-title">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>
+                      Items
+                    </h4>
+                    <div className="ord-modal__items-list">
+                      {(modalDetail?.items ?? []).map((item) => (
+                        <div className="ord-modal__item" key={item.id}>
+                          <div className="ord-modal__item-img">
+                            {item.imageUrl ? (
+                              <img src={item.imageUrl} alt={item.name} loading="lazy" />
+                            ) : (
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.3"><rect x="3" y="3" width="18" height="18" rx="2" /></svg>
+                            )}
+                          </div>
+                          <div className="ord-modal__item-info">
+                            <span className="ord-modal__item-name">{item.name}</span>
+                            <span className="ord-modal__item-meta">{item.game}{item.condition ? ` · ${item.condition}` : ""}</span>
+                          </div>
+                          <span className="ord-modal__item-price">{parseFloat(item.buyoutPrice).toFixed(2)}<small>$</small></span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Modal actions */}
+                <div className="ord-modal__actions">
+                  <Link href={`/order/${detail.id}` as `/order/${string}`} className="ord-modal__action-btn ord-modal__action-btn--primary" onClick={closeModal}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+                    {t("view")}
+                  </Link>
+                  {detail.status === "TRADE_CANCELLED" && (
+                    <Link href="/sell" className="ord-modal__action-btn ord-modal__action-btn--retry" onClick={closeModal}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+                      Retry
+                    </Link>
+                  )}
+                  <button className="ord-modal__action-btn ord-modal__action-btn--support" onClick={() => window.open("mailto:support@skinwave.com", "_blank")}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+                    Support
+                  </button>
+                </div>
+              </>
+            ) : null}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

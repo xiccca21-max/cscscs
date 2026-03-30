@@ -3424,8 +3424,6 @@
   .sell-sidebar {
     position: static;
     height: auto;
-    max-height: none;
-    align-self: stretch;
     background: transparent;
     border-left: none;
     border-top: 1px solid #e4e2ee;

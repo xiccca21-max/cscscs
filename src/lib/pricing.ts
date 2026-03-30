@@ -42,38 +42,6 @@ async function loadTmPrices(): Promise<Map<string, number>> {
   }
 }
 
-const GAME_APP_IDS: Record<string, number> = {
-  CS2: 730,
-  DOTA2: 570,
-  TF2: 440,
-  RUST: 252490,
-};
-
-async function getSteamMarketPrice(
-  marketHashName: string,
-  game: Game,
-): Promise<number | null> {
-  try {
-    const appId = GAME_APP_IDS[game] ?? 730;
-    const encoded = encodeURIComponent(marketHashName);
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-    const res = await fetch(
-      `https://steamcommunity.com/market/priceoverview/?appid=${appId}&currency=1&market_hash_name=${encoded}`,
-      { signal: controller.signal, cache: "no-store" },
-    );
-    clearTimeout(timeout);
-    if (!res.ok) return null;
-    const data = await res.json();
-    const raw = data?.lowest_price || data?.median_price;
-    if (!raw) return null;
-    const price = parseFloat(raw.replace(/[^0-9.]/g, ""));
-    return price > 0 ? price : null;
-  } catch {
-    return null;
-  }
-}
-
 interface PricingRuleRow {
   game: Game | null;
   itemExternalId: string | null;

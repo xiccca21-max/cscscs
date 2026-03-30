@@ -5,8 +5,6 @@ import { generateOrderNumber, getSteamProfileUrl, isValidTradeUrl } from "@/lib/
 import { Prisma, type Game } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
-const MAX_PRICE_DEVIATION = 0.05;
-
 type OrderItemInput = {
   game: Game;
   name: string;
@@ -129,15 +127,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { success: false, error: `Item "${item.name}" is not available for sale` },
           { status: 400 },
-        );
-      }
-
-      const clientPrice = Number(item.buyoutPrice);
-      const diff = Math.abs(clientPrice - serverPrice.buyoutPrice) / serverPrice.buyoutPrice;
-      if (diff > MAX_PRICE_DEVIATION) {
-        return NextResponse.json(
-          { success: false, error: `Price mismatch for "${item.name}". Please refresh and try again.` },
-          { status: 409 },
         );
       }
 

@@ -2124,8 +2124,12 @@
   display: flex;
   align-items: center;
   gap: 0;
-  padding: 0;
-  background: transparent;
+  padding: 8px 14px;
+  background: rgba(30,27,75,0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(99,102,241,0.15);
+  border-radius: 12px;
 }
 
 .sell-step {

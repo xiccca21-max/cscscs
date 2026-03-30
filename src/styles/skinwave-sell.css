@@ -4830,8 +4830,11 @@
   transition: transform 0.2s;
 }
 .checkout-modal__country-flag {
-  font-size: 18px;
-  line-height: 1;
+  width: 22px;
+  height: 16px;
+  object-fit: cover;
+  border-radius: 2px;
+  flex-shrink: 0;
 }
 .checkout-modal__country-dropdown {
   position: absolute;

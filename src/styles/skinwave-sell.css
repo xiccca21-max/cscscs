@@ -4592,29 +4592,21 @@
 }
 
 .checkout-modal__icon {
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
   margin: 0 auto 14px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, var(--ck-color), var(--ck-color-light));
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid var(--ck-glow);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  box-shadow:
-    0 4px 20px var(--ck-glow),
-    inset 0 1px 0 rgba(255,255,255,0.15);
+  color: var(--ck-color-pale);
   animation: ckIconPulse 3s ease-in-out infinite;
-  overflow: hidden;
-}
-.checkout-modal__icon img {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
 }
 @keyframes ckIconPulse {
-  0%, 100% { box-shadow: 0 4px 20px var(--ck-glow), inset 0 1px 0 rgba(255,255,255,0.15); }
-  50% { box-shadow: 0 6px 30px var(--ck-glow), inset 0 1px 0 rgba(255,255,255,0.15); }
+  0%, 100% { box-shadow: 0 0 20px var(--ck-glow-soft); }
+  50% { box-shadow: 0 0 35px var(--ck-glow); }
 }
 
 .checkout-modal__title {

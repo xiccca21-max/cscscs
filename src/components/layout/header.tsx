@@ -140,68 +140,106 @@ export function Header() {
 
             {/* Mobile-only sections inside burger menu */}
             <div className="header__mob-section">
-              <div className="header__mob-sep" />
-              {!loading && user && (
-                <div className="header__mob-user">
-                  <div className="header__mob-avatar">
-                    {user.steamAvatar ? <img src={user.steamAvatar} alt="Avatar" /> : <span>{(user.steamLogin || "U")[0].toUpperCase()}</span>}
-                  </div>
-                  <div className="header__mob-user-info">
-                    <span className="header__mob-name">{user.steamLogin || "User"}</span>
-                    <span className="header__mob-balance">{format(Number(user.balance ?? 0))}</span>
-                  </div>
-                </div>
-              )}
-              {!loading && user && (
-                <>
-                  <Link href="/orders" className="header__mob-link" onClick={() => setMobileOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                    {t("menuOrders")}
-                  </Link>
-                  <Link href="/balance" className="header__mob-link" onClick={() => setMobileOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
-                    {t("menuBalance")}
-                  </Link>
-                  <Link href="/referral" className="header__mob-link" onClick={() => setMobileOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    {t("menuReferral")}
-                  </Link>
-                  {user.isAdmin && (
-                    <NextLink href="/admin" className="header__mob-link" onClick={() => setMobileOpen(false)}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                      {t("admin")}
-                    </NextLink>
-                  )}
-                  <a href="/api/auth/logout" className="header__mob-link header__mob-link--logout" onClick={() => setMobileOpen(false)}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    {t("menuLogout")}
-                  </a>
-                </>
-              )}
-              {!loading && !user && (
-                <a href="/api/auth/steam" className="header__mob-login" onClick={() => setMobileOpen(false)}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-9.96 9.04l5.35 2.21a2.83 2.83 0 0 1 1.6-.49c.05 0 .1 0 .16.01l2.4-3.47v-.05a3.77 3.77 0 0 1 3.77-3.77 3.77 3.77 0 0 1 3.77 3.77 3.77 3.77 0 0 1-3.77 3.77h-.09l-3.41 2.44c0 .04.01.09.01.13a2.84 2.84 0 0 1-2.84 2.84 2.85 2.85 0 0 1-2.8-2.37L2.2 12.9A10 10 0 1 0 12 2z"/></svg>
-                  {t("signIn")}
-                </a>
-              )}
-              <div className="header__mob-sep" />
-              <div className="header__mob-prefs">
-                <div className="header__mob-pref">
-                  <span className="header__mob-pref-label">{t("currency") ?? "Currency"}</span>
-                  <div className="header__mob-pref-btns">
+              {/* Top bar: balance + currency + lang */}
+              <div className="header__mob-topbar">
+                {!loading && user && (
+                  <span className="header__mob-topbar-bal">{format(Number(user.balance ?? 0))}</span>
+                )}
+                {!loading && !user && <span />}
+                <div className="header__mob-topbar-selects">
+                  <div className="header__mob-pref-btns header__mob-pref-btns--inline">
                     {(["USD", "EUR", "RUB"] as const).map(c => (
                       <button key={c} className={`header__mob-pref-btn${currency === c ? " active" : ""}`} onClick={() => handleCurrency(c)}>{c}</button>
                     ))}
                   </div>
-                </div>
-                <div className="header__mob-pref">
-                  <span className="header__mob-pref-label">{t("language") ?? "Language"}</span>
-                  <div className="header__mob-pref-btns">
+                  <div className="header__mob-pref-btns header__mob-pref-btns--inline">
                     <button className={`header__mob-pref-btn${lang === "EN" ? " active" : ""}`} onClick={() => handleLang("EN")}>EN</button>
                     <button className={`header__mob-pref-btn${lang === "RU" ? " active" : ""}`} onClick={() => handleLang("RU")}>RU</button>
                   </div>
                 </div>
               </div>
+
+              <div className="header__mob-sep" />
+
+              {/* User profile row */}
+              {!loading && user && (
+                <Link href="/sell" className="header__mob-link header__mob-link--profile" onClick={() => setMobileOpen(false)}>
+                  <div className="header__mob-avatar">
+                    {user.steamAvatar ? <img src={user.steamAvatar} alt="Avatar" /> : <span>{(user.steamLogin || "U")[0].toUpperCase()}</span>}
+                  </div>
+                  <span>{user.steamLogin || "User"}</span>
+                </Link>
+              )}
+
+              {!loading && user && (
+                <>
+                  <div className="header__mob-sep" />
+                  <Link href="/sell" className="header__mob-link" onClick={() => setMobileOpen(false)}>
+                    <span className="header__mob-icon header__mob-icon--indigo">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                    </span>
+                    {t("sellSkins")}
+                  </Link>
+                  <Link href="/balance" className="header__mob-link" onClick={() => setMobileOpen(false)}>
+                    <span className="header__mob-icon header__mob-icon--green">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+                    </span>
+                    {t("menuBalance")}
+                  </Link>
+
+                  <div className="header__mob-sep" />
+                  <Link href="/orders" className="header__mob-link" onClick={() => setMobileOpen(false)}>
+                    <span className="header__mob-icon header__mob-icon--orange">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                    </span>
+                    {t("menuOrders")}
+                  </Link>
+                  <Link href="/referral" className="header__mob-link" onClick={() => setMobileOpen(false)}>
+                    <span className="header__mob-icon header__mob-icon--cyan">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </span>
+                    {t("menuReferral")}
+                  </Link>
+                  <Link href="/#reviews" className="header__mob-link" onClick={() => setMobileOpen(false)}>
+                    <span className="header__mob-icon header__mob-icon--yellow">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </span>
+                    {t("reviews")}
+                  </Link>
+
+                  <div className="header__mob-sep" />
+                  <Link href="/faq" className="header__mob-link" onClick={() => setMobileOpen(false)}>
+                    <span className="header__mob-icon header__mob-icon--purple">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>
+                    </span>
+                    {t("faq")}
+                  </Link>
+                  {user.isAdmin && (
+                    <NextLink href="/admin" className="header__mob-link" onClick={() => setMobileOpen(false)}>
+                      <span className="header__mob-icon header__mob-icon--slate">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </span>
+                      {t("admin")}
+                    </NextLink>
+                  )}
+                  <a href="/api/auth/logout" className="header__mob-link header__mob-link--logout" onClick={() => setMobileOpen(false)}>
+                    <span className="header__mob-icon header__mob-icon--red">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </span>
+                    {t("menuLogout")}
+                  </a>
+                </>
+              )}
+
+              {!loading && !user && (
+                <>
+                  <div className="header__mob-sep" />
+                  <a href="/api/auth/steam" className="header__mob-login" onClick={() => setMobileOpen(false)}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-9.96 9.04l5.35 2.21a2.83 2.83 0 0 1 1.6-.49c.05 0 .1 0 .16.01l2.4-3.47v-.05a3.77 3.77 0 0 1 3.77-3.77 3.77 3.77 0 0 1 3.77 3.77 3.77 3.77 0 0 1-3.77 3.77h-.09l-3.41 2.44c0 .04.01.09.01.13a2.84 2.84 0 0 1-2.84 2.84 2.85 2.85 0 0 1-2.8-2.37L2.2 12.9A10 10 0 1 0 12 2z"/></svg>
+                    {t("signIn")}
+                  </a>
+                </>
+              )}
             </div>
           </nav>
 

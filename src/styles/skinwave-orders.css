@@ -1745,13 +1745,26 @@
     margin-top: 16px;
   }
   .ord-toolbar__right {
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: auto 1fr;
     gap: 8px;
+    width: 100%;
+  }
+  .ord-export-btn {
+    height: 38px;
+    padding: 0 14px;
+    font-size: 12px;
+    justify-content: center;
+  }
+  .ord-method-filter {
+    min-width: 0;
   }
   .ord-method-filter select {
     width: 100%;
+    height: 38px;
   }
   .ord-search {
+    grid-column: 1 / -1;
     width: 100%;
   }
   .ord-search input {

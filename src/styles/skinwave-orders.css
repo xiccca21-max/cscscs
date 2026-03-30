@@ -957,6 +957,159 @@
 }
 
 /* ══════════════════════════════════════════════
+   SPARKLINES IN STAT CARDS
+   ══════════════════════════════════════════════ */
+.ord-stat__spark {
+  margin-top: 4px;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+.ord-stat:hover .ord-stat__spark {
+  opacity: 1;
+}
+
+/* ══════════════════════════════════════════════
+   COPY TOAST
+   ══════════════════════════════════════════════ */
+.ord-toast {
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: #1e293b;
+  color: #fff;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  z-index: 99999;
+  animation: ordToastIn 0.3s ease, ordToastOut 0.3s ease 1.5s forwards;
+}
+@keyframes ordToastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@keyframes ordToastOut {
+  from { opacity: 1; }
+  to { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+}
+
+/* ══════════════════════════════════════════════
+   COPY ICON ON ORDER ID
+   ══════════════════════════════════════════════ */
+.ord-row__copy-icon {
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0;
+  transform: translateX(-2px);
+  transition: all 0.15s;
+  color: #94a3b8;
+  vertical-align: middle;
+}
+.ord-row:hover .ord-row__copy-icon {
+  opacity: 0.5;
+  transform: translateX(0);
+}
+.ord-row__id:hover .ord-row__copy-icon {
+  opacity: 1;
+  color: #4f46e5;
+}
+
+/* ══════════════════════════════════════════════
+   EXPORT CSV BUTTON
+   ══════════════════════════════════════════════ */
+.ord-export-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.25s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  height: 40px;
+}
+.ord-export-btn:hover {
+  border-color: #c7d2fe;
+  color: #4f46e5;
+  background: rgba(250,248,255,0.9);
+  box-shadow: 0 4px 12px rgba(99,102,241,0.1);
+}
+
+/* ══════════════════════════════════════════════
+   ATTENTION PULSE DOT
+   ══════════════════════════════════════════════ */
+.ord-badge__pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: ordPulseDot 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes ordPulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.6); }
+}
+
+/* ══════════════════════════════════════════════
+   MINI ROW PROGRESS BAR
+   ══════════════════════════════════════════════ */
+.ord-row__progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: rgba(0,0,0,0.03);
+  overflow: hidden;
+  z-index: 2;
+}
+.ord-row__progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+.ord-row__progress-fill[data-status="created"]    { background: #6366f1; }
+.ord-row__progress-fill[data-status="trade_sent"]  { background: #f59e0b; }
+.ord-row__progress-fill[data-status="processing"]  { background: #f59e0b; }
+.ord-row__progress-fill[data-status="paid"]        { background: #22c55e; }
+.ord-row__progress-fill[data-status="cancelled"]   { background: #ef4444; }
+
+.ord-row {
+  position: relative;
+}
+
+/* ══════════════════════════════════════════════
+   CHART EMPTY STATE
+   ══════════════════════════════════════════════ */
+.ord-chart__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 0 8px;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+}
+.ord-chart__empty svg {
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════
    PROCESSING BADGE
    ══════════════════════════════════════════════ */
 .ord-badge--processing {

@@ -93,6 +93,26 @@ const PAYOUT_ESTIMATE: Record<string, string> = {
   PAYMENT_PENDING: "~2-5 min",
 };
 
+const STATUS_ORDER: Record<string, number> = {
+  CREATED: 0,
+  TRADE_SENT: 1,
+  TRADE_COMPLETED: 2,
+  PAYMENT_PENDING: 3,
+  PAID: 4,
+  TRADE_CANCELLED: 5,
+};
+
+const PROGRESS_PERCENT: Record<string, number> = {
+  CREATED: 15,
+  TRADE_SENT: 40,
+  TRADE_COMPLETED: 65,
+  PAYMENT_PENDING: 80,
+  PAID: 100,
+  TRADE_CANCELLED: 0,
+};
+
+const NEEDS_ACTION = new Set(["CREATED", "TRADE_SENT"]);
+
 const FILTER_TABS = [
   { key: "all", i18n: "filterAll", dot: null },
   { key: "CREATED", i18n: "filterCreated", dot: "ord-fil__dot--created" },
@@ -102,6 +122,8 @@ const FILTER_TABS = [
 ] as const;
 
 type FilterKey = (typeof FILTER_TABS)[number]["key"];
+type SortKey = "date" | "amount" | "status" | "items" | null;
+type SortDir = "asc" | "desc";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -153,6 +175,25 @@ function amtClass(status: string): string {
   return "ord-row__amt";
 }
 
+function Sparkline({ data, color = "#6366f1" }: { data: number[]; color?: string }) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data, 1);
+  const min = Math.min(...data, 0);
+  const range = max - min || 1;
+  const w = 48;
+  const h = 20;
+  const pts = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w;
+    const y = h - ((v - min) / range) * h;
+    return `${x},${y}`;
+  }).join(" ");
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} className="ord-stat__spark">
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function MiniChart({ data, period, onToggle }: { data: number[]; period: "7d" | "30d"; onToggle: (p: "7d" | "30d") => void }) {
   const max = Math.max(...data, 1);
   const min = Math.min(...data, 0);
@@ -160,6 +201,8 @@ function MiniChart({ data, period, onToggle }: { data: number[]; period: "7d" | 
   const w = 280;
   const h = 60;
   const pad = 2;
+  const total = data.reduce((s, v) => s + v, 0);
+  const isEmpty = total === 0;
 
   const points = data.map((v, i) => {
     const x = pad + (i / (data.length - 1 || 1)) * (w - pad * 2);
@@ -168,7 +211,6 @@ function MiniChart({ data, period, onToggle }: { data: number[]; period: "7d" | 
   }).join(" ");
 
   const areaPoints = `${pad},${h - pad} ${points} ${w - pad},${h - pad}`;
-  const total = data.reduce((s, v) => s + v, 0);
 
   return (
     <div className="ord-chart">
@@ -182,21 +224,55 @@ function MiniChart({ data, period, onToggle }: { data: number[]; period: "7d" | 
           <button className={`ord-chart__btn${period === "30d" ? " active" : ""}`} onClick={() => onToggle("30d")}>30d</button>
         </div>
       </div>
-      <svg viewBox={`0 0 ${w} ${h}`} className="ord-chart__svg" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(99,102,241,0.3)" />
-            <stop offset="100%" stopColor="rgba(99,102,241,0)" />
-          </linearGradient>
-        </defs>
-        <polygon points={areaPoints} fill="url(#chartGrad)" />
-        <polyline points={points} fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        {data.length > 0 && (
-          <circle cx={pad + ((data.length - 1) / (data.length - 1 || 1)) * (w - pad * 2)} cy={h - pad - ((data[data.length - 1] - min) / range) * (h - pad * 2)} r="3" fill="#6366f1" stroke="#fff" strokeWidth="2" />
-        )}
-      </svg>
+      {isEmpty ? (
+        <div className="ord-chart__empty">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+          <span>Start selling skins to see your earnings trend here</span>
+        </div>
+      ) : (
+        <svg viewBox={`0 0 ${w} ${h}`} className="ord-chart__svg" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(99,102,241,0.3)" />
+              <stop offset="100%" stopColor="rgba(99,102,241,0)" />
+            </linearGradient>
+          </defs>
+          <polygon points={areaPoints} fill="url(#chartGrad)" />
+          <polyline points={points} fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          {data.length > 0 && (
+            <circle cx={pad + ((data.length - 1) / (data.length - 1 || 1)) * (w - pad * 2)} cy={h - pad - ((data[data.length - 1] - min) / range) * (h - pad * 2)} r="3" fill="#6366f1" stroke="#fff" strokeWidth="2" />
+          )}
+        </svg>
+      )}
     </div>
   );
+}
+
+function CopyToast({ show }: { show: boolean }) {
+  if (!show) return null;
+  return (
+    <div className="ord-toast">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+      <span>Copied!</span>
+    </div>
+  );
+}
+
+function exportCSV(orders: OrderRow[]) {
+  const header = "Order ID,Date,Items,Amount,Method,Status\n";
+  const rows = orders.map((o) => {
+    const date = new Date(o.createdAt).toISOString().split("T")[0];
+    const method = o.paymentMethod?.name ?? "-";
+    const status = o.status;
+    return `${o.orderNumber},${date},${o.itemCount},${parseFloat(o.totalAmount).toFixed(2)},${method},${status}`;
+  }).join("\n");
+  const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `orders_${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export default function OrdersPage() {
@@ -224,6 +300,9 @@ export default function OrdersPage() {
   const [modalOrder, setModalOrder] = useState<OrderRow | null>(null);
   const [modalDetail, setModalDetail] = useState<OrderRow | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [copyToast, setCopyToast] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [updatedRows, setUpdatedRows] = useState<Set<string>>(new Set());
   const prevStatusRef = useRef<Record<string, string>>({});
@@ -277,6 +356,22 @@ export default function OrdersPage() {
     };
   }, [user, orders, fetchOrders]);
 
+  const handleCopyId = useCallback((e: React.MouseEvent, orderNumber: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(orderNumber);
+    setCopyToast(true);
+    setTimeout(() => setCopyToast(false), 1800);
+  }, []);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  };
+
   const filtered = useMemo(() => {
     let result = orders;
     if (activeFilter !== "all") {
@@ -292,9 +387,25 @@ export default function OrdersPage() {
     return result;
   }, [orders, activeFilter, methodFilter, search]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const sorted = useMemo(() => {
+    if (!sortKey) return filtered;
+    const arr = [...filtered];
+    const dir = sortDir === "asc" ? 1 : -1;
+    arr.sort((a, b) => {
+      switch (sortKey) {
+        case "date": return dir * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        case "amount": return dir * (parseFloat(a.totalAmount) - parseFloat(b.totalAmount));
+        case "status": return dir * ((STATUS_ORDER[a.status] ?? 0) - (STATUS_ORDER[b.status] ?? 0));
+        case "items": return dir * (a.itemCount - b.itemCount);
+        default: return 0;
+      }
+    });
+    return arr;
+  }, [filtered, sortKey, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / ITEMS_PER_PAGE));
   const currentPage = Math.min(page, totalPages);
-  const paginated = filtered.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  const paginated = sorted.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   useEffect(() => { setPage(1); }, [activeFilter, search, methodFilter]);
 
@@ -337,6 +448,30 @@ export default function OrdersPage() {
     }
     return buckets;
   }, [orders, chartPeriod]);
+
+  const sparkData = useMemo(() => {
+    const now = new Date();
+    const totalSpark: number[] = [];
+    const earnedSpark: number[] = [];
+    const pendingSpark: number[] = [];
+    const completedSpark: number[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = new Date(now);
+      dayStart.setDate(dayStart.getDate() - i);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(dayStart);
+      dayEnd.setDate(dayEnd.getDate() + 1);
+      const dayOrders = orders.filter((o) => {
+        const d = new Date(o.createdAt);
+        return d >= dayStart && d < dayEnd;
+      });
+      totalSpark.push(dayOrders.length);
+      earnedSpark.push(dayOrders.filter((o) => o.status === "PAID" || o.status === "TRADE_COMPLETED").reduce((s, o) => s + parseFloat(o.totalAmount), 0));
+      pendingSpark.push(dayOrders.filter((o) => o.status === "CREATED" || o.status === "TRADE_SENT" || o.status === "PAYMENT_PENDING").reduce((s, o) => s + parseFloat(o.totalAmount), 0));
+      completedSpark.push(dayOrders.filter((o) => o.status === "PAID" || o.status === "TRADE_COMPLETED").length);
+    }
+    return { totalSpark, earnedSpark, pendingSpark, completedSpark };
+  }, [orders]);
 
   const handleStatClick = (filter: FilterKey) => {
     setActiveFilter(filter);
@@ -399,15 +534,24 @@ export default function OrdersPage() {
   }
 
   const hasOrders = orders.length > 0;
-  const hasResults = filtered.length > 0;
+  const hasResults = sorted.length > 0;
   const isSearching = search.trim().length > 0 || activeFilter !== "all" || methodFilter !== "all";
 
   const detail = modalDetail ?? modalOrder;
   const isCancelled = detail?.status === "TRADE_CANCELLED";
   const activeStep = detail ? getTimelineIndex(detail.status) : 0;
 
+  function thClass(key: SortKey) {
+    let cls = "ord-th--sortable";
+    if (sortKey === key) cls += " ord-th--active";
+    if (sortKey === key && sortDir === "asc") cls += " ord-th--asc";
+    return cls;
+  }
+
   return (
     <main className="ord">
+      <CopyToast show={copyToast} />
+
       {/* Hero header */}
       <div className="ord-hero">
         <div className="ord-hero__decor">
@@ -427,7 +571,7 @@ export default function OrdersPage() {
             </Link>
           </div>
 
-          {/* Stats inside hero — now clickable */}
+          {/* Stats — clickable + sparklines */}
           <div className="ord-stats">
             <button type="button" className={`ord-stat ord-stat--clickable${activeFilter === "all" ? " ord-stat--active" : ""}`} onClick={() => handleStatClick("all")}>
               <div className="ord-stat__icon">
@@ -436,6 +580,7 @@ export default function OrdersPage() {
               <div className="ord-stat__body">
                 <span className="ord-stat__label">{t("statsTotal")}</span>
                 <span className="ord-stat__val">{loading ? "-" : orders.length}</span>
+                {!loading && <Sparkline data={sparkData.totalSpark} color="#6366f1" />}
               </div>
             </button>
             <button type="button" className="ord-stat ord-stat--clickable" onClick={() => handleStatClick("PAID")}>
@@ -445,6 +590,7 @@ export default function OrdersPage() {
               <div className="ord-stat__body">
                 <span className="ord-stat__label">{t("statsEarned")}</span>
                 <span className="ord-stat__val">{loading ? "-" : <>{totalEarned.toFixed(2)}<small>$</small></>}</span>
+                {!loading && <Sparkline data={sparkData.earnedSpark} color="#22c55e" />}
               </div>
             </button>
             <button type="button" className={`ord-stat ord-stat--clickable${activeFilter === "CREATED" ? " ord-stat--active" : ""}`} onClick={() => handleStatClick("CREATED")}>
@@ -454,6 +600,7 @@ export default function OrdersPage() {
               <div className="ord-stat__body">
                 <span className="ord-stat__label">{t("statsPending")}</span>
                 <span className="ord-stat__val">{loading ? "-" : <>{pendingAmount.toFixed(2)}<small>$</small></>}</span>
+                {!loading && <Sparkline data={sparkData.pendingSpark} color="#f59e0b" />}
               </div>
             </button>
             <button type="button" className={`ord-stat ord-stat--clickable${activeFilter === "PAID" ? " ord-stat--active" : ""}`} onClick={() => handleStatClick("PAID")}>
@@ -463,6 +610,7 @@ export default function OrdersPage() {
               <div className="ord-stat__body">
                 <span className="ord-stat__label">{t("statsCompleted")}</span>
                 <span className="ord-stat__val">{loading ? "-" : completedCount}</span>
+                {!loading && <Sparkline data={sparkData.completedSpark} color="#10b981" />}
               </div>
             </button>
           </div>
@@ -477,7 +625,7 @@ export default function OrdersPage() {
           </div>
         )}
 
-        {/* Toolbar: filters + search + method filter */}
+        {/* Toolbar */}
         <div className="ord-toolbar" style={hasOrders ? {} : { marginTop: 68 }}>
           <div className="ord-filters">
             {FILTER_TABS.map((tab) => {
@@ -497,6 +645,12 @@ export default function OrdersPage() {
             })}
           </div>
           <div className="ord-toolbar__right">
+            {hasOrders && (
+              <button type="button" className="ord-export-btn" onClick={() => exportCSV(filtered)}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                CSV
+              </button>
+            )}
             <div className="ord-method-filter">
               <select value={methodFilter} onChange={(e) => setMethodFilter(e.target.value)}>
                 <option value="all">{t("colMethod")}</option>
@@ -530,17 +684,36 @@ export default function OrdersPage() {
           </div>
         ) : hasOrders && hasResults ? (
           <>
-            {/* Orders table */}
             <div className="ord-table-wrap">
               <table className="ord-table">
                 <thead>
                   <tr>
                     <th>{t("colOrder")}</th>
-                    <th>{t("colDate")}</th>
-                    <th>{t("colItems")}</th>
-                    <th>{t("colAmount")}</th>
+                    <th className={thClass("date")} onClick={() => handleSort("date")}>
+                      {t("colDate")}
+                      <span className="ord-th__arrow">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="6 9 12 15 18 9" /></svg>
+                      </span>
+                    </th>
+                    <th className={thClass("items")} onClick={() => handleSort("items")}>
+                      {t("colItems")}
+                      <span className="ord-th__arrow">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="6 9 12 15 18 9" /></svg>
+                      </span>
+                    </th>
+                    <th className={thClass("amount")} onClick={() => handleSort("amount")}>
+                      {t("colAmount")}
+                      <span className="ord-th__arrow">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="6 9 12 15 18 9" /></svg>
+                      </span>
+                    </th>
                     <th>{t("colMethod")}</th>
-                    <th>{t("colStatus")}</th>
+                    <th className={thClass("status")} onClick={() => handleSort("status")}>
+                      {t("colStatus")}
+                      <span className="ord-th__arrow">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="6 9 12 15 18 9" /></svg>
+                      </span>
+                    </th>
                     <th></th>
                   </tr>
                 </thead>
@@ -549,6 +722,8 @@ export default function OrdersPage() {
                     const rel = formatRelativeDate(order.createdAt);
                     const estimate = PAYOUT_ESTIMATE[order.status];
                     const isFlashing = updatedRows.has(order.id);
+                    const progress = PROGRESS_PERCENT[order.status] ?? 0;
+                    const needsAction = NEEDS_ACTION.has(order.status);
                     return (
                       <tr
                         key={order.id}
@@ -557,7 +732,10 @@ export default function OrdersPage() {
                         onClick={() => openModal(order)}
                       >
                         <td data-label={t("colOrder")}>
-                          <span className="ord-row__id">#{order.orderNumber}</span>
+                          <span className="ord-row__id" onClick={(e) => handleCopyId(e, order.orderNumber)} title="Click to copy">
+                            #{order.orderNumber}
+                            <svg className="ord-row__copy-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+                          </span>
                         </td>
                         <td data-label={t("colDate")}>
                           <span className="ord-row__date" title={rel.full}>{rel.label}</span>
@@ -579,6 +757,7 @@ export default function OrdersPage() {
                         <td data-label={t("colStatus")}>
                           <div className="ord-status-cell">
                             <span className={`ord-badge ${STATUS_BADGE[order.status] ?? "ord-badge--created"}`}>
+                              {needsAction && <span className="ord-badge__pulse" />}
                               {STATUS_ICON[order.status]}
                               <span>{t(STATUS_I18N[order.status] ?? "statusCreated")}</span>
                             </span>
@@ -599,6 +778,10 @@ export default function OrdersPage() {
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
                             </button>
                           </span>
+                          {/* Mini progress bar */}
+                          <div className="ord-row__progress">
+                            <div className="ord-row__progress-fill" style={{ width: `${progress}%` }} data-status={STATUS_DATA_ATTR[order.status] ?? "created"} />
+                          </div>
                         </td>
                       </tr>
                     );
@@ -611,34 +794,17 @@ export default function OrdersPage() {
             {totalPages > 1 && (
               <div className="ord-pag">
                 <span className="ord-pag__info">
-                  {t("showing", { from: (currentPage - 1) * ITEMS_PER_PAGE + 1, to: Math.min(currentPage * ITEMS_PER_PAGE, filtered.length), total: filtered.length })}
+                  {t("showing", { from: (currentPage - 1) * ITEMS_PER_PAGE + 1, to: Math.min(currentPage * ITEMS_PER_PAGE, sorted.length), total: sorted.length })}
                 </span>
                 <div className="ord-pag__btns">
-                  <button
-                    type="button"
-                    className="ord-pag__btn"
-                    disabled={currentPage <= 1}
-                    onClick={() => setPage((p) => p - 1)}
-                  >
+                  <button type="button" className="ord-pag__btn" disabled={currentPage <= 1} onClick={() => setPage((p) => p - 1)}>
                     <span className="sr-only">{t("prev")}</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
                   </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      className={`ord-pag__btn${p === currentPage ? " ord-pag__btn--active" : ""}`}
-                      onClick={() => setPage(p)}
-                    >
-                      {p}
-                    </button>
+                    <button key={p} type="button" className={`ord-pag__btn${p === currentPage ? " ord-pag__btn--active" : ""}`} onClick={() => setPage(p)}>{p}</button>
                   ))}
-                  <button
-                    type="button"
-                    className="ord-pag__btn"
-                    disabled={currentPage >= totalPages}
-                    onClick={() => setPage((p) => p + 1)}
-                  >
+                  <button type="button" className="ord-pag__btn" disabled={currentPage >= totalPages} onClick={() => setPage((p) => p + 1)}>
                     <span className="sr-only">{t("next")}</span>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
                   </button>
@@ -683,7 +849,6 @@ export default function OrdersPage() {
               </div>
             ) : detail ? (
               <>
-                {/* Modal header */}
                 <div className="ord-modal__header">
                   <div className="ord-modal__header-left">
                     <h2>#{detail.orderNumber}</h2>
@@ -697,7 +862,6 @@ export default function OrdersPage() {
                   </span>
                 </div>
 
-                {/* Timeline */}
                 {!isCancelled && (
                   <div className="ord-modal__timeline">
                     {TIMELINE_STEPS.map((step, i) => {
@@ -721,7 +885,6 @@ export default function OrdersPage() {
                   </div>
                 )}
 
-                {/* Summary row */}
                 <div className="ord-modal__summary">
                   <div className="ord-modal__summary-item">
                     <span className="ord-modal__summary-label">{t("colAmount")}</span>
@@ -742,7 +905,6 @@ export default function OrdersPage() {
                   </div>
                 </div>
 
-                {/* Items list */}
                 {(modalDetail?.items ?? []).length > 0 && (
                   <div className="ord-modal__items">
                     <h4 className="ord-modal__section-title">
@@ -770,7 +932,6 @@ export default function OrdersPage() {
                   </div>
                 )}
 
-                {/* Modal actions */}
                 <div className="ord-modal__actions">
                   <Link href={`/order/${detail.id}` as `/order/${string}`} className="ord-modal__action-btn ord-modal__action-btn--primary" onClick={closeModal}>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>

@@ -622,45 +622,40 @@ export default function SellPage() {
 
         <div className="sell-steps" id="sellProgress">
           <div className={`sell-step${step1Done ? " done" : ""}`} data-step="1">
-            <span className="sell-step__circle">
+            <span className="sell-step__icon">
               {step1Done ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               ) : (
-                <span>1</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/><circle cx="7.5" cy="20" r="1.5"/><circle cx="17.5" cy="20" r="1.5"/></svg>
               )}
             </span>
-            <span className="sell-step__text">
-              <span className="sell-step__title">{t("stepSelect")}</span>
-              <span className="sell-step__desc">Choose your items</span>
-            </span>
+            <span className="sell-step__label">{t("stepSelect")}</span>
           </div>
-          <div className={`sell-step__line${step1Done ? " done" : ""}`} />
+          <span className="sell-step__chev">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
           <div className={`sell-step${step1Done && step2Done ? " done" : ""}`} data-step="2">
-            <span className="sell-step__circle">
+            <span className="sell-step__icon">
               {step1Done && step2Done ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               ) : (
-                <span>2</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
               )}
             </span>
-            <span className="sell-step__text">
-              <span className="sell-step__title">{t("stepTradeUrl")}</span>
-              <span className="sell-step__desc">Paste your link</span>
-            </span>
+            <span className="sell-step__label">{t("stepTradeUrl")}</span>
           </div>
-          <div className={`sell-step__line${step1Done && step2Done ? " done" : ""}`} />
+          <span className="sell-step__chev">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
           <div className={`sell-step${step3Active ? " done" : ""}`} data-step="3">
-            <span className="sell-step__circle">
+            <span className="sell-step__icon">
               {step3Active ? (
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               ) : (
-                <span>3</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/><path d="M6 16h4"/></svg>
               )}
             </span>
-            <span className="sell-step__text">
-              <span className="sell-step__title">{t("stepGetPaid")}</span>
-              <span className="sell-step__desc">Receive payout</span>
-            </span>
+            <span className="sell-step__label">{t("stepGetPaid")}</span>
           </div>
         </div>
       </div>

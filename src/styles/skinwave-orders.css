@@ -310,10 +310,10 @@
 
 /* Gap between hero overlap and chart/toolbar */
 .ord-chart-gap {
-  margin-top: 68px;
+  margin-top: 80px;
 }
 .ord-toolbar--no-chart {
-  margin-top: 68px;
+  margin-top: 80px;
 }
 
 /* ══════════════════════════════════════════════
@@ -1681,6 +1681,10 @@
 @media (max-width: 1024px) {
   .ord-stats {
     grid-template-columns: repeat(2, 1fr);
+  }
+  .ord-chart-gap,
+  .ord-toolbar--no-chart {
+    margin-top: 130px;
   }
 }
 

@@ -323,7 +323,6 @@ export default function BalancePage() {
                       value={cashoutAmount}
                       onChange={handleAmountChange}
                     />
-                    <span className="cashout-currency">$</span>
                     <button
                       className="cashout-max"
                       onClick={() => setCashoutAmount(balance.toFixed(2))}
@@ -346,6 +345,11 @@ export default function BalancePage() {
                       </div>
                       <span className="bal-method__name">{t("debitCard")}</span>
                       <span className="bal-method__desc">{t("visaMc")}</span>
+                      <div className="bal-method__conditions">
+                        <span>{t("methodMin")}: <strong>1$</strong></span>
+                        <span>{t("methodFee")}: <strong>0%</strong></span>
+                        <span>{t("methodSpeed")}: <strong>{t("methodInstant")}</strong></span>
+                      </div>
                     </button>
                     <button
                       className={`bal-method${cashoutMethod === "crypto" ? " active" : ""}`}
@@ -356,6 +360,11 @@ export default function BalancePage() {
                       </div>
                       <span className="bal-method__name">{t("cryptocurrency")}</span>
                       <span className="bal-method__desc">{t("cryptoDesc")}</span>
+                      <div className="bal-method__conditions">
+                        <span>{t("methodMin")}: <strong>5$</strong></span>
+                        <span>{t("methodFee")}: <strong>0%</strong></span>
+                        <span>{t("methodSpeed")}: <strong>{t("methodInstant")}</strong></span>
+                      </div>
                     </button>
                     <button
                       className={`bal-method${cashoutMethod === "bank" ? " active" : ""}`}
@@ -366,6 +375,11 @@ export default function BalancePage() {
                       </div>
                       <span className="bal-method__name">{t("bankTransfer")}</span>
                       <span className="bal-method__desc">{t("ibanSwift")}</span>
+                      <div className="bal-method__conditions">
+                        <span>{t("methodMin")}: <strong>50$</strong></span>
+                        <span>{t("methodFee")}: <strong>0%</strong></span>
+                        <span>{t("methodSpeed")}: <strong>1-2 {t("methodDays")}</strong></span>
+                      </div>
                     </button>
                   </div>
                 </div>

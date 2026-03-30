@@ -6,8 +6,12 @@ import { useTranslations } from "next-intl";
 import { useCurrency } from "@/components/currency-provider";
 
 const PAYOUT_NAMES = [
-  "Alex C.", "Maria S.", "Denis P.", "John K.", "Emma R.",
-  "Ivan T.", "Sophie L.", "Nikita V.", "Kate M.", "Oleg D.",
+  "Nugaev", "kukas", "Nomad", "hokage", "Conq3r",
+  "Razrez", "G7AX", "maestro", "mango", "Matt",
+  "MauseR", "max1moff_", "Mason", "mayONEZY", "MaF1ozee",
+  "madnothappy", "Maisie", "MakaR", "MAXIS", "mataso",
+  "Mangekyō", "NoT1cE", "anger", "РЫБАК", "Wa1halla",
+  "pinkgose", "maz1k", "MADMAX", "mARNESY", "Mag1st0r",
 ];
 
 const SLIDE_COUNT = 7;
@@ -266,15 +270,15 @@ export default function HomePage() {
                 {t("recentPayouts")}
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[0] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
-                <div className="hero__payout-user"><span>A</span> Alex C.</div>
+                <div className="hero__payout-user"><span>N</span> Nugaev</div>
                 <span className="hero__payout-amount">{format(1790)}</span>
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[1] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
-                <div className="hero__payout-user"><span>M</span> Maria S.</div>
+                <div className="hero__payout-user"><span>M</span> max1moff_</div>
                 <span className="hero__payout-amount">{format(89.5)}</span>
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[2] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
-                <div className="hero__payout-user"><span>D</span> Denis P.</div>
+                <div className="hero__payout-user"><span>R</span> Razrez</div>
                 <span className="hero__payout-amount">{format(3100)}</span>
               </div>
             </div>
@@ -503,16 +507,16 @@ export default function HomePage() {
               <div className="review-card" style={{"--av1":"#6366f1","--av2":"#818cf8"} as React.CSSProperties}>
                 <span className="review-card__quote">&ldquo;</span>
                 <div className="review-card__header">
-                  <div className="review-card__avatar"><span>V</span></div>
+                  <div className="review-card__avatar"><span>N</span></div>
                   <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/viktor_cs_trade" className="review-card__name" target="_blank" rel="noopener">Viktor_CS</a>
+                    <a href="https://steamcommunity.com/id/nugaev" className="review-card__name" target="_blank" rel="noopener">Nugaev</a>
                     <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
                 <p className="review-card__text">{t("review1Text")}</p>
                 <div className="review-card__footer">
                   <span className="review-card__game">{t("review1Game")}</span>
-                  <a href="https://steamcommunity.com/id/viktor_cs_trade" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
+                  <a href="https://steamcommunity.com/id/nugaev" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -521,16 +525,16 @@ export default function HomePage() {
               <div className="review-card" style={{"--av1":"#e2740e","--av2":"#f59e0b"} as React.CSSProperties}>
                 <span className="review-card__quote">&ldquo;</span>
                 <div className="review-card__header">
-                  <div className="review-card__avatar"><span>A</span></div>
+                  <div className="review-card__avatar"><span>M</span></div>
                   <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/anna_dota2" className="review-card__name" target="_blank" rel="noopener">anna_dota</a>
+                    <a href="https://steamcommunity.com/id/Dracula1999" className="review-card__name" target="_blank" rel="noopener">mango</a>
                     <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
                 <p className="review-card__text">{t("review2Text")}</p>
                 <div className="review-card__footer">
                   <span className="review-card__game">{t("review2Game")}</span>
-                  <a href="https://steamcommunity.com/id/anna_dota2" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
+                  <a href="https://steamcommunity.com/id/Dracula1999" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -539,16 +543,16 @@ export default function HomePage() {
               <div className="review-card" style={{"--av1":"#4338ca","--av2":"#6366f1"} as React.CSSProperties}>
                 <span className="review-card__quote">&ldquo;</span>
                 <div className="review-card__header">
-                  <div className="review-card__avatar"><span>S</span></div>
+                  <div className="review-card__avatar"><span>R</span></div>
                   <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/sergey_knives" className="review-card__name" target="_blank" rel="noopener">sergey_knives</a>
+                    <a href="https://steamcommunity.com/id/razrezoff" className="review-card__name" target="_blank" rel="noopener">Razrez</a>
                     <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
                 <p className="review-card__text">{t("review3Text")}</p>
                 <div className="review-card__footer">
                   <span className="review-card__game">{t("review3Game")}</span>
-                  <a href="https://steamcommunity.com/id/sergey_knives" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
+                  <a href="https://steamcommunity.com/id/razrezoff" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -557,16 +561,16 @@ export default function HomePage() {
               <div className="review-card" style={{"--av1":"#059669","--av2":"#34d399"} as React.CSSProperties}>
                 <span className="review-card__quote">&ldquo;</span>
                 <div className="review-card__header">
-                  <div className="review-card__avatar"><span>M</span></div>
+                  <div className="review-card__avatar"><span>G</span></div>
                   <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/max_trader_tf2" className="review-card__name" target="_blank" rel="noopener">max_trader</a>
+                    <a href="https://steamcommunity.com/id/G7AX" className="review-card__name" target="_blank" rel="noopener">G7AX</a>
                     <div className="review-card__stars" aria-label="4 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.25"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
                 <p className="review-card__text">{t("review4Text")}</p>
                 <div className="review-card__footer">
                   <span className="review-card__game">{t("review4Game")}</span>
-                  <a href="https://steamcommunity.com/id/max_trader_tf2" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
+                  <a href="https://steamcommunity.com/id/G7AX" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -575,16 +579,16 @@ export default function HomePage() {
               <div className="review-card" style={{"--av1":"#dc2626","--av2":"#f87171"} as React.CSSProperties}>
                 <span className="review-card__quote">&ldquo;</span>
                 <div className="review-card__header">
-                  <div className="review-card__avatar"><span>D</span></div>
+                  <div className="review-card__avatar"><span>M</span></div>
                   <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/d1mka_rust" className="review-card__name" target="_blank" rel="noopener">d1mka_rust</a>
+                    <a href="https://steamcommunity.com/id/ddoormatts" className="review-card__name" target="_blank" rel="noopener">Matt</a>
                     <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
                 <p className="review-card__text">{t("review1Text")}</p>
                 <div className="review-card__footer">
-                  <span className="review-card__game">Rust</span>
-                  <a href="https://steamcommunity.com/id/d1mka_rust" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
+                  <span className="review-card__game">Rocket League</span>
+                  <a href="https://steamcommunity.com/id/ddoormatts" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -593,16 +597,16 @@ export default function HomePage() {
               <div className="review-card" style={{"--av1":"#7c3aed","--av2":"#a78bfa"} as React.CSSProperties}>
                 <span className="review-card__quote">&ldquo;</span>
                 <div className="review-card__header">
-                  <div className="review-card__avatar"><span>K</span></div>
+                  <div className="review-card__avatar"><span>M</span></div>
                   <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/kate_gamer_dota" className="review-card__name" target="_blank" rel="noopener">kate_gamer</a>
+                    <a href="https://steamcommunity.com/id/max1moff_" className="review-card__name" target="_blank" rel="noopener">max1moff_</a>
                     <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
                 <p className="review-card__text">{t("review2Text")}</p>
                 <div className="review-card__footer">
                   <span className="review-card__game">Dota 2</span>
-                  <a href="https://steamcommunity.com/id/kate_gamer_dota" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
+                  <a href="https://steamcommunity.com/id/max1moff_" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>
@@ -611,16 +615,16 @@ export default function HomePage() {
               <div className="review-card" style={{"--av1":"#0891b2","--av2":"#22d3ee"} as React.CSSProperties}>
                 <span className="review-card__quote">&ldquo;</span>
                 <div className="review-card__header">
-                  <div className="review-card__avatar"><span>I</span></div>
+                  <div className="review-card__avatar"><span>M</span></div>
                   <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/ivan_trade_cs2" className="review-card__name" target="_blank" rel="noopener">ivan_trade</a>
+                    <a href="https://steamcommunity.com/id/playajzx" className="review-card__name" target="_blank" rel="noopener">Mangekyō</a>
                     <div className="review-card__stars" aria-label="4 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.25"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
                   </div>
                 </div>
                 <p className="review-card__text">{t("review3Text")}</p>
                 <div className="review-card__footer">
                   <span className="review-card__game">CS2</span>
-                  <a href="https://steamcommunity.com/id/ivan_trade_cs2" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
+                  <a href="https://steamcommunity.com/id/playajzx" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                 </div>
               </div>
             </div>

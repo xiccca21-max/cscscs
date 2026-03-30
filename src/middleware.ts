@@ -1,6 +1,6 @@
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -16,12 +16,7 @@ export default function middleware(request: NextRequest) {
     if (MOBILE_UA_RE.test(ua)) {
       const url = request.nextUrl.clone();
       url.pathname = `/en${pathname === "/" ? "" : pathname}`;
-      return intlMiddleware(
-        new NextRequest(url, {
-          headers: request.headers,
-          method: request.method,
-        }),
-      );
+      return NextResponse.redirect(url);
     }
   }
 

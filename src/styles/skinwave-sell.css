@@ -847,133 +847,81 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  background: rgba(10, 8, 24, 0.35);
-  backdrop-filter: blur(40px) saturate(1.4);
-  -webkit-backdrop-filter: blur(40px) saturate(1.4);
-  animation: guestOverlayIn 0.4s ease;
-}
-@keyframes guestOverlayIn {
-  from { opacity: 0; backdrop-filter: blur(0); }
-  to { opacity: 1; backdrop-filter: blur(40px) saturate(1.4); }
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(80px);
+  -webkit-backdrop-filter: blur(80px);
 }
 .sell-guest-overlay__content {
   text-align: center;
-  padding: 44px 36px 32px;
-  background: linear-gradient(170deg,
-    rgba(26, 23, 64, 0.85) 0%,
-    rgba(19, 17, 43, 0.9) 40%,
-    rgba(14, 12, 34, 0.92) 100%);
-  border: 1px solid rgba(99,102,241,0.12);
-  border-radius: 24px;
-  box-shadow:
-    0 32px 80px rgba(0,0,0,0.4),
-    0 0 80px rgba(99,102,241,0.05),
-    inset 0 1px 0 rgba(255,255,255,0.04);
-  max-width: 400px;
+  padding: 48px 40px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
+  max-width: 420px;
   width: 90%;
-  position: relative;
-  overflow: hidden;
-  animation: guestModalIn 0.45s cubic-bezier(.22,.61,.36,1);
-}
-@keyframes guestModalIn {
-  from { opacity: 0; transform: translateY(20px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-.sell-guest-overlay__content::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 5%, #6366f1 35%, #818cf8 50%, #6366f1 65%, transparent 95%);
-}
-.sell-guest-overlay__logo {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 20px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #171a21, #1b2838);
-  border: 1px solid rgba(255,255,255,0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-}
-.sell-guest-overlay__logo img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-.sell-guest-overlay__content h3 {
-  font-size: 22px;
-  font-weight: 800;
-  color: #fff;
-  margin-bottom: 10px;
-  letter-spacing: -0.3px;
-}
-.sell-guest-overlay__content p {
-  color: rgba(255,255,255,0.4);
-  font-size: 14px;
-  line-height: 1.6;
-  margin-bottom: 28px;
-  max-width: 300px;
-  margin-left: auto;
-  margin-right: auto;
-}
-.sell-guest-overlay__steam-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  width: 100%;
-  padding: 15px 24px;
-  background: linear-gradient(135deg, #171a21, #1b2838);
-  color: #fff;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 700;
-  border: 1px solid rgba(255,255,255,0.06);
-  cursor: pointer;
-  transition: all 0.25s;
-  text-decoration: none;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-}
-.sell-guest-overlay__steam-logo {
-  height: 18px;
-  width: auto;
-  filter: brightness(2);
-}
-.sell-guest-overlay__steam-btn:hover {
-  background: linear-gradient(135deg, #1b2838, #2a475e);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
-  transform: translateY(-1px);
 }
 .sell-guest-overlay__home {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-top: 16px;
-  font-size: 13px;
+  margin-top: 14px;
+  font-size: 14px;
   font-weight: 500;
-  color: rgba(255,255,255,0.3);
+  color: #64748b;
   text-decoration: none;
   transition: color 0.2s;
 }
 .sell-guest-overlay__home:hover {
-  color: rgba(255,255,255,0.7);
+  color: #0f172a;
+  text-decoration: underline;
 }
-.sell-guest-overlay__note {
+.sell-guest-overlay__icon {
+  width: 64px; height: 64px;
+  margin: 0 auto 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  margin-top: 20px;
-  font-size: 12px;
-  color: rgba(255,255,255,0.2);
+  border-radius: 16px;
+  background: #0f172a;
+  color: #fff;
 }
-.sell-guest-overlay__note svg {
-  flex-shrink: 0;
-  color: rgba(255,255,255,0.15);
+.sell-guest-overlay__content h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+.sell-guest-overlay__content p {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 28px;
+}
+.sell-guest-overlay .btn--primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 24px;
+  background: #0f172a;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none;
+}
+.sell-guest-overlay .btn--primary:hover {
+  background: #1e293b;
+}
+.sell-guest-overlay__note {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #94a3b8;
 }
 
 /* Scrollable inventory area */
@@ -3501,16 +3449,28 @@
   }
 
   /* ── Guest overlay ── */
+  .sell-guest-overlay {
+    position: relative;
+    inset: auto;
+    min-height: 300px;
+    border-radius: 16px;
+    margin: 12px;
+    z-index: 10;
+    background: linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,27,75,0.9) 100%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
   .sell-guest-overlay__content {
     padding: 32px 24px;
     max-width: 340px;
+    margin: 0 auto;
   }
   .sell-guest-overlay__content h3 {
     font-size: 19px;
   }
-  .sell-guest-overlay__logo {
-    width: 56px;
-    height: 56px;
+  .sell-guest-overlay__icon {
+    width: 52px;
+    height: 52px;
     margin-bottom: 16px;
   }
 
@@ -3746,6 +3706,9 @@
   .game-tab {
     padding: 4px 10px;
     font-size: 11px;
+  }
+  .sell-guest-overlay {
+    min-height: 280px;
   }
   .sell-guest-overlay__content {
     padding: 24px 18px;

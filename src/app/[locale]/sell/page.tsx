@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { useSession } from "@/components/session-provider";
 import { useCurrency } from "@/components/currency-provider";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface InventoryItem {
   id: string;
@@ -165,6 +165,7 @@ export default function SellPage() {
   const { user, loading: sessionLoading } = useSession();
   const { format, formatParts, symbol, convert } = useCurrency();
   const t = useTranslations("sell");
+  const locale = useLocale();
 
   const SORT_LABELS: Record<SortKey, string> = {
     "price-desc": t("high2low"),
@@ -406,9 +407,12 @@ export default function SellPage() {
     });
   }, []);
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const handleSubmit = useCallback(async () => {
     if (!canSubmit) return;
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const gameApiMap: Record<string, string> = { cs2: "CS2", dota2: "DOTA2", tf2: "TF2", rust: "RUST" };
       const fromDb = dbPaymentMethods.find((m) => m.type === paymentMethod);
@@ -434,14 +438,16 @@ export default function SellPage() {
       });
       const json = await res.json();
       if (json.success && json.data?.orderId) {
-        window.location.href = `/order/${json.data.orderId}`;
+        window.location.href = `/${locale}/order/${json.data.orderId}`;
+      } else {
+        setSubmitError(json.error ?? "Something went wrong. Please try again.");
+        setSubmitting(false);
       }
     } catch {
-      /* handled by caller */
-    } finally {
+      setSubmitError("Network error. Please check your connection and try again.");
       setSubmitting(false);
     }
-  }, [canSubmit, selectedItems, tradeUrl, paymentMethod, dbPaymentMethods, payDetails]);
+  }, [canSubmit, selectedItems, tradeUrl, paymentMethod, dbPaymentMethods, payDetails, locale]);
 
   useEffect(() => {
     if (!user) return;
@@ -1361,10 +1367,15 @@ export default function SellPage() {
             </div>
 
             <div className="checkout-modal__footer">
+              {submitError && (
+                <p style={{ color: "#ef4444", fontSize: 13, fontWeight: 600, textAlign: "center", marginBottom: 8 }}>
+                  {submitError}
+                </p>
+              )}
               <button
                 className="checkout-modal__submit"
                 disabled={submitting}
-                onClick={() => { setCheckoutOpen(false); handleSubmit(); }}
+                onClick={handleSubmit}
               >
                 {submitting ? (
                   <span className="checkout-modal__spinner" />

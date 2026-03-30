@@ -201,6 +201,8 @@ export default function SellPage() {
   const [countryOpen, setCountryOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
   const countryRef = useRef<HTMLDivElement>(null);
+  const [cryptoDropOpen, setCryptoDropOpen] = useState(false);
+  const cryptoDropRef = useRef<HTMLDivElement>(null);
 
   const offerItemsRef = useRef<HTMLDivElement>(null);
 
@@ -490,6 +492,16 @@ export default function SellPage() {
     document.addEventListener("touchstart", handler);
     return () => { document.removeEventListener("mousedown", handler); document.removeEventListener("touchstart", handler); };
   }, [countryOpen]);
+
+  useEffect(() => {
+    if (!cryptoDropOpen) return;
+    const handler = (e: Event) => {
+      if (cryptoDropRef.current && !cryptoDropRef.current.contains(e.target as Node)) setCryptoDropOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => { document.removeEventListener("mousedown", handler); document.removeEventListener("touchstart", handler); };
+  }, [cryptoDropOpen]);
 
   const filteredCountries = useMemo(() => {
     if (!countrySearch) return COUNTRIES;
@@ -1308,17 +1320,37 @@ export default function SellPage() {
                 <>
                   <label className="checkout-modal__field">
                     <span>{t("checkoutSelectCrypto")}</span>
-                    <div className="checkout-modal__input-wrap">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-                      <select className="checkout-modal__select" value={payDetails.network || ""}
-                        onChange={(e) => setPayDetails(p => ({ ...p, network: e.target.value }))}>
-                        <option value="" disabled>Select network...</option>
-                        <option value="BTC">Bitcoin (BTC)</option>
-                        <option value="ETH">Ethereum (ERC-20)</option>
-                        <option value="USDT-TRC20">USDT (TRC-20)</option>
-                        <option value="USDT-ERC20">USDT (ERC-20)</option>
-                        <option value="LTC">Litecoin (LTC)</option>
-                      </select>
+                    <div className="ck-crypto" ref={cryptoDropRef}>
+                      <button type="button" className="ck-crypto__btn" onClick={() => setCryptoDropOpen(!cryptoDropOpen)}>
+                        {payDetails.network ? (
+                          <span className="ck-crypto__selected">
+                            <span className={`ck-crypto__dot ck-crypto__dot--${payDetails.network.toLowerCase().replace("-","")}`} />
+                            {({BTC:"Bitcoin (BTC)",ETH:"Ethereum (ERC-20)","USDT-TRC20":"USDT (TRC-20)","USDT-ERC20":"USDT (ERC-20)",LTC:"Litecoin (LTC)"} as Record<string,string>)[payDetails.network]}
+                          </span>
+                        ) : (
+                          <span className="ck-crypto__placeholder">Select network...</span>
+                        )}
+                        <svg className={`ck-crypto__chev${cryptoDropOpen ? " open" : ""}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                      </button>
+                      {cryptoDropOpen && (
+                        <div className="ck-crypto__drop">
+                          {[
+                            { val: "BTC", label: "Bitcoin", tag: "BTC", color: "#f7931a" },
+                            { val: "ETH", label: "Ethereum", tag: "ERC-20", color: "#627eea" },
+                            { val: "USDT-TRC20", label: "USDT", tag: "TRC-20", color: "#26a17b" },
+                            { val: "USDT-ERC20", label: "USDT", tag: "ERC-20", color: "#26a17b" },
+                            { val: "LTC", label: "Litecoin", tag: "LTC", color: "#bfbbbb" },
+                          ].map(n => (
+                            <button key={n.val} type="button"
+                              className={`ck-crypto__opt${payDetails.network === n.val ? " active" : ""}`}
+                              onClick={() => { setPayDetails(p => ({ ...p, network: n.val })); setCryptoDropOpen(false); }}>
+                              <span className="ck-crypto__dot" style={{ background: n.color }} />
+                              <span className="ck-crypto__opt-label">{n.label}</span>
+                              <span className="ck-crypto__opt-tag">{n.tag}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </label>
                   <label className="checkout-modal__field">

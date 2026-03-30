@@ -4868,6 +4868,114 @@
   color: rgba(255,255,255,0.3);
 }
 
+/* ── Custom crypto network dropdown ── */
+.ck-crypto {
+  position: relative;
+}
+.ck-crypto__btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.ck-crypto__btn:hover {
+  border-color: rgba(255,255,255,0.15);
+}
+.ck-crypto__placeholder {
+  color: rgba(255,255,255,0.25);
+}
+.ck-crypto__selected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ck-crypto__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.ck-crypto__dot--btc { background: #f7931a; }
+.ck-crypto__dot--eth { background: #627eea; }
+.ck-crypto__dot--usdttrc20 { background: #26a17b; }
+.ck-crypto__dot--usdterc20 { background: #26a17b; }
+.ck-crypto__dot--ltc { background: #bfbbbb; }
+.ck-crypto__chev {
+  color: rgba(255,255,255,0.3);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.ck-crypto__chev.open {
+  transform: rotate(180deg);
+}
+.ck-crypto__drop {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #161430;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  animation: ckDropIn 0.15s ease-out;
+}
+@keyframes ckDropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ck-crypto__opt {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.ck-crypto__opt:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+.ck-crypto__opt.active {
+  background: rgba(99,102,241,0.12);
+  color: #fff;
+}
+.ck-crypto__opt-label {
+  flex: 1;
+}
+.ck-crypto__opt-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.05);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
 /* Country dropdown */
 .checkout-modal__country {
   position: relative;

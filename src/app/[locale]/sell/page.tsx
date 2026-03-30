@@ -368,17 +368,32 @@ export default function SellPage() {
 
   /* ---- handlers ---- */
   const toggleItem = useCallback((item: InventoryItem) => {
-    setSelectedItems((prev) =>
-      prev.find((i) => i.id === item.id)
-        ? prev.filter((i) => i.id !== item.id)
-        : [...prev, item],
-    );
+    setSelectedItems((prev) => {
+      if (prev.find((i) => i.id === item.id)) return prev.filter((i) => i.id !== item.id);
+      const hasCs2 = prev.some((i) => i.game === "cs2");
+      const hasOther = prev.some((i) => i.game !== "cs2");
+      if (item.game === "cs2" && hasOther) return prev;
+      if (item.game !== "cs2" && hasCs2) return prev;
+      return [...prev, item];
+    });
   }, []);
 
   const selectAll = useCallback(() => {
     setSelectedItems((prev) => {
+      const hasCs2 = prev.some((i) => i.game === "cs2");
+      const hasOther = prev.some((i) => i.game !== "cs2");
       const ids = new Set(prev.map((i) => i.id));
-      return [...prev, ...filteredItems.filter((i) => !ids.has(i.id))];
+      const toAdd = filteredItems.filter((i) => {
+        if (ids.has(i.id)) return false;
+        if (i.game === "cs2" && hasOther) return false;
+        if (i.game !== "cs2" && hasCs2) return false;
+        return true;
+      });
+      const combined = [...prev, ...toAdd];
+      const combinedHasCs2 = combined.some((i) => i.game === "cs2");
+      const combinedHasOther = combined.some((i) => i.game !== "cs2");
+      if (combinedHasCs2 && combinedHasOther) return prev;
+      return combined;
     });
   }, [filteredItems]);
 
@@ -966,7 +981,7 @@ export default function SellPage() {
                           <span className="float-bar__val">{item.float.toFixed(4)}</span>
                         </div>
                       )}
-                      {item.type && <span className="inv-card__type">{item.type}</span>}
+                      {item.type && item.type.toLowerCase() !== "normal" && <span className="inv-card__type">{item.type}</span>}
                       <span className="inv-card__price">
                         {whole}<span className="inv-card__cents">.{cents}</span><span className="inv-card__currency">{symbol}</span>
                       </span>
@@ -1248,60 +1263,6 @@ export default function SellPage() {
             </div>
 
             <div className="checkout-modal__fields">
-              <label className="checkout-modal__field">
-                <span>{t("checkoutEmail")}</span>
-                <div className="checkout-modal__input-wrap">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
-                  <input type="email" placeholder="your@email.com"
-                    value={payDetails.email || ""}
-                    onChange={(e) => setPayDetails(p => ({ ...p, email: e.target.value }))} />
-                </div>
-              </label>
-              <label className="checkout-modal__field">
-                <span>{t("checkoutCountry")}</span>
-                <div className="checkout-modal__country" ref={countryRef}>
-                  <button
-                    type="button"
-                    className="checkout-modal__country-btn"
-                    onClick={() => { setCountryOpen(!countryOpen); setCountrySearch(""); }}
-                  >
-                    {selectedCountry ? (
-                      <><img className="checkout-modal__country-flag" src={flagUrl(selectedCountry.code)} alt={selectedCountry.code} /> {selectedCountry.name}</>
-                    ) : (
-                      <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> {t("checkoutSelectCountry")}</>
-                    )}
-                    <svg className="checkout-modal__country-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
-                  </button>
-                  {countryOpen && (
-                    <div className="checkout-modal__country-dropdown">
-                      <div className="checkout-modal__country-search">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input
-                          type="text"
-                          placeholder={t("checkoutSearchCountry")}
-                          value={countrySearch}
-                          onChange={(e) => setCountrySearch(e.target.value)}
-                          autoFocus
-                        />
-                      </div>
-                      <div className="checkout-modal__country-list">
-                        {filteredCountries.map(c => (
-                          <button
-                            key={c.code}
-                            type="button"
-                            className={`checkout-modal__country-option${payDetails.country === c.code ? " selected" : ""}`}
-                            onClick={() => { setPayDetails(p => ({ ...p, country: c.code })); setCountryOpen(false); }}
-                          >
-                            <img className="checkout-modal__country-flag" src={flagUrl(c.code)} alt={c.code} />
-                            {c.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </label>
-
               {paymentMethod === "balance" && (
                 <div className="checkout-modal__info">
                   <div className="checkout-modal__info-icon">
@@ -1343,9 +1304,9 @@ export default function SellPage() {
                     <span>{t("checkoutSelectCrypto")}</span>
                     <div className="checkout-modal__input-wrap">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-                      <select value={payDetails.network || ""}
+                      <select className="checkout-modal__select" value={payDetails.network || ""}
                         onChange={(e) => setPayDetails(p => ({ ...p, network: e.target.value }))}>
-                        <option value="">Select network...</option>
+                        <option value="" disabled>Select network...</option>
                         <option value="BTC">Bitcoin (BTC)</option>
                         <option value="ETH">Ethereum (ERC-20)</option>
                         <option value="USDT-TRC20">USDT (TRC-20)</option>

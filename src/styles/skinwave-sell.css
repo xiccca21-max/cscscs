@@ -1190,7 +1190,7 @@
   border: 1px solid rgba(255,255,255,0.15);
   background: rgba(255,255,255,0.08);
   color: rgba(255,255,255,0.5);
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -1198,9 +1198,6 @@
   transition: all 0.2s;
   box-shadow: none;
   z-index: 2;
-}
-.sell-offer__arrow.visible {
-  display: flex;
 }
 .sell-offer__arrow:hover {
   border-color: rgba(255,255,255,0.3);
@@ -4865,6 +4862,10 @@
 .checkout-modal__input-wrap select option {
   background: #1a1740;
   color: #fff;
+  padding: 8px;
+}
+.checkout-modal__input-wrap select option:disabled {
+  color: rgba(255,255,255,0.3);
 }
 
 /* Country dropdown */

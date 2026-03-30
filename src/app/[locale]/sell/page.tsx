@@ -620,28 +620,6 @@ export default function SellPage() {
           </div>
         </div>
 
-        <div className="sell-steps" id="sellProgress">
-          <div className={`sell-step${step1Done ? " done" : ""}`} data-step="1">
-            <span className="sell-step__icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/><circle cx="7.5" cy="20" r="1.5"/><circle cx="17.5" cy="20" r="1.5"/></svg>
-            </span>
-            <span className="sell-step__label">{t("stepSelect")}</span>
-          </div>
-          <span className="sell-step__chev" />
-          <div className={`sell-step${step1Done && step2Done ? " done" : ""}`} data-step="2">
-            <span className="sell-step__icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-            </span>
-            <span className="sell-step__label">{t("stepTradeUrl")}</span>
-          </div>
-          <span className="sell-step__chev" />
-          <div className={`sell-step${step3Active ? " done" : ""}`} data-step="3">
-            <span className="sell-step__icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/><path d="M6 16h4"/></svg>
-            </span>
-            <span className="sell-step__label">{t("stepGetPaid")}</span>
-          </div>
-        </div>
       </div>
 
       <div className="sell-layout">
@@ -1035,6 +1013,29 @@ export default function SellPage() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
             {t("backToItems")}
           </button>
+
+          <div className="sell-steps" id="sellProgress">
+            <div className={`sell-step${step1Done ? " done" : ""}`} data-step="1">
+              <span className="sell-step__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/><circle cx="7.5" cy="20" r="1.5"/><circle cx="17.5" cy="20" r="1.5"/></svg>
+              </span>
+              <span className="sell-step__label">{t("stepSelect")}</span>
+            </div>
+            <span className="sell-step__chev" />
+            <div className={`sell-step${step1Done && step2Done ? " done" : ""}`} data-step="2">
+              <span className="sell-step__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              </span>
+              <span className="sell-step__label">{t("stepTradeUrl")}</span>
+            </div>
+            <span className="sell-step__chev" />
+            <div className={`sell-step${step3Active ? " done" : ""}`} data-step="3">
+              <span className="sell-step__icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/><path d="M6 16h4"/></svg>
+              </span>
+              <span className="sell-step__label">{t("stepGetPaid")}</span>
+            </div>
+          </div>
 
           <div className="sidebar-tradeurl sidebar-tradeurl--desktop">
             <div className="sidebar-tradeurl__header">

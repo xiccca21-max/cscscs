@@ -1,8 +1,11 @@
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { getBulkPrices } from "@/lib/pricing";
 import { generateOrderNumber, getSteamProfileUrl, isValidTradeUrl } from "@/lib/utils";
 import { Prisma, type Game } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+
+const MAX_PRICE_DEVIATION = 0.05;
 
 type OrderItemInput = {
   game: Game;
@@ -54,9 +57,8 @@ export async function GET() {
     return NextResponse.json({ success: true, data });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
-    if (message === "Unauthorized") {
-      return NextResponse.json({ success: false, error: message }, { status: 401 });
-    }
+    if (message === "Unauthorized") return NextResponse.json({ success: false, error: message }, { status: 401 });
+    if (message === "Blocked") return NextResponse.json({ success: false, error: "Your account has been blocked" }, { status: 403 });
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
@@ -117,7 +119,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const totalAmount = items.reduce((sum, i) => sum + Number(i.buyoutPrice), 0);
+    const priceInputs = items.map((i) => ({ name: i.name, game: i.game }));
+    const serverPrices = await getBulkPrices(priceInputs);
+
+    const verifiedItems: OrderItemInput[] = [];
+    for (const item of items) {
+      const serverPrice = serverPrices.get(item.name);
+      if (!serverPrice || !serverPrice.available) {
+        return NextResponse.json(
+          { success: false, error: `Item "${item.name}" is not available for sale` },
+          { status: 400 },
+        );
+      }
+
+      const clientPrice = Number(item.buyoutPrice);
+      const diff = Math.abs(clientPrice - serverPrice.buyoutPrice) / serverPrice.buyoutPrice;
+      if (diff > MAX_PRICE_DEVIATION) {
+        return NextResponse.json(
+          { success: false, error: `Price mismatch for "${item.name}". Please refresh and try again.` },
+          { status: 409 },
+        );
+      }
+
+      verifiedItems.push({
+        ...item,
+        basePrice: serverPrice.basePrice,
+        buyoutPrice: serverPrice.buyoutPrice,
+      });
+    }
+
+    const totalAmount = verifiedItems.reduce((sum, i) => sum + Number(i.buyoutPrice), 0);
     if (totalAmount <= 0) {
       return NextResponse.json(
         { success: false, error: "Invalid order total" },
@@ -143,7 +174,7 @@ export async function POST(request: NextRequest) {
           paymentMethodId,
           paymentDetails,
           items: {
-            create: items.map((i) => ({
+            create: verifiedItems.map((i) => ({
               game: i.game,
               name: i.name,
               externalId: i.externalId,
@@ -182,9 +213,8 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
-    if (message === "Unauthorized") {
-      return NextResponse.json({ success: false, error: message }, { status: 401 });
-    }
+    if (message === "Unauthorized") return NextResponse.json({ success: false, error: message }, { status: 401 });
+    if (message === "Blocked") return NextResponse.json({ success: false, error: "Your account has been blocked" }, { status: 403 });
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

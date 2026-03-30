@@ -8,6 +8,27 @@ const STEAM_GAME_APP_IDS: Record<string, number> = {
   RUST: 252490,
 };
 
+const INVENTORY_CACHE_TTL = 3 * 60 * 1000;
+
+interface CachedInventory {
+  items: ReturnType<typeof parseInventoryItems>;
+  error: "inventory_private" | "rate_limited" | "fetch_failed" | null;
+  timestamp: number;
+}
+
+const inventoryCache = new Map<string, CachedInventory>();
+
+function cleanupInventoryCache() {
+  const now = Date.now();
+  for (const [key, entry] of inventoryCache) {
+    if (now - entry.timestamp > INVENTORY_CACHE_TTL * 2) {
+      inventoryCache.delete(key);
+    }
+  }
+}
+
+setInterval(cleanupInventoryCache, 60_000).unref?.();
+
 export function getSteamLoginUrl(returnUrl: string): string {
   const params = new URLSearchParams({
     "openid.ns": "http://specs.openid.net/auth/2.0",
@@ -156,34 +177,11 @@ async function fetchViaSteamDirect(
   return { data: null, error: "fetch_failed" };
 }
 
-export async function getSteamInventory(
-  steamId: string,
-  game: keyof typeof STEAM_GAME_APP_IDS,
-) {
-  const appId = STEAM_GAME_APP_IDS[game];
-  if (!appId) throw new Error(`Unknown game: ${game}`);
+type SteamTag = { category: string; localized_tag_name: string };
 
-  let result = await fetchViaSteamApis(steamId, appId);
-
-  if (result.error === "no_key" || result.error === "fetch_failed") {
-    result = await fetchViaSteamDirect(steamId, appId);
-  }
-
-  if (result.error === "inventory_private") {
-    return { items: [], error: "inventory_private" as const };
-  }
-  if (result.error === "rate_limited") {
-    return { items: [], error: "rate_limited" as const };
-  }
-  if (result.error || !result.data) {
-    return { items: [], error: "fetch_failed" as const };
-  }
-
-  const data = result.data;
-
+function parseInventoryItems(data: Record<string, unknown>) {
   if (!data.descriptions || !data.assets) {
-    console.log(`[steam] Empty inventory for ${game}, total: ${data.total_inventory_count}`);
-    return { items: [], error: null };
+    return [];
   }
 
   const descriptionsMap = new Map<string, Record<string, unknown>>();
@@ -191,9 +189,7 @@ export async function getSteamInventory(
     descriptionsMap.set(`${desc.classid}_${desc.instanceid}`, desc);
   }
 
-  type SteamTag = { category: string; localized_tag_name: string };
-
-  const items = (data.assets as Record<string, string>[])
+  return (data.assets as Record<string, string>[])
     .map((asset) => {
       const desc = descriptionsMap.get(
         `${asset.classid}_${asset.instanceid}`,
@@ -217,8 +213,43 @@ export async function getSteamInventory(
       };
     })
     .filter((item) => item.tradable);
+}
 
-  console.log(`[steam] Parsed ${items.length} tradable items for ${game}`);
+export async function getSteamInventory(
+  steamId: string,
+  game: keyof typeof STEAM_GAME_APP_IDS,
+) {
+  const appId = STEAM_GAME_APP_IDS[game];
+  if (!appId) throw new Error(`Unknown game: ${game}`);
+
+  const cacheKey = `${steamId}:${appId}`;
+  const cached = inventoryCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < INVENTORY_CACHE_TTL) {
+    console.log(`[steam] Cache hit for ${game} ${steamId} (${cached.items.length} items, age ${Math.round((Date.now() - cached.timestamp) / 1000)}s)`);
+    return { items: cached.items, error: cached.error };
+  }
+
+  let result = await fetchViaSteamApis(steamId, appId);
+
+  if (result.error === "no_key" || result.error === "fetch_failed") {
+    result = await fetchViaSteamDirect(steamId, appId);
+  }
+
+  if (result.error === "inventory_private") {
+    inventoryCache.set(cacheKey, { items: [], error: "inventory_private", timestamp: Date.now() });
+    return { items: [], error: "inventory_private" as const };
+  }
+  if (result.error === "rate_limited") {
+    return { items: [], error: "rate_limited" as const };
+  }
+  if (result.error || !result.data) {
+    return { items: [], error: "fetch_failed" as const };
+  }
+
+  const items = parseInventoryItems(result.data);
+  console.log(`[steam] Parsed ${items.length} tradable items for ${game}, caching for ${INVENTORY_CACHE_TTL / 1000}s`);
+
+  inventoryCache.set(cacheKey, { items, error: null, timestamp: Date.now() });
   return { items, error: null };
 }
 

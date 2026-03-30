@@ -101,9 +101,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, data: result });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
-    if (message === "Unauthorized") {
-      return NextResponse.json({ success: false, error: message }, { status: 401 });
-    }
+    if (message === "Unauthorized") return NextResponse.json({ success: false, error: message }, { status: 401 });
+    if (message === "Blocked") return NextResponse.json({ success: false, error: "Your account has been blocked" }, { status: 403 });
     if (message === "USER_NOT_FOUND") {
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }

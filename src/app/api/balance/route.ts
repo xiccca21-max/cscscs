@@ -29,9 +29,8 @@ export async function GET() {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
-    if (message === "Unauthorized") {
-      return NextResponse.json({ success: false, error: message }, { status: 401 });
-    }
+    if (message === "Unauthorized") return NextResponse.json({ success: false, error: message }, { status: 401 });
+    if (message === "Blocked") return NextResponse.json({ success: false, error: "Your account has been blocked" }, { status: 403 });
     return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

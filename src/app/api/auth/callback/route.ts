@@ -34,6 +34,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    if (user.status === "BLOCKED") {
+      return NextResponse.redirect(
+        new URL("/?error=account_blocked", request.url),
+      );
+    }
+
     const referralCode =
       request.cookies.get("referral_code")?.value ||
       searchParams.get("ref") ||
@@ -63,7 +69,10 @@ export async function GET(request: NextRequest) {
     session.isAdmin = adminSteamIds.includes(user.steamId);
     await session.save();
 
-    return NextResponse.redirect(new URL("/", request.url));
+    const savedLocale = user.locale || "en";
+    const validLocales = ["en", "ru"];
+    const locale = validLocales.includes(savedLocale) ? savedLocale : "en";
+    return NextResponse.redirect(new URL(`/${locale}`, request.url));
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.redirect(

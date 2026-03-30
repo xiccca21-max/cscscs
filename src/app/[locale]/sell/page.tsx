@@ -1458,14 +1458,6 @@ export default function SellPage() {
               </svg>
             </button>
 
-            <div className="gmix-modal__icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-            </div>
-
             <h3 className="gmix-modal__title">{t("gameMixTitle")}</h3>
 
             <div className="gmix-modal__body">
@@ -1487,9 +1479,6 @@ export default function SellPage() {
               <p className="gmix-modal__reason">{t("gameMixReason")}</p>
 
               <div className="gmix-modal__hint">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                </svg>
                 <span>{t("gameMixHint")}</span>
               </div>
             </div>

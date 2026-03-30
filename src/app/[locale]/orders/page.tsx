@@ -516,7 +516,7 @@ export default function OrdersPage() {
           </div>
         </div>
         <div className="container">
-          <div className="ord-empty" style={{ marginTop: 68 }}>
+          <div className="ord-empty ord-chart-gap">
             <div className="ord-empty__icon">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" />
@@ -620,13 +620,13 @@ export default function OrdersPage() {
       <div className="container">
         {/* Earnings chart */}
         {hasOrders && (
-          <div style={{ marginTop: 68 }}>
+          <div className="ord-chart-gap">
             <MiniChart data={chartData} period={chartPeriod} onToggle={setChartPeriod} />
           </div>
         )}
 
         {/* Toolbar */}
-        <div className="ord-toolbar" style={hasOrders ? {} : { marginTop: 68 }}>
+        <div className={`ord-toolbar${hasOrders ? "" : " ord-toolbar--no-chart"}`}>
           <div className="ord-filters">
             {FILTER_TABS.map((tab) => {
               const count = tab.key === "all" ? orders.length : (countByStatus[tab.key] ?? 0);

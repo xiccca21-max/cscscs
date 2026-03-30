@@ -61,6 +61,90 @@ const ICON_WRAP_CLS: Record<string, string> = {
 const TRADE_URL_RE =
   /^https:\/\/steamcommunity\.com\/tradeoffer\/new\/\?partner=\d+&token=.+$/;
 
+const COUNTRIES = [
+  { code: "AF", flag: "\u{1F1E6}\u{1F1EB}", name: "Afghanistan" },
+  { code: "AL", flag: "\u{1F1E6}\u{1F1F1}", name: "Albania" },
+  { code: "DZ", flag: "\u{1F1E9}\u{1F1FF}", name: "Algeria" },
+  { code: "AR", flag: "\u{1F1E6}\u{1F1F7}", name: "Argentina" },
+  { code: "AM", flag: "\u{1F1E6}\u{1F1F2}", name: "Armenia" },
+  { code: "AU", flag: "\u{1F1E6}\u{1F1FA}", name: "Australia" },
+  { code: "AT", flag: "\u{1F1E6}\u{1F1F9}", name: "Austria" },
+  { code: "AZ", flag: "\u{1F1E6}\u{1F1FF}", name: "Azerbaijan" },
+  { code: "BY", flag: "\u{1F1E7}\u{1F1FE}", name: "Belarus" },
+  { code: "BE", flag: "\u{1F1E7}\u{1F1EA}", name: "Belgium" },
+  { code: "BR", flag: "\u{1F1E7}\u{1F1F7}", name: "Brazil" },
+  { code: "BG", flag: "\u{1F1E7}\u{1F1EC}", name: "Bulgaria" },
+  { code: "CA", flag: "\u{1F1E8}\u{1F1E6}", name: "Canada" },
+  { code: "CL", flag: "\u{1F1E8}\u{1F1F1}", name: "Chile" },
+  { code: "CN", flag: "\u{1F1E8}\u{1F1F3}", name: "China" },
+  { code: "CO", flag: "\u{1F1E8}\u{1F1F4}", name: "Colombia" },
+  { code: "HR", flag: "\u{1F1ED}\u{1F1F7}", name: "Croatia" },
+  { code: "CY", flag: "\u{1F1E8}\u{1F1FE}", name: "Cyprus" },
+  { code: "CZ", flag: "\u{1F1E8}\u{1F1FF}", name: "Czech Republic" },
+  { code: "DK", flag: "\u{1F1E9}\u{1F1F0}", name: "Denmark" },
+  { code: "EG", flag: "\u{1F1EA}\u{1F1EC}", name: "Egypt" },
+  { code: "EE", flag: "\u{1F1EA}\u{1F1EA}", name: "Estonia" },
+  { code: "FI", flag: "\u{1F1EB}\u{1F1EE}", name: "Finland" },
+  { code: "FR", flag: "\u{1F1EB}\u{1F1F7}", name: "France" },
+  { code: "GE", flag: "\u{1F1EC}\u{1F1EA}", name: "Georgia" },
+  { code: "DE", flag: "\u{1F1E9}\u{1F1EA}", name: "Germany" },
+  { code: "GR", flag: "\u{1F1EC}\u{1F1F7}", name: "Greece" },
+  { code: "HK", flag: "\u{1F1ED}\u{1F1F0}", name: "Hong Kong" },
+  { code: "HU", flag: "\u{1F1ED}\u{1F1FA}", name: "Hungary" },
+  { code: "IS", flag: "\u{1F1EE}\u{1F1F8}", name: "Iceland" },
+  { code: "IN", flag: "\u{1F1EE}\u{1F1F3}", name: "India" },
+  { code: "ID", flag: "\u{1F1EE}\u{1F1E9}", name: "Indonesia" },
+  { code: "IR", flag: "\u{1F1EE}\u{1F1F7}", name: "Iran" },
+  { code: "IQ", flag: "\u{1F1EE}\u{1F1F6}", name: "Iraq" },
+  { code: "IE", flag: "\u{1F1EE}\u{1F1EA}", name: "Ireland" },
+  { code: "IL", flag: "\u{1F1EE}\u{1F1F1}", name: "Israel" },
+  { code: "IT", flag: "\u{1F1EE}\u{1F1F9}", name: "Italy" },
+  { code: "JP", flag: "\u{1F1EF}\u{1F1F5}", name: "Japan" },
+  { code: "KZ", flag: "\u{1F1F0}\u{1F1FF}", name: "Kazakhstan" },
+  { code: "KR", flag: "\u{1F1F0}\u{1F1F7}", name: "South Korea" },
+  { code: "KG", flag: "\u{1F1F0}\u{1F1EC}", name: "Kyrgyzstan" },
+  { code: "LV", flag: "\u{1F1F1}\u{1F1FB}", name: "Latvia" },
+  { code: "LT", flag: "\u{1F1F1}\u{1F1F9}", name: "Lithuania" },
+  { code: "LU", flag: "\u{1F1F1}\u{1F1FA}", name: "Luxembourg" },
+  { code: "MY", flag: "\u{1F1F2}\u{1F1FE}", name: "Malaysia" },
+  { code: "MX", flag: "\u{1F1F2}\u{1F1FD}", name: "Mexico" },
+  { code: "MD", flag: "\u{1F1F2}\u{1F1E9}", name: "Moldova" },
+  { code: "MN", flag: "\u{1F1F2}\u{1F1F3}", name: "Mongolia" },
+  { code: "ME", flag: "\u{1F1F2}\u{1F1EA}", name: "Montenegro" },
+  { code: "MA", flag: "\u{1F1F2}\u{1F1E6}", name: "Morocco" },
+  { code: "NL", flag: "\u{1F1F3}\u{1F1F1}", name: "Netherlands" },
+  { code: "NZ", flag: "\u{1F1F3}\u{1F1FF}", name: "New Zealand" },
+  { code: "NG", flag: "\u{1F1F3}\u{1F1EC}", name: "Nigeria" },
+  { code: "NO", flag: "\u{1F1F3}\u{1F1F4}", name: "Norway" },
+  { code: "PK", flag: "\u{1F1F5}\u{1F1F0}", name: "Pakistan" },
+  { code: "PE", flag: "\u{1F1F5}\u{1F1EA}", name: "Peru" },
+  { code: "PH", flag: "\u{1F1F5}\u{1F1ED}", name: "Philippines" },
+  { code: "PL", flag: "\u{1F1F5}\u{1F1F1}", name: "Poland" },
+  { code: "PT", flag: "\u{1F1F5}\u{1F1F9}", name: "Portugal" },
+  { code: "RO", flag: "\u{1F1F7}\u{1F1F4}", name: "Romania" },
+  { code: "RU", flag: "\u{1F1F7}\u{1F1FA}", name: "Russia" },
+  { code: "SA", flag: "\u{1F1F8}\u{1F1E6}", name: "Saudi Arabia" },
+  { code: "RS", flag: "\u{1F1F7}\u{1F1F8}", name: "Serbia" },
+  { code: "SG", flag: "\u{1F1F8}\u{1F1EC}", name: "Singapore" },
+  { code: "SK", flag: "\u{1F1F8}\u{1F1F0}", name: "Slovakia" },
+  { code: "SI", flag: "\u{1F1F8}\u{1F1EE}", name: "Slovenia" },
+  { code: "ZA", flag: "\u{1F1FF}\u{1F1E6}", name: "South Africa" },
+  { code: "ES", flag: "\u{1F1EA}\u{1F1F8}", name: "Spain" },
+  { code: "SE", flag: "\u{1F1F8}\u{1F1EA}", name: "Sweden" },
+  { code: "CH", flag: "\u{1F1E8}\u{1F1ED}", name: "Switzerland" },
+  { code: "TW", flag: "\u{1F1F9}\u{1F1FC}", name: "Taiwan" },
+  { code: "TJ", flag: "\u{1F1F9}\u{1F1EF}", name: "Tajikistan" },
+  { code: "TH", flag: "\u{1F1F9}\u{1F1ED}", name: "Thailand" },
+  { code: "TR", flag: "\u{1F1F9}\u{1F1F7}", name: "Turkey" },
+  { code: "TM", flag: "\u{1F1F9}\u{1F1F2}", name: "Turkmenistan" },
+  { code: "UA", flag: "\u{1F1FA}\u{1F1E6}", name: "Ukraine" },
+  { code: "AE", flag: "\u{1F1E6}\u{1F1EA}", name: "United Arab Emirates" },
+  { code: "GB", flag: "\u{1F1EC}\u{1F1E7}", name: "United Kingdom" },
+  { code: "US", flag: "\u{1F1FA}\u{1F1F8}", name: "United States" },
+  { code: "UZ", flag: "\u{1F1FA}\u{1F1FF}", name: "Uzbekistan" },
+  { code: "VN", flag: "\u{1F1FB}\u{1F1F3}", name: "Vietnam" },
+];
+
 type SortKey =
   | "price-desc"
   | "price-asc"
@@ -109,6 +193,9 @@ export default function SellPage() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [payDetails, setPayDetails] = useState<Record<string, string>>({});
   const [mobilePayStep, setMobilePayStep] = useState<1 | 2>(1);
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
+  const countryRef = useRef<HTMLDivElement>(null);
 
   const offerItemsRef = useRef<HTMLDivElement>(null);
 
@@ -367,6 +454,23 @@ export default function SellPage() {
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
   }, [sortOpen]);
+
+  useEffect(() => {
+    if (!countryOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (countryRef.current && !countryRef.current.contains(e.target as Node)) setCountryOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [countryOpen]);
+
+  const filteredCountries = useMemo(() => {
+    if (!countrySearch) return COUNTRIES;
+    const q = countrySearch.toLowerCase();
+    return COUNTRIES.filter(c => c.name.toLowerCase().includes(q));
+  }, [countrySearch]);
+
+  const selectedCountry = COUNTRIES.find(c => c.code === payDetails.country);
 
   /* ================================================================ JSX */
   return (
@@ -1123,6 +1227,60 @@ export default function SellPage() {
             </div>
 
             <div className="checkout-modal__fields">
+              <label className="checkout-modal__field">
+                <span>{t("checkoutEmail")}</span>
+                <div className="checkout-modal__input-wrap">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+                  <input type="email" placeholder="your@email.com"
+                    value={payDetails.email || ""}
+                    onChange={(e) => setPayDetails(p => ({ ...p, email: e.target.value }))} />
+                </div>
+              </label>
+              <label className="checkout-modal__field">
+                <span>{t("checkoutCountry")}</span>
+                <div className="checkout-modal__country" ref={countryRef}>
+                  <button
+                    type="button"
+                    className="checkout-modal__country-btn"
+                    onClick={() => { setCountryOpen(!countryOpen); setCountrySearch(""); }}
+                  >
+                    {selectedCountry ? (
+                      <><span className="checkout-modal__country-flag">{selectedCountry.flag}</span> {selectedCountry.name}</>
+                    ) : (
+                      <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> {t("checkoutSelectCountry")}</>
+                    )}
+                    <svg className="checkout-modal__country-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </button>
+                  {countryOpen && (
+                    <div className="checkout-modal__country-dropdown">
+                      <div className="checkout-modal__country-search">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input
+                          type="text"
+                          placeholder={t("checkoutSearchCountry")}
+                          value={countrySearch}
+                          onChange={(e) => setCountrySearch(e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      <div className="checkout-modal__country-list">
+                        {filteredCountries.map(c => (
+                          <button
+                            key={c.code}
+                            type="button"
+                            className={`checkout-modal__country-option${payDetails.country === c.code ? " selected" : ""}`}
+                            onClick={() => { setPayDetails(p => ({ ...p, country: c.code })); setCountryOpen(false); }}
+                          >
+                            <span className="checkout-modal__country-flag">{c.flag}</span>
+                            {c.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </label>
+
               {paymentMethod === "balance" && (
                 <div className="checkout-modal__info">
                   <div className="checkout-modal__info-icon">

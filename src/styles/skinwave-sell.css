@@ -4795,6 +4795,124 @@
   color: #fff;
 }
 
+/* Country dropdown */
+.checkout-modal__country {
+  position: relative;
+}
+.checkout-modal__country-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  text-align: left;
+}
+.checkout-modal__country-btn:hover {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+}
+.checkout-modal__country-btn svg:first-child {
+  color: rgba(255,255,255,0.25);
+  flex-shrink: 0;
+}
+.checkout-modal__country-chevron {
+  margin-left: auto;
+  color: rgba(255,255,255,0.3);
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.checkout-modal__country-flag {
+  font-size: 18px;
+  line-height: 1;
+}
+.checkout-modal__country-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #1a1740;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  z-index: 20;
+  overflow: hidden;
+  animation: ckCountryIn 0.2s ease;
+}
+@keyframes ckCountryIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.checkout-modal__country-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.checkout-modal__country-search svg {
+  color: rgba(255,255,255,0.3);
+  flex-shrink: 0;
+}
+.checkout-modal__country-search input {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+.checkout-modal__country-search input::placeholder {
+  color: rgba(255,255,255,0.25);
+}
+.checkout-modal__country-list {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px;
+}
+.checkout-modal__country-list::-webkit-scrollbar {
+  width: 4px;
+}
+.checkout-modal__country-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.checkout-modal__country-list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+}
+.checkout-modal__country-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-align: left;
+}
+.checkout-modal__country-option:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
+.checkout-modal__country-option.selected {
+  background: color-mix(in srgb, var(--ck-color) 15%, transparent);
+  color: var(--ck-color-pale);
+}
+
 .checkout-modal__footer {
   padding: 12px 20px 24px;
 }

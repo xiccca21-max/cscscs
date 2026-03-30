@@ -2323,15 +2323,15 @@
   100% { background-position: 200% 0; }
 }
 .sell-pay__title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 900;
-  padding: 14px 16px 10px;
+  padding: 12px 14px 8px;
   color: #fff;
   letter-spacing: 0.3px;
   background: transparent;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   text-transform: uppercase;
   position: relative;
   overflow: hidden;
@@ -2400,8 +2400,8 @@
   flex: 1 1 0;
 }
 .sell-pay__check-dot {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.15);
   flex-shrink: 0;
@@ -2758,10 +2758,10 @@
 
 /* Bottom section (Amount → Promo) */
 .sell-pay__bottom {
-  margin-top: auto;
+  margin-top: 0;
   background: transparent;
   border-radius: 0 0 16px 16px;
-  padding: 12px 16px 14px;
+  padding: 10px 14px 12px;
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -2897,15 +2897,15 @@
 .sell-pay__hold-warn {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  font-size: 12px;
-  line-height: 1.4;
+  gap: 6px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.35;
   color: #fbbf24;
   background: rgba(245,158,11,0.12);
   border: 1px solid rgba(245,158,11,0.25);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 .sell-pay__hold-warn svg {
   flex-shrink: 0;
@@ -2997,10 +2997,10 @@
   z-index: 1;
 }
 .sell-pay__promo-label {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: rgba(255,255,255,0.5);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -3051,8 +3051,8 @@
   flex: 1;
   border: none;
   background: transparent;
-  padding: 10px 12px;
-  font-size: 13px;
+  padding: 8px 10px;
+  font-size: 12px;
   color: #fff;
   outline: none;
   font-family: inherit;
@@ -3061,7 +3061,7 @@
   color: rgba(255,255,255,0.35);
 }
 .promo-input__btn {
-  padding: 10px 18px;
+  padding: 8px 14px;
   border: none;
   background: linear-gradient(135deg, #6366f1, #818cf8);
   color: #fff;

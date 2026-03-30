@@ -4,9 +4,10 @@
 
 /* Page wrapper */
 .sell-page-wrap {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - var(--header-h) + 180px);
+  display: grid;
+  grid-template-columns: 1fr 30%;
+  grid-template-rows: auto 1fr;
+  min-height: calc(100vh - var(--header-h) + 180px);
   overflow: visible;
   position: relative;
 }
@@ -29,12 +30,7 @@
 }
 
 .sell-layout {
-  display: grid;
-  grid-template-columns: 1fr 30%;
-  flex: 1 1 0;
-  min-height: 0;
-  gap: 0;
-  background: linear-gradient(135deg, #f3f4f8 0%, #eeeef4 100%);
+  display: contents;
 }
 .sell-page-wrap + .footer,
 .sell-page-wrap ~ .footer {
@@ -43,8 +39,10 @@
 
 /* ── Inventory (Left) ── */
 .sell-inventory {
+  grid-column: 1;
+  grid-row: 2;
   padding: 12px 20px;
-  background: transparent;
+  background: linear-gradient(135deg, #f3f4f8 0%, #eeeef4 100%);
   position: relative;
   overflow-y: auto;
   display: flex;
@@ -1014,9 +1012,9 @@
 
 /* ── Top row: Offer + Steps ── */
 .sell-topbar {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
+  display: block;
+  grid-column: 1;
+  grid-row: 1;
   background: linear-gradient(135deg, #f3f4f8 0%, #eeeef4 100%);
 }
 
@@ -1844,6 +1842,8 @@
 
 /* ── Sidebar (Right) ── */
 .sell-sidebar {
+  grid-column: 2;
+  grid-row: 1 / -1;
   position: sticky;
   top: var(--header-h, 64px);
   max-height: calc(100vh - var(--header-h, 64px));
@@ -3294,7 +3294,7 @@
     display: flex !important;
   }
   .sell-page-wrap--step2 .sell-topbar {
-    display: grid !important;
+    display: block !important;
   }
   .sidebar-tradeurl--desktop {
     display: block !important;
@@ -3303,10 +3303,7 @@
 
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 1024px) {
-  .sell-topbar {
-    grid-template-columns: 1fr;
-  }
-  .sell-layout {
+  .sell-page-wrap {
     grid-template-columns: 1fr 35%;
   }
   .sell-inventory__grid {
@@ -3316,8 +3313,15 @@
 }
 
 @media (max-width: 768px) {
+  .sell-page-wrap {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: visible;
+    max-width: 100vw;
+  }
   .sell-topbar {
-    grid-template-columns: 1fr;
     gap: 8px;
     padding: 8px 12px;
     background: transparent;
@@ -3327,10 +3331,6 @@
     border-radius: 14px;
     padding: 12px 14px;
   }
-  .sell-topbar > .sell-steps {
-    margin: 6px 12px 6px 0;
-    padding: 10px 12px;
-  }
   .sell-step { gap: 6px; }
   .sell-step__icon { width: 28px; height: 28px; border-radius: 8px; }
   .sell-step__label { font-size: 9px; }
@@ -3339,25 +3339,19 @@
     border-right: none;
   }
   .sell-offer__arrow { display: none; }
-  .sell-page-wrap {
-    height: auto;
-    overflow-x: hidden;
-    overflow-y: visible;
-    max-width: 100vw;
-  }
   .sell-layout {
-    grid-template-columns: 1fr;
-    height: auto;
-    overflow-x: hidden;
-    overflow-y: visible;
-    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
   }
   .sell-inventory {
+    grid-column: auto;
+    grid-row: auto;
     overflow-x: hidden;
     overflow-y: visible;
     height: auto;
     min-width: 0;
     padding: 8px 12px;
+    background: transparent;
   }
   .sell-inventory__scroll {
     overflow: visible;
@@ -3365,8 +3359,11 @@
     padding-bottom: 60px;
   }
   .sell-sidebar {
+    grid-column: auto;
+    grid-row: auto;
     position: static;
     height: auto;
+    max-height: none;
     background: transparent;
     border-left: none;
     border-top: 1px solid #e4e2ee;

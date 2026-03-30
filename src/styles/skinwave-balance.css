@@ -1370,25 +1370,116 @@
    ══════════════════════════════════════════════ */
 @media (max-width: 768px) {
   .bal { padding: 24px 0 60px; }
+
+  /* Wallet card */
   .bal-wallet__main { padding: 28px 20px 20px; }
-  .bal-wallet__amount { font-size: 38px; }
+  .bal-wallet__page-title {
+    font-size: 22px;
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+  }
+  .bal-wallet__amount { font-size: 38px; margin-bottom: 20px; }
   .bal-wallet__amount small { font-size: 20px; }
-  .bal-wallet__actions { flex-direction: column; }
+  .bal-wallet__actions { flex-direction: column; gap: 8px; }
+  .bal-wallet__cashout,
+  .bal-wallet__sell {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Stats row */
   .bal-wallet__stats {
     flex-direction: column;
     padding: 16px 20px;
-    gap: 12px;
+    gap: 0;
   }
   .bal-wstat__sep { display: none; }
-  .bal-history__head { flex-direction: column; align-items: flex-start; }
-  .bal-methods { grid-template-columns: 1fr 1fr 1fr; }
+  .bal-wstat {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .bal-wstat:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .bal-wstat:first-child {
+    padding-top: 0;
+  }
+
+  /* Cashout form */
+  .bal-cashout__body { padding: 20px 16px; }
+  .bal-cashout__head { padding: 16px; }
+
+  /* Payment methods: 2 cols, 3rd wraps below */
+  .bal-methods {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .bal-method {
+    padding: 16px 10px 14px;
+    gap: 8px;
+  }
+  .bal-method__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+  .bal-method__name { font-size: 13px; }
+  .bal-method__conditions {
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+  .bal-method__conditions span { font-size: 10px; }
+
+  /* Summary */
+  .bal-summary__row--total { font-size: 15px; }
+
+  /* History */
+  .bal-history__head {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+  }
+  .bal-history__filters { width: 100%; }
+  .bal-fil {
+    flex: 1;
+    justify-content: center;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  /* Transaction table → cards */
   .bal-table thead { display: none; }
-  .bal-row { display: flex; flex-wrap: wrap; padding: 16px; gap: 8px; border-bottom: 1px solid #f0eef5; }
-  .bal-row td { display: block; padding: 0; border-bottom: none; }
-  .bal-row td:nth-child(1) { order: 1; width: 50%; font-size: 12px; color: #94a3b8; }
-  .bal-row td:nth-child(2) { order: 3; width: 100%; }
-  .bal-row td:nth-child(3) { order: 2; width: 50%; text-align: right; }
-  .bal-row td:nth-child(4) { order: 4; width: 100%; }
+  .bal-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 14px 16px;
+    gap: 6px 8px;
+    border-bottom: 1px solid #f0eef5;
+  }
+  .bal-row td {
+    display: block;
+    padding: 0;
+    border-bottom: none;
+  }
+  .bal-row td:nth-child(1) {
+    order: 1;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+  .bal-row td:nth-child(3) {
+    order: 2;
+    text-align: right;
+  }
+  .bal-row td:nth-child(2) {
+    order: 3;
+    grid-column: 1 / -1;
+  }
+  .bal-row td:nth-child(4) {
+    order: 4;
+    grid-column: 1 / -1;
+    margin-top: 4px;
+  }
   .bal-row:hover {
     background: transparent;
     transform: none;
@@ -1396,15 +1487,47 @@
   }
   .bal-row__desc-wrap { width: 100%; }
 }
+
 @media (max-width: 480px) {
   .bal { padding: 16px 0 48px; }
   .bal-wallet__main { padding: 24px 16px 16px; }
+  .bal-wallet__page-title {
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
   .bal-wallet__amount { font-size: 32px; }
   .bal-wallet__amount small { font-size: 16px; }
   .bal-wallet__stats { padding: 14px 16px; }
+
+  /* Payment methods: 1 column */
   .bal-methods { grid-template-columns: 1fr; }
+  .bal-method {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .bal-method__icon {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+  .bal-method__conditions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+  .bal-method__conditions span {
+    flex: none;
+    font-size: 10px;
+  }
+
   .bal-history__title { font-size: 16px; }
   .bal-row { padding: 12px; font-size: 13px; }
+
   .bal-guest { max-width: none; }
   .bal-guest__card { padding: 0 22px 28px; }
   .bal-guest__intro { margin-left: -22px; margin-right: -22px; padding-left: 22px; padding-right: 22px; }

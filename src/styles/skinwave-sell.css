@@ -3268,6 +3268,9 @@
 }
 
 /* ═══ MOBILE STEP FLOW ═══ */
+.sell-steps--mobile {
+  display: none;
+}
 .sell-tradeurl--mobile {
   display: none;
 }
@@ -3280,6 +3283,7 @@
 
 /* Desktop safety: ensure mobile step classes never affect desktop */
 @media (min-width: 769px) {
+  .sell-steps--mobile,
   .sell-tradeurl--mobile,
   .sell-mobile-continue,
   .sell-mobile-back {
@@ -3399,14 +3403,33 @@
   }
   .sell-toolbar {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 6px;
   }
-  .sell-toolbar__left {
+  .sell-toolbar__top {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .sell-inventory__search {
     width: 100%;
+    order: -1;
   }
   .sell-toolbar__right {
     width: 100%;
-    justify-content: flex-end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+  }
+  .sell-toolbar__right .toolbar-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .sell-toolbar__count {
+    font-size: 11px;
+  }
+  .sell-toolbar__left {
+    width: 100%;
   }
   .sell-toolbar__price-range { display: none; }
   .sell-toolbar__sort { display: none; }
@@ -3471,6 +3494,12 @@
   .sell-toolbar__wear-filters {
     flex-wrap: wrap;
     gap: 2px;
+    width: 100%;
+    justify-content: center;
+  }
+  .wear-pill {
+    padding: 4px 10px;
+    font-size: 10px;
   }
 
   /* ── Guest overlay ── */
@@ -3590,6 +3619,20 @@
   }
 
   /* Show trade URL above inventory on mobile */
+  /* Show steps above inventory on mobile */
+  .sell-steps--mobile {
+    display: block;
+    padding: 0 0 8px;
+  }
+  .sell-steps--mobile .sell-steps {
+    margin: 0;
+    border-radius: 14px;
+  }
+  /* Hide steps inside sidebar on mobile */
+  .sell-sidebar > .sell-steps {
+    display: none !important;
+  }
+
   .sell-tradeurl--mobile {
     display: block;
     padding: 0 0 8px;
@@ -3738,6 +3781,24 @@
   .game-tab {
     padding: 4px 10px;
     font-size: 11px;
+  }
+  .sell-steps--mobile .sell-steps {
+    padding: 10px 10px;
+  }
+  .sell-steps--mobile .sell-step__icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+  }
+  .sell-steps--mobile .sell-step__icon svg {
+    width: 13px;
+    height: 13px;
+  }
+  .sell-steps--mobile .sell-step__label {
+    font-size: 8px;
+  }
+  .sell-steps--mobile .sell-step__chev::before {
+    width: 10px;
   }
   .sell-guest-overlay {
     min-height: 280px;

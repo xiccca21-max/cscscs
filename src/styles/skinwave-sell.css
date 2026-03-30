@@ -3409,6 +3409,7 @@
     overflow-y: visible;
     height: auto;
     min-width: 0;
+    padding: 8px 12px;
   }
   .sell-inventory__scroll {
     overflow: visible;
@@ -3646,7 +3647,7 @@
   /* Show trade URL above inventory on mobile */
   .sell-tradeurl--mobile {
     display: block;
-    padding: 0 12px 8px;
+    padding: 0 0 8px;
   }
   .sell-tradeurl--mobile .sidebar-tradeurl {
     border-radius: 14px;

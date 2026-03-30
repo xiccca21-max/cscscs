@@ -251,7 +251,12 @@
     "min": "Min",
     "max": "Max",
     "tradeHoldWarning": "CS2 items have a mandatory 7-day trade hold by Valve. Payment will be processed after the hold period.",
-    "balanceFrozenNote": "The amount will be frozen on your balance until the trade is completed."
+    "balanceFrozenNote": "The amount will be frozen on your balance until the trade is completed.",
+    "gameMixTitle": "Items cannot be combined",
+    "gameMixDesc": "CS2 items have a mandatory 7-day trade hold imposed by Valve. Items from other games (Dota 2, TF2, Rust) do not have this restriction.",
+    "gameMixReason": "Because of different trade hold policies, CS2 items and items from other games must be sold in separate orders.",
+    "gameMixHint": "Remove the currently selected items first, then select items from the other game.",
+    "gameMixClose": "Got it"
   },
   "faq": {
     "heroLabel": "Help Center",

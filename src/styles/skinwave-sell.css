@@ -5192,3 +5192,212 @@
     padding: 8px 16px 20px;
   }
 }
+
+/* ══════════════════════════════════════════════
+   GAME MIX POPUP
+   ══════════════════════════════════════════════ */
+.gmix-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  animation: gmixFadeIn 0.2s ease-out;
+  padding: 16px;
+}
+@keyframes gmixFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.gmix-modal {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(165deg, #13112a 0%, #1a1740 50%, #151330 100%);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 20px;
+  padding: 32px 28px 24px;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(99, 102, 241, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  text-align: center;
+  animation: gmixModalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes gmixModalIn {
+  from { opacity: 0; transform: scale(0.9) translateY(16px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.gmix-modal__close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.gmix-modal__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.gmix-modal__icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.1));
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.gmix-modal__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 20px;
+  letter-spacing: -0.3px;
+}
+
+.gmix-modal__body {
+  text-align: left;
+}
+
+.gmix-modal__row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.gmix-modal__badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+.gmix-modal__badge img {
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.gmix-modal__badge--cs2 {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+.gmix-modal__badge--other {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.gmix-modal__tag {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.gmix-modal__tag--warn {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+.gmix-modal__tag--ok {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.gmix-modal__desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 8px;
+}
+
+.gmix-modal__reason {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.gmix-modal__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  margin-bottom: 20px;
+}
+.gmix-modal__hint svg {
+  flex-shrink: 0;
+  color: #818cf8;
+  margin-top: 1px;
+}
+.gmix-modal__hint span {
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.gmix-modal__btn {
+  width: 100%;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+  transition: all 0.2s;
+}
+.gmix-modal__btn:hover {
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.5);
+  transform: translateY(-1px);
+}
+.gmix-modal__btn:active {
+  transform: scale(0.98) translateY(0);
+}
+
+@media (max-width: 480px) {
+  .gmix-modal {
+    padding: 24px 20px 20px;
+    border-radius: 16px;
+  }
+  .gmix-modal__title {
+    font-size: 16px;
+  }
+  .gmix-modal__badge {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}

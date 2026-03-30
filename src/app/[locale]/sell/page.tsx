@@ -375,8 +375,14 @@ export default function SellPage() {
       if (prev.find((i) => i.id === item.id)) return prev.filter((i) => i.id !== item.id);
       const hasCs2 = prev.some((i) => i.game === "cs2");
       const hasOther = prev.some((i) => i.game !== "cs2");
-      if (item.game === "cs2" && hasOther) return prev;
-      if (item.game !== "cs2" && hasCs2) return prev;
+      if (item.game === "cs2" && hasOther) {
+        setGameMixPopup("cs2");
+        return prev;
+      }
+      if (item.game !== "cs2" && hasCs2) {
+        setGameMixPopup("other");
+        return prev;
+      }
       return [...prev, item];
     });
   }, []);
@@ -410,6 +416,7 @@ export default function SellPage() {
   }, []);
 
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [gameMixPopup, setGameMixPopup] = useState<"cs2" | "other" | null>(null);
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit) return;
@@ -1421,6 +1428,59 @@ export default function SellPage() {
                 {t("checkoutDisclaimer")}
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {gameMixPopup && (
+        <div className="gmix-overlay" onClick={() => setGameMixPopup(null)}>
+          <div className="gmix-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="gmix-modal__close" onClick={() => setGameMixPopup(null)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            <div className="gmix-modal__icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+
+            <h3 className="gmix-modal__title">{t("gameMixTitle")}</h3>
+
+            <div className="gmix-modal__body">
+              <div className="gmix-modal__row">
+                <div className="gmix-modal__badge gmix-modal__badge--cs2">
+                  <img src="/icons/cs2.png" alt="CS2" width={16} height={16} />
+                  <span>CS2</span>
+                  <span className="gmix-modal__tag gmix-modal__tag--warn">7-day hold</span>
+                </div>
+                <div className="gmix-modal__badge gmix-modal__badge--other">
+                  <img src="/icons/dota2.png" alt="Dota 2" width={16} height={16} />
+                  <img src="/icons/tf2.png" alt="TF2" width={16} height={16} />
+                  <span>Dota 2, TF2, Rust</span>
+                  <span className="gmix-modal__tag gmix-modal__tag--ok">No hold</span>
+                </div>
+              </div>
+
+              <p className="gmix-modal__desc">{t("gameMixDesc")}</p>
+              <p className="gmix-modal__reason">{t("gameMixReason")}</p>
+
+              <div className="gmix-modal__hint">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                </svg>
+                <span>{t("gameMixHint")}</span>
+              </div>
+            </div>
+
+            <button className="gmix-modal__btn" onClick={() => setGameMixPopup(null)}>
+              {t("gameMixClose")}
+            </button>
           </div>
         </div>
       )}

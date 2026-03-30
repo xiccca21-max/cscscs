@@ -1208,6 +1208,20 @@ body.avatar-blur > .footer {
 /* ── Mobile backdrop overlay ── */
 .header__mob-backdrop {
   display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s, visibility 0.35s;
+}
+.header__mob-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+@media (max-width: 768px) {
+  .header__mob-backdrop { display: block; }
 }
 
 /* ── Mobile burger sections (hidden on desktop) ── */
@@ -1221,51 +1235,57 @@ body.avatar-blur > .footer {
   .header__left { flex: 1; }
   .header__inner { padding: 0 16px; }
 
-  /* ═══ FULL-SCREEN DARK MENU ═══ */
+  /* ═══ GLASS DRAWER FROM RIGHT ═══ */
   .header__nav {
     position: fixed;
-    inset: 0;
-    background: #171721;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
+    top: 12px;
+    right: 12px;
+    bottom: 12px;
+    left: auto;
+    width: 310px;
+    max-width: calc(100vw - 24px);
+    background: rgba(18, 18, 35, 0.82);
+    backdrop-filter: blur(40px) saturate(1.6);
+    -webkit-backdrop-filter: blur(40px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    box-shadow: 0 8px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
     flex-direction: column;
     padding: 0;
     z-index: 9999;
-    opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transform: none;
-    transition: opacity 0.3s ease, visibility 0.3s;
+    transform: translateX(110%);
+    transition: transform 0.38s cubic-bezier(.32,.72,.24,1), visibility 0.38s;
     display: flex;
     animation: none !important;
     overflow-y: auto;
     overflow-x: hidden;
   }
   .header__nav.open {
-    opacity: 1;
     visibility: visible;
     pointer-events: auto;
+    transform: translateX(0);
   }
 
-  /* Hide desktop nav links — we show them inside mob-section */
   .header__nav > a,
   .header__nav > span.header__nav-sep {
     display: none !important;
   }
 
-  /* Burger button */
   .header__burger {
     display: flex;
     color: var(--text);
     transition: color 0.3s;
+    position: relative;
+    z-index: 10001;
   }
   .header__burger.is-open {
     color: #fff;
     position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 10000;
+    top: 26px;
+    right: 26px;
+    z-index: 10001;
   }
 
   .header__left,
@@ -1288,7 +1308,7 @@ body.avatar-blur > .footer {
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding-top: 60px;
+    padding: 52px 0 16px;
   }
 
   /* Top bar: balance + currency/lang */
@@ -1296,13 +1316,13 @@ body.avatar-blur > .footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px 0;
-    margin-bottom: 4px;
+    padding: 0 18px;
+    margin-bottom: 6px;
   }
   .header__mob-topbar-bal {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 800;
-    color: #e2e8f0;
+    color: #fff;
     font-variant-numeric: tabular-nums;
   }
   .header__mob-topbar-selects {
@@ -1313,39 +1333,42 @@ body.avatar-blur > .footer {
   .header__mob-pref-btns--inline {
     display: flex;
     gap: 2px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 8px;
-    padding: 2px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px;
+    padding: 3px;
   }
   .header__mob-pref-btn {
     padding: 5px 10px;
     font-size: 11px;
     font-weight: 700;
     border: none;
-    border-radius: 6px;
+    border-radius: 7px;
     background: transparent;
-    color: #64748b;
+    color: rgba(255,255,255,0.45);
     cursor: pointer;
     transition: all 0.2s;
     text-align: center;
     font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
   .header__mob-pref-btn.active {
-    background: rgba(255,255,255,0.1);
-    color: #e2e8f0;
+    background: rgba(255,255,255,0.14);
+    color: #fff;
   }
 
   /* Dividers */
   .header__mob-sep {
     height: 1px;
-    background: rgba(255,255,255,0.06);
-    margin: 8px 20px;
+    background: rgba(255,255,255,0.07);
+    margin: 6px 18px;
   }
 
-  /* Avatar row */
+  /* Avatar */
   .header__mob-avatar {
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     overflow: hidden;
     background: linear-gradient(135deg, #6366f1, #818cf8);
@@ -1354,8 +1377,9 @@ body.avatar-blur > .footer {
     justify-content: center;
     font-weight: 700;
     color: #fff;
-    font-size: 14px;
+    font-size: 15px;
     flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.12);
   }
   .header__mob-avatar img {
     width: 100%;
@@ -1368,49 +1392,53 @@ body.avatar-blur > .footer {
     display: flex;
     align-items: center;
     gap: 14px;
-    padding: 14px 20px;
+    padding: 13px 18px;
     font-size: 15px;
     font-weight: 600;
-    color: #cbd5e1;
+    color: #fff;
     text-decoration: none;
     transition: background 0.15s;
     border-radius: 0;
     margin: 0;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
   }
   .header__mob-link:active {
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.06);
   }
   .header__mob-link--profile {
     gap: 12px;
     font-weight: 700;
-    color: #e2e8f0;
   }
 
   /* Colored icon badges */
   .header__mob-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
   .header__mob-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 17px;
+    height: 17px;
   }
-  .header__mob-icon--indigo  { background: rgba(99,102,241,0.15); color: #818cf8; }
-  .header__mob-icon--green   { background: rgba(34,197,94,0.15);  color: #4ade80; }
-  .header__mob-icon--orange  { background: rgba(249,115,22,0.15); color: #fb923c; }
-  .header__mob-icon--cyan    { background: rgba(6,182,212,0.15);  color: #22d3ee; }
-  .header__mob-icon--yellow  { background: rgba(234,179,8,0.15);  color: #facc15; }
-  .header__mob-icon--purple  { background: rgba(168,85,247,0.15); color: #c084fc; }
-  .header__mob-icon--slate   { background: rgba(148,163,184,0.12); color: #94a3b8; }
-  .header__mob-icon--red     { background: rgba(239,68,68,0.12);  color: #f87171; }
+  .header__mob-icon--indigo  { background: rgba(99,102,241,0.18); color: #a5b4fc; }
+  .header__mob-icon--green   { background: rgba(34,197,94,0.18);  color: #86efac; }
+  .header__mob-icon--orange  { background: rgba(249,115,22,0.18); color: #fdba74; }
+  .header__mob-icon--cyan    { background: rgba(6,182,212,0.18);  color: #67e8f9; }
+  .header__mob-icon--yellow  { background: rgba(234,179,8,0.18);  color: #fde047; }
+  .header__mob-icon--purple  { background: rgba(168,85,247,0.18); color: #d8b4fe; }
+  .header__mob-icon--slate   { background: rgba(148,163,184,0.14); color: #cbd5e1; }
+  .header__mob-icon--red     { background: rgba(239,68,68,0.15);  color: #fca5a5; }
 
   .header__mob-link--logout {
-    color: #f87171;
+    color: #fca5a5;
   }
 
   /* Steam login */
@@ -1419,20 +1447,24 @@ body.avatar-blur > .footer {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    padding: 14px 20px;
-    margin: 8px 20px;
+    padding: 14px 18px;
+    margin: 8px 18px;
     font-size: 14px;
     font-weight: 700;
     color: #fff;
-    background: linear-gradient(135deg, #171a21, #1b2838);
-    border-radius: 12px;
+    background: linear-gradient(135deg, #1b2838, #2a475e);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
     text-decoration: none;
     letter-spacing: 0.02em;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
     transition: all 0.25s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    cursor: pointer;
   }
-  .header__mob-login:hover {
-    background: linear-gradient(135deg, #1b2838, #2a475e);
+  .header__mob-login:active {
+    background: linear-gradient(135deg, #2a475e, #3b6d8f);
   }
 
   .header__nav-slider { display: none !important; }

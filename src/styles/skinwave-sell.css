@@ -2806,7 +2806,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 16px;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.85);
   padding: 10px 0;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
@@ -2817,7 +2817,7 @@
 }
 .pay-summary-row__label svg {
   color: #a5b4fc;
-  opacity: 0.8;
+  opacity: 1;
   flex-shrink: 0;
 }
 .pay-summary-row:last-of-type:not(.pay-summary-row--total) {
@@ -2833,12 +2833,12 @@
 .pay-summary-row--fee {
   border-bottom: none;
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: rgba(255,255,255,0.7);
   padding: 4px 0;
 }
 .pay-summary-row--fee .pay-summary-row__label svg {
   color: #ef4444;
-  opacity: 0.6;
+  opacity: 0.9;
 }
 .pay-summary-row__value--fee {
   color: #f87171 !important;
@@ -2850,7 +2850,7 @@
   font-weight: 900;
   padding: 16px 0 4px;
   border-bottom: none;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.9);
   background: rgba(255,255,255,0.03);
   margin: 4px 0 0;
   padding-left: 0;
@@ -2888,7 +2888,7 @@
   gap: 6px;
 }
 .pay-summary-row__label svg {
-  opacity: 0.6;
+  opacity: 0.9;
   transition: opacity 0.3s, transform 0.3s;
 }
 .pay-summary-row--total:hover .pay-summary-row__label svg {

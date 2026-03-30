@@ -3371,11 +3371,21 @@
 @media (max-width: 768px) {
   .sell-topbar {
     grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px 12px;
+    background: transparent;
+  }
+  .sell-topbar > .sell-offer {
+    margin: 0;
+    border-radius: 14px;
+    padding: 12px 14px;
   }
   .sell-topbar > .sell-steps {
     flex-direction: row;
-    padding: 8px 14px;
-    border-top: 1px solid #e4e2ee;
+    padding: 10px 14px;
+    margin: 0;
+    border-top: none;
+    border-radius: 14px;
   }
   .sell-offer {
     border-right: none;
@@ -3403,6 +3413,7 @@
   .sell-inventory__scroll {
     overflow: visible;
     min-width: 0;
+    padding-bottom: 60px;
   }
   .sell-sidebar {
     position: static;
@@ -3461,7 +3472,7 @@
 
   /* ── Offer bar ── */
   .sell-offer {
-    margin: 6px 12px;
+    margin: 0;
     max-height: 180px;
   }
   .sell-offer__total {
@@ -3635,10 +3646,11 @@
   /* Show trade URL above inventory on mobile */
   .sell-tradeurl--mobile {
     display: block;
-    padding: 0 0 8px;
+    padding: 0 12px 8px;
   }
   .sell-tradeurl--mobile .sidebar-tradeurl {
     border-radius: 14px;
+    margin: 0;
   }
 
   /* Hide trade URL inside sidebar on mobile */
@@ -3682,24 +3694,30 @@
     cursor: pointer;
   }
 
-  /* Continue to payment button */
+  /* Continue to payment — sticky bottom bar */
   .sell-mobile-continue {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    width: calc(100% - 24px);
-    margin: 12px auto;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+    margin: 0;
     padding: 14px 20px;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
     color: #fff;
     font-size: 15px;
     font-weight: 700;
     border: none;
-    border-radius: 14px;
+    border-radius: 0;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(99,102,241,0.3);
-    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 -2px 20px rgba(99,102,241,0.3);
+    transition: transform 0.15s;
+    font-family: inherit;
   }
   .sell-mobile-continue:active {
     transform: scale(0.98);
@@ -3743,7 +3761,7 @@
 
 @media (max-width: 480px) {
   .sell-offer {
-    margin: 4px 8px;
+    margin: 0;
     max-height: 150px;
   }
   .sell-offer__total {

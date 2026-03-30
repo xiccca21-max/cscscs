@@ -847,38 +847,34 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(80px);
-  -webkit-backdrop-filter: blur(80px);
+  background: rgba(10, 8, 22, 0.45);
+  backdrop-filter: blur(32px) saturate(1.3);
+  -webkit-backdrop-filter: blur(32px) saturate(1.3);
+  animation: guestFadeIn 0.35s ease;
+}
+@keyframes guestFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .sell-guest-overlay__content {
   text-align: center;
-  padding: 48px 40px;
+  padding: 44px 40px 32px;
   background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 25px 60px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
-  max-width: 420px;
+  border-radius: 22px;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,0.18),
+    0 2px 6px rgba(0,0,0,0.06);
+  max-width: 400px;
   width: 90%;
+  animation: guestSlideUp 0.4s cubic-bezier(.22,.61,.36,1);
 }
-.sell-guest-overlay__home {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 14px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #64748b;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.sell-guest-overlay__home:hover {
-  color: #0f172a;
-  text-decoration: underline;
+@keyframes guestSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .sell-guest-overlay__icon {
   width: 64px; height: 64px;
-  margin: 0 auto 24px;
+  margin: 0 auto 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -894,40 +890,106 @@
 }
 .sell-guest-overlay__content h3 {
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 800;
   color: #0f172a;
   margin-bottom: 8px;
+  letter-spacing: -0.3px;
 }
 .sell-guest-overlay__content p {
   color: #64748b;
   font-size: 14px;
-  line-height: 1.5;
-  margin-bottom: 28px;
+  line-height: 1.6;
+  margin-bottom: 0;
 }
-.sell-guest-overlay .btn--primary {
+.sell-guest-overlay__divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+  margin: 24px 0;
+}
+.sell-guest-overlay__steam-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  padding: 14px 24px;
-  background: #0f172a;
+  padding: 15px 24px;
+  background: linear-gradient(135deg, #171a21, #1b2838);
   color: #fff;
-  border-radius: 12px;
+  border-radius: 14px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   border: none;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.25s;
   text-decoration: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
 }
-.sell-guest-overlay .btn--primary:hover {
-  background: #1e293b;
+.sell-guest-overlay__steam-btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  animation: guestBtnShimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes guestBtnShimmer {
+  0% { left: -100%; }
+  50% { left: 150%; }
+  100% { left: 150%; }
+}
+.sell-guest-overlay__steam-logo {
+  height: 18px;
+  width: auto;
+  filter: brightness(2);
+}
+.sell-guest-overlay__steam-btn:hover {
+  background: linear-gradient(135deg, #1b2838, #2a475e);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+  transform: translateY(-1px);
+}
+.sell-guest-overlay__home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.sell-guest-overlay__home:hover {
+  color: #475569;
+}
+.sell-guest-overlay__trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+.sell-guest-overlay__trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.2px;
+}
+.sell-guest-overlay__trust svg {
+  color: #6366f1;
 }
 .sell-guest-overlay__note {
-  margin-top: 16px;
-  font-size: 12px;
-  color: #94a3b8;
+  margin-top: 14px;
+  font-size: 11px;
+  color: #cbd5e1;
 }
 
 /* Scrollable inventory area */

@@ -488,11 +488,26 @@ export default function SellPage() {
             </div>
             <h3>{t("loginOverlayTitle")}</h3>
             <p>{t("loginOverlayDesc")}</p>
-            <a href="/api/auth/steam" className="btn btn--primary btn--lg" id="guestSignIn">
-              <img src="https://community.cloudflare.steamstatic.com/public/shared/images/header/logo_steam.svg?t=962016" alt="Steam" style={{ height: 18, width: 'auto', filter: 'brightness(2)' }} />
+            <div className="sell-guest-overlay__divider" />
+            <a href="/api/auth/steam" className="sell-guest-overlay__steam-btn" id="guestSignIn">
+              <img src="https://community.cloudflare.steamstatic.com/public/shared/images/header/logo_steam.svg?t=962016" alt="Steam" className="sell-guest-overlay__steam-logo" />
               {t("loginOverlayBtn")}
             </a>
             <a href="/" className="sell-guest-overlay__home">{t("loginOverlayHome")}</a>
+            <div className="sell-guest-overlay__trust">
+              <span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                SSL Secure
+              </span>
+              <span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Instant
+              </span>
+              <span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                24/7
+              </span>
+            </div>
             <p className="sell-guest-overlay__note">{t("loginOverlayNote")}</p>
           </div>
         </div>

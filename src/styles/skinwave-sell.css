@@ -1065,42 +1065,17 @@
 /* Steps in topbar (right side) */
 .sell-topbar > .sell-steps {
   display: flex;
-  align-items: flex-end;
-  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
   gap: 0;
-  background: linear-gradient(160deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
-  border-radius: 14px;
-  padding: 14px 10px 10px;
-  border: 1px solid rgba(99,102,241,0.2);
+  background: linear-gradient(160deg, #0c0a2a 0%, #131139 50%, #1a1750 100%);
+  border-radius: 16px;
+  padding: 16px 24px;
+  border: 1px solid rgba(99,102,241,0.12);
   margin: 6px 14px 6px 14px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(30,27,75,0.15);
-}
-.sell-topbar > .sell-steps::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #6366f1, #818cf8, #a5b4fc);
-  border-radius: 14px 14px 0 0;
-}
-.sell-topbar > .sell-steps::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 14px,
-      rgba(255,255,255,0.015) 14px,
-      rgba(255,255,255,0.015) 28px
-    );
-  pointer-events: none;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
 }
 /* Offer header */
 .sell-offer__header {
@@ -2164,118 +2139,100 @@
 }
 .sell-step {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  transition: all 0.3s;
-  flex: 1 1 0;
-  min-width: 0;
+  gap: 10px;
+  padding: 0;
+  transition: all 0.35s cubic-bezier(.25,.46,.45,.94);
+  flex-shrink: 0;
 }
-.sell-step__num {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  font-size: 20px;
-  font-weight: 900;
+.sell-step__circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.3s;
-}
-.sell-step__num svg {
-  width: 24px;
-  height: 24px;
-}
-.sell-step__label {
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.45);
-  white-space: nowrap;
-  transition: color 0.3s;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-/* Inactive step - on dark bg */
-.sell-step__num {
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.4);
-  border: 2px solid rgba(255,255,255,0.1);
-  border-bottom: 4px solid rgba(255,255,255,0.06);
-  box-shadow:
-    0 2px 0 rgba(0,0,0,0.15),
-    0 4px 8px rgba(0,0,0,0.1),
-    inset 0 1px 0 rgba(255,255,255,0.05);
-  transition: all 0.15s ease;
-}
-.sell-step__num:hover {
-  transform: translateY(1px);
-  border-bottom-width: 3px;
-  background: rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.6);
-}
-
-/* Active step */
-.sell-step.active {
-  background: rgba(99,102,241,0.15);
-  border-radius: 10px;
-}
-.sell-step.active .sell-step__num {
-  background: linear-gradient(180deg, #7c7df5 0%, #5b5ce0 100%);
-  color: #fff;
-  border: 2px solid #818cf8;
-  border-bottom: 4px solid #4338ca;
-  box-shadow:
-    0 2px 0 #3730a3,
-    0 4px 14px rgba(99,102,241,0.4),
-    inset 0 1px 0 rgba(255,255,255,0.25);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  animation: stepGlow 2s ease-in-out infinite;
-}
-@keyframes stepGlow {
-  0%, 100% { box-shadow: 0 2px 0 #3730a3, 0 4px 14px rgba(99,102,241,0.35), inset 0 1px 0 rgba(255,255,255,0.25); }
-  50% { box-shadow: 0 2px 0 #3730a3, 0 6px 22px rgba(99,102,241,0.55), inset 0 1px 0 rgba(255,255,255,0.25); }
-}
-.sell-step.active .sell-step__label {
-  color: #a5b4fc;
+  font-size: 14px;
   font-weight: 800;
-}
-
-
-/* Steps progress bar */
-.sell-steps__progress {
-  width: 100%;
-  height: 3px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 3px;
-  margin-top: 8px;
-  overflow: hidden;
-  flex-basis: 100%;
-}
-.sell-steps__progress-fill {
-  height: 100%;
-  width: 33.3%;
-  background: linear-gradient(90deg, #6366f1, #818cf8, #a5b4fc);
-  border-radius: 3px;
-  transition: width 0.6s ease;
+  color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  transition: all 0.35s cubic-bezier(.25,.46,.45,.94);
   position: relative;
 }
-.sell-steps__progress-fill::after {
+.sell-step__text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.sell-step__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color 0.35s;
+  white-space: nowrap;
+}
+.sell-step__desc {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.18);
+  transition: color 0.35s;
+  white-space: nowrap;
+}
+
+/* Connector line between steps */
+.sell-step__line {
+  flex: 1 1 0;
+  height: 2px;
+  min-width: 24px;
+  max-width: 60px;
+  margin: 0 12px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.4s;
+}
+.sell-step__line::after {
   content: '';
   position: absolute;
+  left: 0;
   top: 0;
-  right: 0;
-  width: 20px;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6));
-  animation: progressShimmer 2s ease-in-out infinite;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(.25,.46,.45,.94);
 }
-@keyframes progressShimmer {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
+.sell-step__line.done::after {
+  width: 100%;
+}
+
+/* Done step */
+.sell-step.done .sell-step__circle {
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  border-color: #818cf8;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(99,102,241,0.4), 0 0 0 4px rgba(99,102,241,0.1);
+}
+.sell-step.done .sell-step__title {
+  color: #e0e7ff;
+}
+.sell-step.done .sell-step__desc {
+  color: rgba(165,180,252,0.5);
+}
+
+/* Hover on inactive */
+.sell-step:not(.done):hover .sell-step__circle {
+  border-color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.5);
+}
+.sell-step:not(.done):hover .sell-step__title {
+  color: rgba(255,255,255,0.6);
 }
 
 /* Payment panel */
@@ -3386,12 +3343,13 @@
     padding: 12px 14px;
   }
   .sell-topbar > .sell-steps {
-    flex-direction: row;
-    padding: 10px 14px;
+    padding: 12px 14px;
     margin: 0;
-    border-top: none;
     border-radius: 14px;
   }
+  .sell-step__text { display: none; }
+  .sell-step__line { min-width: 16px; margin: 0 6px; }
+  .sell-step__circle { width: 32px; height: 32px; font-size: 13px; }
   .sell-offer {
     border-right: none;
   }
@@ -3888,9 +3846,6 @@
   }
   .sell-steps {
     padding: 6px 10px;
-  }
-  .sell-step__label {
-    font-size: 11px;
   }
 }
 

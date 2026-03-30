@@ -1343,7 +1343,7 @@ export default function SellPage() {
                           ].map(n => (
                             <button key={n.val} type="button"
                               className={`ck-crypto__opt${payDetails.network === n.val ? " active" : ""}`}
-                              onClick={(e) => { e.stopPropagation(); setPayDetails(p => ({ ...p, network: n.val })); setCryptoDropOpen(false); }}>
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPayDetails(p => ({ ...p, network: n.val })); setCryptoDropOpen(false); }}>
                               <span className="ck-crypto__dot" style={{ background: n.color }} />
                               <span className="ck-crypto__opt-label">{n.label}</span>
                               <span className="ck-crypto__opt-tag">{n.tag}</span>

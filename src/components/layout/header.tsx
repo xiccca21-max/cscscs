@@ -281,6 +281,7 @@ export function Header() {
           </div>
         </div>
       </header>
+      <div className={`header__mob-backdrop${mobileOpen ? " active" : ""}`} onClick={() => setMobileOpen(false)} />
       <div className={`avatar-menu-backdrop${avatarMenuOpen ? " active" : ""}`} onClick={() => setAvatarMenuOpen(false)} />
       {!loading && user && (
         <div className={`avatar-menu${avatarMenuOpen ? " active" : ""}`}>

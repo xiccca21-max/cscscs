@@ -1883,7 +1883,10 @@
 
 /* ── Sidebar (Right) ── */
 .sell-sidebar {
-  position: relative;
+  position: sticky;
+  top: var(--header-h, 64px);
+  max-height: calc(100vh - var(--header-h, 64px));
+  align-self: start;
   overflow-y: auto;
   background: linear-gradient(180deg, #f4f3fa 0%, #eceaf6 50%, #e6e4f2 100%);
   border-left: none;
@@ -3421,6 +3424,8 @@
   .sell-sidebar {
     position: static;
     height: auto;
+    max-height: none;
+    align-self: stretch;
     background: transparent;
     border-left: none;
     border-top: 1px solid #e4e2ee;

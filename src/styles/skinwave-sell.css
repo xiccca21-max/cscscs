@@ -847,64 +847,68 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  background: rgba(8, 6, 20, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  animation: guestOverlayIn 0.3s ease;
+  background: rgba(10, 8, 24, 0.35);
+  backdrop-filter: blur(40px) saturate(1.4);
+  -webkit-backdrop-filter: blur(40px) saturate(1.4);
+  animation: guestOverlayIn 0.4s ease;
 }
 @keyframes guestOverlayIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; backdrop-filter: blur(40px) saturate(1.4); }
 }
 .sell-guest-overlay__content {
   text-align: center;
-  padding: 44px 36px 36px;
-  background: linear-gradient(170deg, #1a1740 0%, #13112b 40%, #0e0c22 100%);
-  border: 1px solid rgba(99,102,241,0.15);
+  padding: 44px 36px 32px;
+  background: linear-gradient(170deg,
+    rgba(26, 23, 64, 0.85) 0%,
+    rgba(19, 17, 43, 0.9) 40%,
+    rgba(14, 12, 34, 0.92) 100%);
+  border: 1px solid rgba(99,102,241,0.12);
   border-radius: 24px;
   box-shadow:
-    0 32px 80px rgba(0,0,0,0.5),
-    0 0 60px rgba(99,102,241,0.06);
+    0 32px 80px rgba(0,0,0,0.4),
+    0 0 80px rgba(99,102,241,0.05),
+    inset 0 1px 0 rgba(255,255,255,0.04);
   max-width: 400px;
   width: 90%;
   position: relative;
   overflow: hidden;
-  animation: guestModalIn 0.4s cubic-bezier(.22,.61,.36,1);
+  animation: guestModalIn 0.45s cubic-bezier(.22,.61,.36,1);
 }
 @keyframes guestModalIn {
-  from { opacity: 0; transform: translateY(24px) scale(0.95); }
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .sell-guest-overlay__content::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #6366f1, #818cf8, #6366f1, transparent);
+  height: 2px;
+  background: linear-gradient(90deg, transparent 5%, #6366f1 35%, #818cf8 50%, #6366f1 65%, transparent 95%);
 }
 .sell-guest-overlay__logo {
-  width: 68px;
-  height: 68px;
+  width: 64px;
+  height: 64px;
   margin: 0 auto 20px;
-  border-radius: 50%;
-  background: rgba(99,102,241,0.1);
-  border: 2px solid rgba(99,102,241,0.2);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #171a21, #1b2838);
+  border: 1px solid rgba(255,255,255,0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a5b4fc;
-  animation: guestLogoPulse 3s ease-in-out infinite;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
 }
-@keyframes guestLogoPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.1); }
-  50% { box-shadow: 0 0 35px rgba(99,102,241,0.25); }
+.sell-guest-overlay__logo img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 .sell-guest-overlay__content h3 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #fff;
-  margin-bottom: 8px;
-  letter-spacing: -0.2px;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
 }
 .sell-guest-overlay__content p {
   color: rgba(255,255,255,0.4);
@@ -919,7 +923,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
   padding: 15px 24px;
   background: linear-gradient(135deg, #171a21, #1b2838);
@@ -927,11 +931,16 @@
   border-radius: 14px;
   font-size: 15px;
   font-weight: 700;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.06);
   cursor: pointer;
   transition: all 0.25s;
   text-decoration: none;
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.sell-guest-overlay__steam-logo {
+  height: 18px;
+  width: auto;
+  filter: brightness(2);
 }
 .sell-guest-overlay__steam-btn:hover {
   background: linear-gradient(135deg, #1b2838, #2a475e);

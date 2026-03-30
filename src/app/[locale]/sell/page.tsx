@@ -484,12 +484,12 @@ export default function SellPage() {
         <div className="sell-guest-overlay" id="guestOverlay">
           <div className="sell-guest-overlay__content">
             <div className="sell-guest-overlay__logo">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+              <img src="https://store.steampowered.com/favicon.ico" alt="Steam" width="32" height="32" />
             </div>
             <h3>{t("loginOverlayTitle")}</h3>
             <p>{t("loginOverlayDesc")}</p>
             <a href="/api/auth/steam" className="sell-guest-overlay__steam-btn" id="guestSignIn">
-              <svg width="20" height="20" viewBox="0 0 233 233" fill="currentColor"><path d="M108.8 0C50.5 3.8 3.8 50.5 0 108.8l58.4 24.1c5-3.4 11-5.4 17.5-5.4 1.2 0 2.3.1 3.5.2l26.2-38v-.5c0-22.1 18-40.1 40.1-40.1s40.1 18 40.1 40.1-18 40.1-40.1 40.1h-.9l-37.4 26.7c0 .9.1 1.8.1 2.7 0 16.6-13.5 30.1-30.1 30.1-14.8 0-27.2-10.8-29.6-24.9L7.4 141.4C20.5 192.3 66.8 229.7 122 229.7c71.2 0 127.3-60.5 120.7-133.3C236.6 42.8 178.8-3.3 108.8 0zm-31 188.6l-13.3-5.5c3.5 7.3 10.4 12.8 18.9 14.4 17.6 3.4 34.7-8.1 38.1-25.7 1.6-8.5-.1-17.2-4.9-24.3-4.8-7.2-12-12-20.6-13.6-8.4-1.6-16.7.1-23.5 4.4l13.7 5.7c13 5.4 19.2 20.2 13.8 33.2-5.4 13-20.2 19.2-33.2 13.8zm0 0"/><path d="M185.9 89.2c0-22.1-18-40.1-40.1-40.1s-40.1 18-40.1 40.1 18 40.1 40.1 40.1 40.1-18 40.1-40.1zm-67.3 0c0-15 12.2-27.2 27.2-27.2s27.2 12.2 27.2 27.2-12.2 27.2-27.2 27.2-27.2-12.2-27.2-27.2z"/></svg>
+              <img src="https://community.cloudflare.steamstatic.com/public/shared/images/header/logo_steam.svg?t=962016" alt="Steam" className="sell-guest-overlay__steam-logo" />
               {t("loginOverlayBtn")}
             </a>
             <a href="/" className="sell-guest-overlay__home">

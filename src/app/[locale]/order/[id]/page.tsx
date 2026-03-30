@@ -34,6 +34,7 @@ type OrderData = {
     name?: string;
   } | null;
   steamProfileUrl?: string;
+  paymentDetails?: Record<string, string>;
 };
 
 const TIMELINE_STEPS = ["CREATED", "TRADE_SENT", "TRADE_COMPLETED", "PAID"];
@@ -80,6 +81,7 @@ export default function OrderPage({
   const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [payerModalOpen, setPayerModalOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchOrder = useCallback(async (id: string) => {
@@ -127,6 +129,27 @@ export default function OrderPage({
     navigator.clipboard.writeText(order?.orderNumber ?? orderId);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const payerDetailsEntries = Object.entries(order?.paymentDetails ?? {}).filter(
+    ([, value]) => value !== null && value !== undefined && String(value).trim() !== "",
+  );
+
+  const getPayerFieldLabel = (key: string) => {
+    const labels: Record<string, { en: string; ru: string }> = {
+      email: { en: "Email", ru: "Email" },
+      country: { en: "Country", ru: "Страна" },
+      cardNumber: { en: "Card Number", ru: "Номер карты" },
+      cardName: { en: "Card Holder", ru: "Имя владельца" },
+      network: { en: "Network", ru: "Сеть" },
+      walletAddress: { en: "Wallet Address", ru: "Адрес кошелька" },
+      iban: { en: "IBAN", ru: "IBAN" },
+      swift: { en: "SWIFT", ru: "SWIFT" },
+      recipientName: { en: "Recipient Name", ru: "Имя получателя" },
+    };
+    const normalized = labels[key];
+    if (normalized) return locale === "ru" ? normalized.ru : normalized.en;
+    return key;
   };
 
   if (loading) {
@@ -355,13 +378,14 @@ export default function OrderPage({
                     className="odr-field__link"
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label={t("field.steamProfile")}
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                       <polyline points="15 3 21 3 21 9" />
                       <line x1="10" y1="14" x2="21" y2="3" />
                     </svg>
-                    {order.steamProfileUrl.replace(/^https?:\/\//, "")}
+                    <span>{locale === "ru" ? "Открыть профиль" : "Open Profile"}</span>
                   </a>
                 ) : (
                   <span className="odr-field__val">&mdash;</span>
@@ -394,7 +418,7 @@ export default function OrderPage({
               </div>
             </div>
             <div className="odr-card__actions">
-              <button className="odr-card__action-btn">
+              <button className="odr-card__action-btn" onClick={() => setPayerModalOpen(true)}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                   <circle cx="12" cy="7" r="4" />
@@ -628,6 +652,54 @@ export default function OrderPage({
             <Link href="/sell" className="odr-btn">
               {t("state.sellMore")}
             </Link>
+          </div>
+        )}
+
+        {payerModalOpen && (
+          <div className="odr-modal-overlay active" onClick={() => setPayerModalOpen(false)}>
+            <div className="odr-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="odr-modal__accent" />
+              <div className="odr-modal__head">
+                <div className="odr-modal__head-left">
+                  <div className="odr-modal__avatar">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3>{t("viewPayerDetails")}</h3>
+                    <p className="odr-modal__sub">
+                      {locale === "ru" ? "Реквизиты, указанные при оформлении" : "Payout details submitted at checkout"}
+                    </p>
+                  </div>
+                </div>
+                <button className="odr-modal__close" onClick={() => setPayerModalOpen(false)}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+              <div className="odr-modal__fields">
+                {payerDetailsEntries.length > 0 ? (
+                  payerDetailsEntries.map(([key, value]) => (
+                    <div key={key} className="odr-modal__field">
+                      <div className="odr-modal__field-head">
+                        <span className="odr-modal__label">{getPayerFieldLabel(key)}</span>
+                      </div>
+                      <div className="odr-modal__val">{String(value)}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="odr-modal__field">
+                    <div className="odr-modal__val">
+                      {locale === "ru" ? "Реквизиты не заполнены" : "No payout details provided"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -1495,6 +1495,7 @@
 .odr-status--trade-sent { background: #fef3c7 !important; color: #b45309 !important; }
 .odr-status--cancelled { background: #fee2e2 !important; color: #dc2626 !important; }
 .odr-status--paid, .odr-status--received { background: #d1fae5 !important; color: #059669 !important; }
+.odr-status--pending { background: #fef3c7 !important; color: #b45309 !important; }
 
 /* ── COPY BUTTON ── */
 .odr-copy {
@@ -1551,6 +1552,7 @@
 .odr-field__link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   font-size: 13px;
   font-weight: 600;
@@ -1560,6 +1562,8 @@
   padding: 5px 12px;
   border-radius: 8px;
   transition: all 0.15s;
+  white-space: nowrap;
+  max-width: 100%;
 }
 .odr-field__link:hover {
   background: rgba(99,102,241,0.12);

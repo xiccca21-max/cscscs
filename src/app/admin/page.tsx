@@ -75,7 +75,14 @@ export default function AdminPage() {
     } catch { return null; }
   }, []);
 
-  const fetchOrders = useCallback(async () => { const d = await safeFetch("/api/admin/orders"); if (d) setOrders(d.data?.orders ?? []); }, [safeFetch]);
+  const fetchOrders = useCallback(async () => {
+    const params = new URLSearchParams();
+    params.set("limit", "50");
+    if (ordersStatus) params.set("status", ordersStatus);
+    if (ordersSearch.trim()) params.set("search", ordersSearch.trim());
+    const d = await safeFetch(`/api/admin/orders?${params.toString()}`);
+    if (d) setOrders(d.data?.orders ?? []);
+  }, [safeFetch, ordersSearch, ordersStatus]);
   const fetchUsers = useCallback(async () => { const d = await safeFetch("/api/admin/users"); if (d) setUsers(d.data?.users ?? []); }, [safeFetch]);
   const fetchCashouts = useCallback(async () => { const d = await safeFetch("/api/admin/cashouts"); if (d) setCashouts(d.data?.cashouts ?? []); }, [safeFetch]);
   const fetchAuditLogs = useCallback(async () => { const d = await safeFetch("/api/admin/audit"); if (d) setAuditLogs(d.data?.logs ?? []); }, [safeFetch]);
@@ -112,9 +119,26 @@ export default function AdminPage() {
     const id = setInterval(() => {
       if (section === "orders") fetchOrders();
       if (section === "cashouts") fetchCashouts();
-    }, 8000);
+    }, 3000);
     return () => clearInterval(id);
   }, [adminReady, authError, section, fetchOrders, fetchCashouts]);
+
+  useEffect(() => {
+    if (!adminReady || authError || section !== "orders") return;
+    const t = setTimeout(() => {
+      fetchOrders();
+    }, 250);
+    return () => clearTimeout(t);
+  }, [ordersSearch, ordersStatus, section, adminReady, authError, fetchOrders]);
+
+  useEffect(() => {
+    if (!orderDetail?.id || section !== "orders") return;
+    const id = setInterval(async () => {
+      const d = await safeFetch(`/api/admin/orders/${orderDetail.id}`);
+      if (d?.data) setOrderDetail(d.data);
+    }, 3000);
+    return () => clearInterval(id);
+  }, [orderDetail?.id, section, safeFetch]);
 
   const handleAction = async (method: string, url: string, body?: any, successMsg?: string, onSuccess?: () => void) => {
     try {
@@ -330,6 +354,22 @@ export default function AdminPage() {
                     <div><span className="adm-label">Метод выплаты</span>{orderDetail.paymentMethod?.name ?? "-"} <span style={{ color: "var(--text-muted)", fontSize: 12 }}>({orderDetail.paymentMethod?.type})</span></div>
                     <div><span className="adm-label">Бот</span>{orderDetail.botAccount ? <><span style={{ fontWeight: 600 }}>{orderDetail.botAccount.name}</span> - <a href={orderDetail.botAccount.steamProfileUrl} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: 12 }}>{orderDetail.botAccount.steamProfileUrl}</a></> : <span style={{ color: "var(--text-muted)" }}>Не назначен</span>}</div>
                     <div><span className="adm-label">Создан</span>{new Date(orderDetail.createdAt).toLocaleString("ru-RU")}</div>
+                  </div>
+
+                  <div style={{ marginTop: 12 }}>
+                    <span className="adm-label" style={{ display: "block", marginBottom: 6 }}>Реквизиты выплаты</span>
+                    <div style={{ background: "rgba(0,0,0,0.02)", borderRadius: 8, padding: "10px 12px" }}>
+                      {orderDetail.paymentDetails && Object.keys(orderDetail.paymentDetails).length > 0 ? (
+                        Object.entries(orderDetail.paymentDetails).map(([k, v]) => (
+                          <div key={k} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "4px 0", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+                            <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{k}</span>
+                            <span style={{ fontSize: 13, textAlign: "right", wordBreak: "break-word" }}>{String(v ?? "-")}</span>
+                          </div>
+                        ))
+                      ) : (
+                        <span style={{ color: "var(--text-muted)", fontSize: 13 }}>Пользователь не указал реквизиты</span>
+                      )}
+                    </div>
                   </div>
 
                   <div style={{ marginTop: 12 }}>

@@ -414,6 +414,7 @@ export default function SellPage() {
           tradeUrl,
           paymentMethodId: dbPaymentMethods.find((m) => m.type === paymentMethod)?.id ?? paymentMethod,
           currency: "USD",
+          paymentDetails: payDetails,
         }),
       });
       const json = await res.json();
@@ -425,7 +426,7 @@ export default function SellPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [canSubmit, selectedItems, tradeUrl, paymentMethod, dbPaymentMethods]);
+  }, [canSubmit, selectedItems, tradeUrl, paymentMethod, dbPaymentMethods, payDetails]);
 
   useEffect(() => {
     if (!user) return;

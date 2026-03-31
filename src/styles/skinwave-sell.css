@@ -1023,6 +1023,7 @@
   position: relative;
   overflow: hidden;
   min-width: 0;
+  max-height: 180px;
   background: linear-gradient(160deg, #1e1b4b 0%, #252370 30%, #312e81 60%, #3730a3 100%);
   border-radius: 14px;
   border: 1px solid rgba(99,102,241,0.25);
@@ -1138,7 +1139,7 @@
   min-width: 0;
   z-index: 1;
   flex: 1;
-  overflow: visible;
+  overflow: hidden;
 }
 .sell-offer__arrow {
   position: relative;

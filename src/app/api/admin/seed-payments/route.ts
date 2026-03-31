@@ -4,10 +4,14 @@ import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 const DEFAULTS = [
-  { name: "Balance", type: "balance", commission: 0, minAmount: 0, currencies: ["USD", "RUB", "EUR"], sortOrder: 0 },
-  { name: "Карта / Card", type: "card", commission: 2.5, minAmount: 1, currencies: ["RUB", "USD", "EUR"], sortOrder: 1 },
-  { name: "Crypto", type: "crypto", commission: 1, minAmount: 5, currencies: ["USD", "EUR"], sortOrder: 2 },
-  { name: "Банк / Bank", type: "bank", commission: 3, minAmount: 10, currencies: ["RUB"], sortOrder: 3 },
+  { name: "Balance",          type: "balance",    commission: 0,   minAmount: 0,  currencies: ["USD", "RUB", "EUR"], sortOrder: 0 },
+  { name: "Visa / Mastercard", type: "card",      commission: 2.5, minAmount: 1,  currencies: ["RUB", "USD", "EUR"], sortOrder: 1 },
+  { name: "Bitcoin (BTC)",    type: "btc",        commission: 1,   minAmount: 10, currencies: ["USD", "EUR"], sortOrder: 2 },
+  { name: "USDT (TRC-20)",    type: "usdt-trc20", commission: 0,   minAmount: 5,  currencies: ["USD", "EUR"], sortOrder: 3 },
+  { name: "Ethereum (ERC-20)", type: "eth",       commission: 1,   minAmount: 10, currencies: ["USD", "EUR"], sortOrder: 4 },
+  { name: "USDT (ERC-20)",    type: "usdt-erc20", commission: 1,   minAmount: 10, currencies: ["USD", "EUR"], sortOrder: 5 },
+  { name: "Litecoin (LTC)",   type: "ltc",        commission: 1,   minAmount: 5,  currencies: ["USD", "EUR"], sortOrder: 6 },
+  { name: "Bank / Банк",      type: "bank",       commission: 3,   minAmount: 50, currencies: ["RUB", "USD"],  sortOrder: 7 },
 ];
 
 export async function POST() {
@@ -15,7 +19,7 @@ export async function POST() {
     await requireAdmin();
     const created: string[] = [];
     for (const m of DEFAULTS) {
-      const exists = await db.paymentMethod.findFirst({ where: { type: m.type } });
+      const exists = await db.paymentMethod.findFirst({ where: { OR: [{ type: m.type }, { name: m.name }] } });
       if (exists) continue;
       await db.paymentMethod.create({
         data: {

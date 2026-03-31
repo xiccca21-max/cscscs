@@ -84,14 +84,19 @@ type PaymentMethodDB = {
 };
 
 const PAYOUT_CARD_COLORS: Record<string, string> = {
-  card: "#1A1F71",
-  crypto: "#F7931A",
-  bank: "#6366f1",
-  balance: "#f59e0b",
-  sbp: "#1d4ed8",
-  qiwi: "#9333ea",
-  yoomoney: "#8b22c7",
-  other: "#6366f1",
+  balance:      "#f59e0b",
+  card:         "#1A1F71",
+  crypto:       "#F7931A",
+  btc:          "#F7931A",
+  "usdt-trc20": "#26A17B",
+  "usdt-erc20": "#26A17B",
+  eth:          "#627eea",
+  ltc:          "#bfbbbb",
+  bank:         "#6366f1",
+  sbp:          "#1d4ed8",
+  qiwi:         "#9333ea",
+  yoomoney:     "#8b22c7",
+  other:        "#6366f1",
 };
 
 function PayoutCardIcon({ type }: { type: string }) {

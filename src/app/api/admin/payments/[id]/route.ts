@@ -4,6 +4,10 @@ import { logAudit } from "@/lib/audit";
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
+const SYSTEM_TYPES = new Set([
+  "balance", "card", "btc", "usdt-trc20", "usdt-erc20", "eth", "ltc", "bank",
+]);
+
 type PatchBody = {
   name?: string;
   commission?: number;
@@ -93,6 +97,13 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: "Payment method not found" },
         { status: 404 },
+      );
+    }
+
+    if (SYSTEM_TYPES.has(existing.type)) {
+      return NextResponse.json(
+        { success: false, error: "Системный метод оплаты нельзя удалить" },
+        { status: 403 },
       );
     }
 

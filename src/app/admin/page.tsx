@@ -535,7 +535,11 @@ export default function AdminPage() {
                       <td className="adm-actions-cell">
                         <button className="adm-btn adm-btn--sm" onClick={() => { setPmEditModal(pm); setPmEditForm({ name: pm.name, commission: String(pm.commission), minAmount: String(pm.minAmount) }); }}>Ред.</button>
                         <button className="adm-btn adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/payments/${pm.id}`, { isActive: pm.isActive === false }, pm.isActive === false ? "Включён" : "Выключен", fetchPayments)}>{pm.isActive === false ? "Вкл" : "Выкл"}</button>
-                        <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => handleDeletePayment(pm.id)}>Удалить</button>
+                        {!["balance","card","btc","usdt-trc20","usdt-erc20","eth","ltc","bank"].includes(pm.type) ? (
+                          <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => handleDeletePayment(pm.id)}>Удалить</button>
+                        ) : (
+                          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", padding: "4px 8px" }}>Системный</span>
+                        )}
                       </td>
                     </tr>
                   )) : <tr><td colSpan={7} className="adm-empty">Нет методов оплаты</td></tr>}
@@ -552,11 +556,17 @@ export default function AdminPage() {
                     <label>Название<input className="adm-input" value={pmForm.name} onChange={(e) => setPmForm({ ...pmForm, name: e.target.value })} placeholder="Карта Сбербанк" /></label>
                     <label>Тип
                       <select className="adm-input adm-select" value={pmForm.type} onChange={(e) => setPmForm({ ...pmForm, type: e.target.value })}>
+                        <option value="balance">Balance</option>
                         <option value="card">Card</option>
-                        <option value="crypto">Crypto</option>
+                        <option value="btc">Bitcoin (BTC)</option>
+                        <option value="usdt-trc20">USDT (TRC-20)</option>
+                        <option value="eth">Ethereum (ETH)</option>
+                        <option value="usdt-erc20">USDT (ERC-20)</option>
+                        <option value="ltc">Litecoin (LTC)</option>
+                        <option value="bank">Bank</option>
+                        <option value="sbp">СБП</option>
                         <option value="qiwi">QIWI</option>
                         <option value="yoomoney">YooMoney</option>
-                        <option value="sbp">СБП</option>
                         <option value="other">Другое</option>
                       </select>
                     </label>

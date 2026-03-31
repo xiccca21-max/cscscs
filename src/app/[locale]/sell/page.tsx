@@ -43,14 +43,19 @@ const COMMISSION_FALLBACK: Record<string, number> = {
 };
 
 const PAY_ICONS: Record<string, { src: string; cls: string }> = {
-  balance: { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
-  card:    { src: "/icons/pay-card.png",    cls: "pay-btn__img" },
-  crypto:  { src: "/icons/pay-crypto.png",  cls: "pay-btn__img pay-btn__img--circle pay-btn__img--crypto" },
-  bank:    { src: "/icons/pay-bank.png",    cls: "pay-btn__img" },
-  sbp:     { src: "/icons/pay-bank.png",    cls: "pay-btn__img" },
-  qiwi:    { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
-  yoomoney:{ src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
-  other:   { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
+  balance:      { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
+  card:         { src: "/icons/pay-card.png",    cls: "pay-btn__img" },
+  crypto:       { src: "/icons/pay-crypto.png",  cls: "pay-btn__img pay-btn__img--circle pay-btn__img--crypto" },
+  btc:          { src: "/icons/pay-crypto.png",  cls: "pay-btn__img pay-btn__img--circle pay-btn__img--crypto" },
+  "usdt-trc20": { src: "/icons/tether.png",      cls: "pay-btn__img pay-btn__img--circle" },
+  "usdt-erc20": { src: "/icons/tether.png",      cls: "pay-btn__img pay-btn__img--circle" },
+  eth:          { src: "/icons/pay-crypto.png",  cls: "pay-btn__img pay-btn__img--circle pay-btn__img--crypto" },
+  ltc:          { src: "/icons/pay-crypto.png",  cls: "pay-btn__img pay-btn__img--circle pay-btn__img--crypto" },
+  bank:         { src: "/icons/pay-bank.png",    cls: "pay-btn__img" },
+  sbp:          { src: "/icons/pay-bank.png",    cls: "pay-btn__img" },
+  qiwi:         { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
+  yoomoney:     { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
+  other:        { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
 };
 
 const ICON_WRAP_CLS: Record<string, string> = {

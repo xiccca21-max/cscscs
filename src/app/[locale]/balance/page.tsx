@@ -35,14 +35,19 @@ type PaymentMethodDB = {
 };
 
 const CASHOUT_ICONS: Record<string, string> = {
-  card: "/icons/pay-card.png",
-  crypto: "/icons/tether.png",
-  bank: "/icons/pay-bank.png",
-  balance: "/icons/pay-balance.png",
-  sbp: "/icons/pay-bank.png",
-  qiwi: "/icons/pay-balance.png",
-  yoomoney: "/icons/pay-balance.png",
-  other: "/icons/pay-balance.png",
+  balance:      "/icons/pay-balance.png",
+  card:         "/icons/pay-card.png",
+  crypto:       "/icons/tether.png",
+  btc:          "/icons/pay-crypto.png",
+  "usdt-trc20": "/icons/tether.png",
+  "usdt-erc20": "/icons/tether.png",
+  eth:          "/icons/pay-crypto.png",
+  ltc:          "/icons/pay-crypto.png",
+  bank:         "/icons/pay-bank.png",
+  sbp:          "/icons/pay-bank.png",
+  qiwi:         "/icons/pay-balance.png",
+  yoomoney:     "/icons/pay-balance.png",
+  other:        "/icons/pay-balance.png",
 };
 
 export default function BalancePage() {

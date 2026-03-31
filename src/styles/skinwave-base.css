@@ -270,8 +270,8 @@ input, select, textarea { font: inherit; }
   font-size: 24px;
 }
 .header.is-scrolled .header__logo-icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
 }
 .header__inner {
   position: relative;
@@ -319,12 +319,10 @@ input, select, textarea { font: inherit; }
 }
 .header__logo-icon {
   flex-shrink: 0;
-  filter: drop-shadow(0 0 6px rgba(99,102,241,0.3));
-  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), filter 0.4s;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
 }
 .header__logo:hover .header__logo-icon {
   transform: scale(1.1) rotate(-4deg);
-  filter: drop-shadow(0 0 16px rgba(99,102,241,0.5));
 }
 .header__logo-text {
   line-height: 1;

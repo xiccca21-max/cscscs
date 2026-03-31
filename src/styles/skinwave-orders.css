@@ -514,8 +514,13 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+.ord-row {
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
 .ord-row:hover {
   background: #faf8ff;
+  border-left-color: #6366f1;
 }
 
 .ord-row td {

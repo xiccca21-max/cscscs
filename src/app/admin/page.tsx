@@ -457,41 +457,48 @@ export default function AdminPage() {
                   )}
 
                   {/* ── Chat ── */}
-                  <div style={{ marginTop: 16, border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, overflow: "hidden" }}>
-                    <div style={{ padding: "8px 12px", background: "rgba(99,102,241,0.15)", fontSize: 13, fontWeight: 600, color: "#c7d2fe", display: "flex", alignItems: "center", gap: 6 }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                      Чат
+                  <div className="adm-chat">
+                    <div className="adm-chat__accent" />
+                    <div className="adm-chat__header">
+                      <div className="adm-chat__header-left">
+                        <div className="adm-chat__header-icon">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        </div>
+                        <span>Чат с клиентом</span>
+                      </div>
+                      <div className="adm-chat__status">
+                        <span className="adm-chat__status-dot" />
+                        {chatMessages.length > 0 ? `${chatMessages.length} сообщ.` : "Пусто"}
+                      </div>
                     </div>
-                    <div style={{ maxHeight: 220, overflowY: "auto", padding: 10, display: "flex", flexDirection: "column", gap: 6, background: "rgba(0,0,0,0.15)" }}>
-                      {chatMessages.length === 0 && <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textAlign: "center", padding: 12 }}>Нет сообщений</span>}
+                    <div className="adm-chat__messages">
+                      {chatMessages.length === 0 && (
+                        <div className="adm-chat__empty">
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                          <span>Нет сообщений</span>
+                        </div>
+                      )}
                       {chatMessages.map((m: any) => (
-                        <div key={m.id} style={{ display: "flex", flexDirection: "column", alignItems: m.authorRole === "admin" ? "flex-end" : "flex-start" }}>
-                          <div style={{
-                            maxWidth: "80%", padding: "6px 10px", borderRadius: 8, fontSize: 12, lineHeight: 1.5,
-                            background: m.authorRole === "admin" ? "rgba(99,102,241,0.25)" : "rgba(255,255,255,0.08)",
-                            color: m.authorRole === "admin" ? "#c7d2fe" : "rgba(255,255,255,0.8)",
-                          }}>
-                            {m.body}
-                          </div>
-                          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", marginTop: 2, padding: "0 4px" }}>
-                            {m.authorRole === "admin" ? "Админ" : "Клиент"} · {new Date(m.createdAt).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+                        <div key={m.id} className={`adm-chat__msg adm-chat__msg--${m.authorRole}`}>
+                          <div className="adm-chat__bubble">{m.body}</div>
+                          <span className="adm-chat__time">
+                            {m.authorRole === "admin" ? "Вы" : "Клиент"} · {new Date(m.createdAt).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
                           </span>
                         </div>
                       ))}
                       <div ref={chatEndRef} />
                     </div>
-                    <div style={{ display: "flex", gap: 6, padding: 8, background: "rgba(0,0,0,0.1)" }}>
+                    <div className="adm-chat__input-area">
                       <input
-                        className="adm-input"
-                        style={{ flex: 1, fontSize: 12 }}
+                        className="adm-chat__input"
                         placeholder="Написать сообщение..."
                         value={chatInput}
                         onChange={(e) => setChatInput(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMsg(); } }}
                         maxLength={2000}
                       />
-                      <button className="adm-btn adm-btn--primary adm-btn--sm" disabled={chatSending || !chatInput.trim()} onClick={sendChatMsg}>
-                        {chatSending ? "..." : "→"}
+                      <button className="adm-chat__send" disabled={chatSending || !chatInput.trim()} onClick={sendChatMsg}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                       </button>
                     </div>
                   </div>

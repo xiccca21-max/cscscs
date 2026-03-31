@@ -52,6 +52,7 @@ function getTimelineIndex(status: string): number {
   const idx = TIMELINE_STEPS.indexOf(status);
   if (idx < 0) return 0;
   if (status === "TRADE_COMPLETED" || status === "PAYMENT_PENDING") return 3;
+  if (status === "PAID") return 4;
   return idx;
 }
 

@@ -2041,3 +2041,174 @@
   background: rgba(255,255,255,0.1);
   margin: 0 8px;
 }
+
+/* ══════════════════════════════════════════════
+   TRADE READY — dark themed (matches tw3 / step 1)
+   ══════════════════════════════════════════════ */
+.odr-trade-ready {
+  display: flex !important;
+  flex-direction: column !important;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%) !important;
+  border-radius: 0 0 16px 16px !important;
+  padding: 28px 24px 24px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+.odr-trade-ready::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+.odr-trade-ready::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  top: -80px;
+  right: -50px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+  border: 1px solid rgba(99,102,241,0.08);
+  pointer-events: none;
+}
+
+/* Reorder: timer → deal → note → bot → actions */
+.odr-trade-ready .odr-trade-timer { order: 1 !important; }
+.odr-trade-ready .odr-trade-deal { order: 2 !important; }
+.odr-trade-ready .odr-trade-note { order: 4 !important; }
+.odr-trade-ready .odr-trade-bot { order: 3 !important; }
+.odr-trade-ready .odr-trade-actions { order: 5 !important; }
+
+/* ── Timer (dark) ── */
+.odr-trade-ready .odr-trade-timer {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  padding: 16px 20px !important;
+  margin-bottom: 16px !important;
+  position: relative;
+  z-index: 1;
+}
+.odr-trade-ready .odr-trade-timer__head {
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+.odr-trade-ready .odr-trade-timer__head svg {
+  color: #a5b4fc !important;
+}
+.odr-trade-ready .odr-trade-timer__clock {
+  color: #f97316 !important;
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 20px rgba(249,115,22,0.3);
+}
+.odr-trade-ready .odr-trade-timer__clock--warn {
+  color: #ef4444 !important;
+  text-shadow: 0 0 20px rgba(239,68,68,0.4) !important;
+}
+
+/* ── Deal number (dark) ── */
+.odr-trade-ready .odr-trade-deal {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  border-radius: 10px !important;
+  padding: 10px 16px !important;
+  margin-bottom: 16px !important;
+  position: relative;
+  z-index: 1;
+}
+.odr-trade-ready .odr-trade-deal__label {
+  color: rgba(255,255,255,0.35) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  font-size: 11px !important;
+}
+.odr-trade-ready .odr-trade-deal__val {
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+/* ── Bot info (dark) ── */
+.odr-trade-ready .odr-trade-bot {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 10px !important;
+  margin-bottom: 12px !important;
+  position: relative;
+  z-index: 1;
+}
+.odr-trade-ready .odr-trade-bot__avatar {
+  border-color: rgba(129,140,248,0.4) !important;
+  background: linear-gradient(135deg, #1e1b4b, #312e81) !important;
+}
+.odr-trade-ready .odr-trade-bot__name--link {
+  color: #818cf8 !important;
+}
+.odr-trade-ready .odr-trade-bot__name--link:hover {
+  color: #a5b4fc !important;
+}
+.odr-trade-ready .odr-trade-bot__level {
+  color: rgba(255,255,255,0.45) !important;
+}
+
+/* ── Note / instruction (dark) ── */
+.odr-trade-ready .odr-trade-note {
+  color: rgba(255,255,255,0.4) !important;
+  font-size: 13px !important;
+  margin-bottom: 8px !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Action buttons (dark) ── */
+.odr-trade-ready .odr-trade-actions {
+  position: relative;
+  z-index: 1;
+}
+.odr-trade-ready .odr-trade-actions__btn--browser {
+  background: linear-gradient(135deg, #6366f1, #818cf8) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 16px rgba(99,102,241,0.4) !important;
+}
+.odr-trade-ready .odr-trade-actions__btn--browser:hover {
+  background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+  box-shadow: 0 4px 24px rgba(99,102,241,0.5) !important;
+}
+.odr-trade-ready .odr-trade-actions__btn--client {
+  background: rgba(255,255,255,0.06) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+.odr-trade-ready .odr-trade-actions__btn--client:hover {
+  background: rgba(255,255,255,0.1) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+  color: #fff !important;
+}
+
+/* ── Mobile overrides for dark trade-ready ── */
+@media (max-width: 768px) {
+  .odr-trade-ready {
+    padding: 20px 16px 18px !important;
+  }
+  .odr-trade-ready .odr-trade-timer {
+    flex-direction: column !important;
+    gap: 8px !important;
+    align-items: flex-start !important;
+    padding: 12px 16px !important;
+  }
+  .odr-trade-ready .odr-trade-timer__clock {
+    font-size: 26px !important;
+    align-self: flex-end !important;
+  }
+  .odr-trade-ready .odr-trade-actions {
+    grid-template-columns: 1fr !important;
+  }
+  .odr-trade-ready .odr-trade-actions__btn {
+    padding: 12px !important;
+    font-size: 11px !important;
+  }
+}

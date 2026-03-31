@@ -65,6 +65,22 @@ const ICON_WRAP_CLS: Record<string, string> = {
 
 const CRYPTO_TYPES = new Set(["crypto", "btc", "usdt-trc20", "usdt-erc20", "eth", "ltc"]);
 
+function CryptoInlineSvg({ type }: { type: string }) {
+  const s = 22;
+  switch (type) {
+    case "btc": case "crypto":
+      return <svg width={s} height={s} viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A" /><path d="M22.5 14c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.6 2.6c-.4-.1-.9-.2-1.3-.3l.7-2.6-1.7-.4-.7 2.7c-.4-.1-.7-.2-1-.2v-.1l-2.3-.6-.4 1.8s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c0 .1.1.1.1.1h-.1l-1.2 4.7c-.1.2-.3.6-.8.4 0 0-1.2-.3-1.2-.3l-.8 1.9 2.2.5c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.7.4.7-2.8c2.8.5 5 .3 5.9-2.2.7-2-.1-3.2-1.5-3.9 1.1-.3 1.9-1 2.1-2.6zm-3.7 5.2c-.5 2.1-4.1 1-5.3.7l1-3.8c1.1.3 4.9.8 4.3 3.1zm.5-5.3c-.5 1.9-3.5.9-4.4.7l.8-3.4c1 .2 4.1.7 3.6 2.7z" fill="#fff" /></svg>;
+    case "usdt-trc20": case "usdt-erc20":
+      return <svg width={s} height={s} viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B" /><path d="M17.9 17.2v0c-.1 0-.7.1-2 .1-1 0-1.7 0-1.9-.1v0c-3.8-.2-6.6-.8-6.6-1.6s2.8-1.5 6.6-1.6v2.6c.3 0 1 .1 2 .1 1.2 0 1.8-.1 1.9-.1v-2.6c3.8.2 6.6.8 6.6 1.6s-2.8 1.4-6.6 1.6zm0-3.5V11h5.3V8H8.9v3h5.3v2.7c-4.3.2-7.5 1.1-7.5 2.1s3.2 1.9 7.5 2.1v7.6h3.7v-7.6c4.3-.2 7.5-1.1 7.5-2.1s-3.2-1.9-7.5-2.1z" fill="#fff" /></svg>;
+    case "eth":
+      return <svg width={s} height={s} viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#627eea"/><path d="M16.5 4v8.87l7.5 3.35L16.5 4z" fill="#fff" opacity=".6"/><path d="M16.5 4L9 16.22l7.5-3.35V4z" fill="#fff"/><path d="M16.5 21.97v6.03L24 17.62l-7.5 4.35z" fill="#fff" opacity=".6"/><path d="M16.5 28V21.97L9 17.62 16.5 28z" fill="#fff"/></svg>;
+    case "ltc":
+      return <svg width={s} height={s} viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#bfbbbb"/><path d="M16 5l-1 .4v14.2l1 .6 7-4.1L16 5z" fill="#fff" opacity=".5"/><path d="M16 5L9 16.1l7 4.1V5z" fill="#fff"/><path d="M16 21.5l-.1.1v5.4l.1.3 7-9.8-7 4z" fill="#fff" opacity=".5"/><path d="M16 27.3v-5.8L9 17.5l7 9.8z" fill="#fff"/></svg>;
+    default:
+      return <svg width={s} height={s} viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A" /><path d="M16 8v16M10 16h12" stroke="#fff" strokeWidth="2.5" strokeLinecap="round"/></svg>;
+  }
+}
+
 const TRADE_URL_RE =
   /^https:\/\/steamcommunity\.com\/tradeoffer\/new\/\?partner=\d+&token=.+$/;
 
@@ -1210,7 +1226,6 @@ export default function SellPage() {
               {paymentMethod === "crypto" && cryptoDropOpen && cryptoMethods.length > 0 && (
                 <div className="pay-crypto-select">
                   {cryptoMethods.map((cm) => {
-                    const icon = PAY_ICONS[cm.type] ?? PAY_ICONS.crypto;
                     const active = selectedCrypto === cm.type;
                     return (
                       <button
@@ -1218,7 +1233,7 @@ export default function SellPage() {
                         className={`pay-crypto-opt${active ? " active" : ""}`}
                         onClick={() => { setSelectedCrypto(cm.type); setCryptoDropOpen(false); }}
                       >
-                        <img src={icon.src} alt={cm.name} className={icon.cls} width="20" height="20" />
+                        <CryptoInlineSvg type={cm.type} />
                         <span>{cm.name}</span>
                         <span className="pay-crypto-opt__fee">{parseFloat(cm.commission)}%</span>
                       </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 
 type Section = "orders" | "users" | "payments" | "prices" | "balances" | "cashouts" | "bots" | "referrals" | "logs" | "social";
@@ -41,6 +41,11 @@ export default function AdminPage() {
   const [botUrlInput, setBotUrlInput] = useState("");
   const [tradeOfferUrlInput, setTradeOfferUrlInput] = useState("");
   const [botResolving, setBotResolving] = useState(false);
+
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatSending, setChatSending] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [adminReady, setAdminReady] = useState(false);
 
@@ -140,6 +145,39 @@ export default function AdminPage() {
     }, 3000);
     return () => clearInterval(id);
   }, [orderDetail?.id, section, safeFetch]);
+
+  useEffect(() => {
+    if (!orderDetail?.id) { setChatMessages([]); return; }
+    let cancelled = false;
+    const fetchMsgs = async () => {
+      const d = await safeFetch(`/api/admin/orders/${orderDetail.id}/messages`);
+      if (!cancelled && d?.data) setChatMessages(d.data);
+    };
+    fetchMsgs();
+    const iv = setInterval(fetchMsgs, 4000);
+    return () => { cancelled = true; clearInterval(iv); };
+  }, [orderDetail?.id, safeFetch]);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+  const sendChatMsg = async () => {
+    if (!chatInput.trim() || !orderDetail?.id || chatSending) return;
+    setChatSending(true);
+    try {
+      const r = await fetch(`/api/admin/orders/${orderDetail.id}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: chatInput.trim() }),
+      });
+      const j = await r.json();
+      if (j.success) {
+        setChatMessages((prev) => [...prev, j.data]);
+        setChatInput("");
+      }
+    } finally { setChatSending(false); }
+  };
 
   const handleAction = async (method: string, url: string, body?: any, successMsg?: string, onSuccess?: () => void) => {
     try {
@@ -417,6 +455,46 @@ export default function AdminPage() {
                       }}>{botResolving ? "Загрузка..." : "Трейд отправлен"}</button>
                     </div>
                   )}
+
+                  {/* ── Chat ── */}
+                  <div style={{ marginTop: 16, border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, overflow: "hidden" }}>
+                    <div style={{ padding: "8px 12px", background: "rgba(99,102,241,0.15)", fontSize: 13, fontWeight: 600, color: "#c7d2fe", display: "flex", alignItems: "center", gap: 6 }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      Чат
+                    </div>
+                    <div style={{ maxHeight: 220, overflowY: "auto", padding: 10, display: "flex", flexDirection: "column", gap: 6, background: "rgba(0,0,0,0.15)" }}>
+                      {chatMessages.length === 0 && <span style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", textAlign: "center", padding: 12 }}>Нет сообщений</span>}
+                      {chatMessages.map((m: any) => (
+                        <div key={m.id} style={{ display: "flex", flexDirection: "column", alignItems: m.authorRole === "admin" ? "flex-end" : "flex-start" }}>
+                          <div style={{
+                            maxWidth: "80%", padding: "6px 10px", borderRadius: 8, fontSize: 12, lineHeight: 1.5,
+                            background: m.authorRole === "admin" ? "rgba(99,102,241,0.25)" : "rgba(255,255,255,0.08)",
+                            color: m.authorRole === "admin" ? "#c7d2fe" : "rgba(255,255,255,0.8)",
+                          }}>
+                            {m.body}
+                          </div>
+                          <span style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", marginTop: 2, padding: "0 4px" }}>
+                            {m.authorRole === "admin" ? "Админ" : "Клиент"} · {new Date(m.createdAt).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                      ))}
+                      <div ref={chatEndRef} />
+                    </div>
+                    <div style={{ display: "flex", gap: 6, padding: 8, background: "rgba(0,0,0,0.1)" }}>
+                      <input
+                        className="adm-input"
+                        style={{ flex: 1, fontSize: 12 }}
+                        placeholder="Написать сообщение..."
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMsg(); } }}
+                        maxLength={2000}
+                      />
+                      <button className="adm-btn adm-btn--primary adm-btn--sm" disabled={chatSending || !chatInput.trim()} onClick={sendChatMsg}>
+                        {chatSending ? "..." : "→"}
+                      </button>
+                    </div>
+                  </div>
 
                   <div className="adm-modal__actions" style={{ marginTop: 16 }}>
                     {orderDetail.status === "TRADE_SENT" && (

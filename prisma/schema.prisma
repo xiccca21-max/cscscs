@@ -71,11 +71,24 @@ model Order {
   items               OrderItem[]
   balanceTransactions  BalanceTransaction[]
   statusHistory        OrderStatusHistory[]
+  messages            OrderMessage[]
 
   @@index([userId])
   @@index([orderNumber])
   @@index([status])
   @@index([steamId])
+}
+
+model OrderMessage {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  authorId   String
+  authorRole String
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([orderId])
 }
 
 model OrderItem {

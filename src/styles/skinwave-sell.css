@@ -5374,6 +5374,7 @@
 .gmix-modal__badge img {
   border-radius: 4px;
   flex-shrink: 0;
+  filter: brightness(0) invert(1);
 }
 .gmix-modal__badge--cs2 {
   background: rgba(245, 158, 11, 0.08);

@@ -100,6 +100,12 @@ export default function OrderPage({
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatSending, setChatSending] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
   const fetchOrder = useCallback(async (id: string) => {
     try {
       const r = await fetch(`/api/orders/${id}`);
@@ -171,6 +177,42 @@ export default function OrderPage({
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [order?.tradeSentAt, order?.status]);
+
+  useEffect(() => {
+    if (!orderId) return;
+    let cancelled = false;
+    const fetchMsgs = async () => {
+      try {
+        const r = await fetch(`/api/orders/${orderId}/messages`);
+        const j = await r.json();
+        if (!cancelled && j.success) setChatMessages(j.data);
+      } catch {}
+    };
+    fetchMsgs();
+    const iv = setInterval(fetchMsgs, 5000);
+    return () => { cancelled = true; clearInterval(iv); };
+  }, [orderId]);
+
+  useEffect(() => {
+    if (chatOpen) chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages, chatOpen]);
+
+  const sendChatMessage = async () => {
+    if (!chatInput.trim() || !orderId || chatSending) return;
+    setChatSending(true);
+    try {
+      const r = await fetch(`/api/orders/${orderId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ body: chatInput.trim() }),
+      });
+      const j = await r.json();
+      if (j.success) {
+        setChatMessages((prev) => [...prev, j.data]);
+        setChatInput("");
+      }
+    } finally { setChatSending(false); }
+  };
 
   const formatCountdown = (secs: number) => {
     const m = Math.floor(secs / 60).toString().padStart(2, "0");
@@ -896,11 +938,15 @@ export default function OrderPage({
 
                 {/* Confirm buttons */}
                 <div className="odr-trade-actions">
-                  <a
-                    href={tradeOfferUrl ?? botSteamUrl ?? "#"}
+                  <button
+                    type="button"
                     className="odr-trade-actions__btn odr-trade-actions__btn--browser"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    onClick={() => {
+                      const url = tradeOfferUrl ?? botSteamUrl ?? "#";
+                      if (url === "#") return;
+                      const w = window.open("about:blank", "_blank");
+                      if (w) { w.location.href = url; } else { window.location.href = url; }
+                    }}
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <circle cx="12" cy="12" r="10" />
@@ -908,16 +954,28 @@ export default function OrderPage({
                       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
                     </svg>
                     <span>{t("confirmBrowser")}</span>
-                  </a>
-                  <a
-                    href={tradeOfferId ? `steam://url/ShowTradeOffer/${tradeOfferId}` : `steam://openurl/${botSteamUrl ?? ""}`}
+                  </button>
+                  <button
+                    type="button"
                     className="odr-trade-actions__btn odr-trade-actions__btn--client"
+                    onClick={() => {
+                      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                      if (isMobile) {
+                        const url = tradeOfferUrl ?? botSteamUrl;
+                        if (url) window.location.href = url;
+                      } else {
+                        const url = tradeOfferId
+                          ? `steam://url/ShowTradeOffer/${tradeOfferId}`
+                          : `steam://openurl/${botSteamUrl ?? ""}`;
+                        window.location.href = url;
+                      }
+                    }}
                   >
                     <svg width="16" height="16" viewBox="0 0 256 259" fill="currentColor">
                       <path d="M127.779 0C57.895 0 .69 55.324.046 124.599L86.729 160.3a35.896 35.896 0 0 1 20.365-6.3l30.472-44.12v-.655c0-26.638 21.674-48.311 48.32-48.311 26.643 0 48.317 21.673 48.317 48.324 0 26.642-21.674 48.316-48.317 48.316h-1.124l-43.412 30.993c0 .349.018.697.018 1.037 0 19.98-16.241 36.227-36.233 36.227-17.616 0-32.323-12.627-35.56-29.349L4.05 168.46C20.455 220.12 69.244 258.218 127.779 258.218c70.556 0 127.774-57.214 127.774-127.776S198.335 0 127.779 0" />
                     </svg>
                     <span>{t("confirmClient")}</span>
-                  </a>
+                  </button>
                 </div>
               </div>
             )}
@@ -983,33 +1041,51 @@ export default function OrderPage({
           </div>
         </div>
 
-        {/* ── Need Help? ── */}
-        <div
-          className="odr-help odr-fade"
-          style={{ "--delay": 5 } as React.CSSProperties}
-        >
-          <div className="odr-help__decor">
-            <div className="odr-help__decor-circle"></div>
-            <div className="odr-help__decor-grid"></div>
-          </div>
-          <div className="odr-help__icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <circle cx="12" cy="17" r=".5" fill="currentColor" />
-            </svg>
-          </div>
-          <div className="odr-help__text">
-            <span>{t("needHelp")}</span>
-            <Link href="/faq">{t("visitFaq")}</Link> {t("helpOr")}{" "}
-            <a href="#">{t("contactSupport")}</a>
-          </div>
-          <a href="#" className="odr-help__btn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        {/* ── Chat ── */}
+        <div className="odr-chat odr-fade" style={{ "--delay": 5 } as React.CSSProperties}>
+          <button className="odr-chat__toggle" onClick={() => setChatOpen((o) => !o)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
             <span>{t("chat")}</span>
-          </a>
+            {chatMessages.length > 0 && <span className="odr-chat__badge">{chatMessages.length}</span>}
+            <svg className={`odr-chat__chevron${chatOpen ? " open" : ""}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+          </button>
+          {chatOpen && (
+            <div className="odr-chat__body">
+              <div className="odr-chat__messages">
+                {chatMessages.length === 0 && (
+                  <div className="odr-chat__empty">
+                    {locale === "ru" ? "Нет сообщений. Напишите, если вам нужна помощь." : "No messages yet. Write if you need help."}
+                  </div>
+                )}
+                {chatMessages.map((m: any) => (
+                  <div key={m.id} className={`odr-chat__msg odr-chat__msg--${m.authorRole}`}>
+                    <div className="odr-chat__bubble">
+                      {m.body}
+                    </div>
+                    <span className="odr-chat__time">
+                      {m.authorRole === "admin" ? (locale === "ru" ? "Поддержка" : "Support") : (locale === "ru" ? "Вы" : "You")} · {new Date(m.createdAt).toLocaleTimeString(locale === "ru" ? "ru-RU" : "en-US", { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                ))}
+                <div ref={chatEndRef} />
+              </div>
+              <div className="odr-chat__input-row">
+                <input
+                  className="odr-chat__input"
+                  placeholder={locale === "ru" ? "Ваше сообщение..." : "Your message..."}
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); } }}
+                  maxLength={2000}
+                />
+                <button className="odr-chat__send" disabled={chatSending || !chatInput.trim()} onClick={sendChatMessage}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Cancelled state is now inside Trade Information card */}

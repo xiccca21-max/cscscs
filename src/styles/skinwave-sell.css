@@ -17,7 +17,7 @@
 .sell-page-wrap::after {
   content: '';
   position: fixed;
-  top: var(--header-h, 64px);
+  top: calc(var(--header-h, 64px) - 6px);
   bottom: 0;
   right: 30%;
   width: 1px;
@@ -1857,14 +1857,14 @@
 /* ── Sidebar (Right) ── */
 .sell-sidebar {
   position: fixed;
-  top: var(--header-h, 64px);
+  top: calc(var(--header-h, 64px) - 6px);
   right: 0;
   width: 30%;
-  height: calc(100vh - var(--header-h, 64px));
+  height: calc(100vh - var(--header-h, 64px) + 6px);
   overflow-y: auto;
   background: linear-gradient(180deg, #f4f3fa 0%, #eceaf6 50%, #e6e4f2 100%);
   border-left: none;
-  padding: 6px 14px 14px 14px;
+  padding: 12px 14px 14px 14px;
   display: flex;
   flex-direction: column;
   gap: 8px;

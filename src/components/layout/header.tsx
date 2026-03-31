@@ -111,18 +111,23 @@ export function Header() {
             <Link href="/" className="header__logo">
               <svg className="header__logo-icon" width="28" height="28" viewBox="0 0 100 100" fill="none">
                 <defs>
-                  <linearGradient id="logoGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                  <linearGradient id="logoGrad" x1="10" y1="10" x2="90" y2="90" gradientUnits="userSpaceOnUse">
                     <stop offset="0%" stopColor="#4338ca"/>
                     <stop offset="50%" stopColor="#6366f1"/>
                     <stop offset="100%" stopColor="#818cf8"/>
                   </linearGradient>
                 </defs>
                 <g transform="translate(50,50) rotate(45)">
-                  <rect className="header__logo-block header__logo-block--left" x="-38" y="-12" width="32" height="24" rx="5" fill="url(#logoGrad)"/>
-                  <rect className="header__logo-block header__logo-block--right" x="6" y="-12" width="32" height="24" rx="5" fill="url(#logoGrad)"/>
-                  <rect className="header__logo-diamond header__logo-diamond--top" x="-4" y="-28" width="8" height="8" rx="2" fill="url(#logoGrad)"/>
-                  <rect className="header__logo-diamond header__logo-diamond--bottom" x="-4" y="20" width="8" height="8" rx="2" fill="url(#logoGrad)"/>
-                  <line className="header__logo-slash" x1="-12" y1="12" x2="12" y2="-12" stroke="#fff" strokeWidth="5" strokeLinecap="round"/>
+                  {/* Left (bottom-left in screen) block */}
+                  <rect className="header__logo-block header__logo-block--left" x="-44" y="-16" width="40" height="32" rx="7" fill="url(#logoGrad)"/>
+                  {/* Right (top-right in screen) block */}
+                  <rect className="header__logo-block header__logo-block--right" x="4" y="-16" width="40" height="32" rx="7" fill="url(#logoGrad)"/>
+                  {/* Top-right small diamond (top-left in screen) */}
+                  <rect className="header__logo-diamond header__logo-diamond--top" x="-7" y="-32" width="14" height="14" rx="4" fill="url(#logoGrad)"/>
+                  {/* Bottom-left small diamond (bottom-right in screen) */}
+                  <rect className="header__logo-diamond header__logo-diamond--bottom" x="-7" y="18" width="14" height="14" rx="4" fill="url(#logoGrad)"/>
+                  {/* White diagonal slash */}
+                  <line className="header__logo-slash" x1="-20" y1="20" x2="20" y2="-20" stroke="#fff" strokeWidth="7" strokeLinecap="round"/>
                 </g>
               </svg>
               <span className="header__logo-text">SKINSELL</span>

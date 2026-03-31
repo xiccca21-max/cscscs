@@ -216,12 +216,12 @@ export default function HomePage() {
   /* ── B) Reviews carousel ── */
   const [liveReviews, setLiveReviews] = useState<typeof REVIEWS | null>(null);
   useEffect(() => {
-    fetch("/api/reviews").then((r) => r.json()).then((d) => {
+    fetch(`/api/reviews?locale=${locale}`).then((r) => r.json()).then((d) => {
       if (d?.data?.length) {
         setLiveReviews(d.data.map((r: any) => ({ user: r.user, steam: r.steam, avatar: r.avatar, en: r.textEn, ru: r.textRu, game: r.game, stars: r.stars })));
       }
     }).catch(() => {});
-  }, []);
+  }, [locale]);
   const reviewData = liveReviews ?? REVIEWS;
   const slideCount = reviewData.length;
 

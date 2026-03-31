@@ -55,6 +55,7 @@ export default function AdminPage() {
   const [reviewsList, setReviewsList] = useState<any[]>([]);
   const [reviewModal, setReviewModal] = useState<any | null>(null);
   const [reviewForm, setReviewForm] = useState({ user: "", steam: "", avatar: "", textEn: "", textRu: "", game: "CS2", stars: "5" });
+  const [reviewFetching, setReviewFetching] = useState(false);
 
   const [exchangeRate, setExchangeRate] = useState("");
   const [eurRate, setEurRate] = useState("");
@@ -995,31 +996,33 @@ export default function AdminPage() {
               <h1>Отзывы ({reviewsList.length})</h1>
               <button className="adm-btn adm-btn--primary" onClick={() => { setReviewModal("new"); setReviewForm({ user: "", steam: "", avatar: "", textEn: "", textRu: "", game: "CS2", stars: "5" }); }}>+ Добавить</button>
             </div>
-            <div className="adm-card">
-              <table className="adm-table">
-                <thead><tr><th>Юзер</th><th>Игра</th><th>★</th><th>Текст (EN)</th><th>Steam</th><th>Активен</th><th></th></tr></thead>
-                <tbody>
-                  {reviewsList.map((rv) => (
-                    <tr key={rv.id}>
-                      <td style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        {rv.avatar && <img src={rv.avatar} alt="" width="24" height="24" style={{ borderRadius: 6 }} />}
-                        <span style={{ maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{rv.user}</span>
-                      </td>
-                      <td>{rv.game}</td>
-                      <td>{rv.stars}</td>
-                      <td style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{rv.textEn}</td>
-                      <td><a href={rv.steam} target="_blank" rel="noopener" style={{ color: "#818cf8", fontSize: 11 }}>профиль</a></td>
-                      <td>{rv.isActive ? "✅" : "❌"}</td>
-                      <td className="adm-actions-cell">
-                        <button className="adm-btn adm-btn--sm" onClick={() => { setReviewModal(rv); setReviewForm({ user: rv.user, steam: rv.steam, avatar: rv.avatar ?? "", textEn: rv.textEn, textRu: rv.textRu, game: rv.game, stars: String(rv.stars) }); }}>Ред.</button>
-                        <button className="adm-btn adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/reviews/${rv.id}`, { isActive: !rv.isActive }, rv.isActive ? "Скрыт" : "Показан", fetchReviews)}>{rv.isActive ? "Скрыть" : "Показать"}</button>
-                        <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={async () => { if (!confirm("Удалить отзыв?")) return; await handleAction("DELETE", `/api/admin/reviews/${rv.id}`, undefined, "Удалён", fetchReviews); }}>Удалить</button>
-                      </td>
-                    </tr>
-                  ))}
-                  {reviewsList.length === 0 && <tr><td colSpan={7} className="adm-empty">Нет отзывов</td></tr>}
-                </tbody>
-              </table>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 12 }}>
+              {reviewsList.map((rv) => (
+                <div key={rv.id} className="adm-card" style={{ padding: 14, display: "flex", flexDirection: "column", gap: 8, opacity: rv.isActive ? 1 : 0.5 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    {rv.avatar ? <img src={rv.avatar} alt="" width="36" height="36" style={{ borderRadius: 8, flexShrink: 0 }} /> : <div style={{ width: 36, height: 36, borderRadius: 8, background: "var(--accent-soft)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, color: "var(--accent)" }}>{(rv.user || "?")[0]}</div>}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{rv.user}</div>
+                      <div style={{ fontSize: 11, color: "var(--muted)", display: "flex", gap: 8, alignItems: "center" }}>
+                        <span>{rv.game}</span>
+                        <span>{"★".repeat(rv.stars)}{"☆".repeat(5 - rv.stars)}</span>
+                        <a href={rv.steam} target="_blank" rel="noopener" style={{ color: "var(--accent)", textDecoration: "none" }}>Steam</a>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6, background: rv.isActive ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)", color: rv.isActive ? "#22c55e" : "#ef4444", fontWeight: 600 }}>{rv.isActive ? "Активен" : "Скрыт"}</span>
+                  </div>
+                  {rv.textRu && <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.4 }}><b>RU:</b> {rv.textRu.length > 100 ? rv.textRu.slice(0, 100) + "…" : rv.textRu}</div>}
+                  {rv.textEn && <div style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.4 }}><b>EN:</b> {rv.textEn.length > 100 ? rv.textEn.slice(0, 100) + "…" : rv.textEn}</div>}
+                  {!rv.textRu && !rv.textEn && <div style={{ fontSize: 12, color: "var(--muted)" }}>Нет текста</div>}
+                  <div style={{ display: "flex", gap: 6, marginTop: "auto" }}>
+                    <button className="adm-btn adm-btn--sm" onClick={() => { setReviewModal(rv); setReviewForm({ user: rv.user, steam: rv.steam, avatar: rv.avatar ?? "", textEn: rv.textEn ?? "", textRu: rv.textRu ?? "", game: rv.game, stars: String(rv.stars) }); }}>Ред.</button>
+                    <button className="adm-btn adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/reviews/${rv.id}`, { isActive: !rv.isActive }, rv.isActive ? "Скрыт" : "Показан", fetchReviews)}>{rv.isActive ? "Скрыть" : "Показать"}</button>
+                    <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={async () => { if (!confirm("Удалить отзыв?")) return; await handleAction("DELETE", `/api/admin/reviews/${rv.id}`, undefined, "Удалён", fetchReviews); }}>Удалить</button>
+                  </div>
+                </div>
+              ))}
+              {reviewsList.length === 0 && <div className="adm-card" style={{ padding: 24, textAlign: "center", color: "var(--muted)" }}>Нет отзывов</div>}
             </div>
 
             {reviewModal && (
@@ -1027,11 +1030,28 @@ export default function AdminPage() {
                 <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
                   <h2>{reviewModal === "new" ? "Новый отзыв" : "Редактировать отзыв"}</h2>
                   <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <label>Ссылка в Steam
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <input className="adm-input" placeholder="https://steamcommunity.com/id/..." value={reviewForm.steam} onChange={(e) => setReviewForm((p) => ({ ...p, steam: e.target.value }))} style={{ flex: 1 }} />
+                        <button className="adm-btn adm-btn--primary" disabled={reviewFetching || !reviewForm.steam.includes("steamcommunity.com")} onClick={async () => {
+                          setReviewFetching(true);
+                          try {
+                            const r = await fetch(`/api/steam/profile?url=${encodeURIComponent(reviewForm.steam)}`);
+                            const d = await r.json();
+                            if (d.success && d.data) {
+                              setReviewForm((p) => ({ ...p, user: d.data.name || p.user, avatar: d.data.avatarUrl || p.avatar }));
+                              addToast("Данные загружены из Steam");
+                            } else { addToast("Не удалось загрузить профиль"); }
+                          } catch { addToast("Ошибка загрузки"); }
+                          setReviewFetching(false);
+                        }}>{reviewFetching ? "..." : "Загрузить"}</button>
+                      </div>
+                    </label>
+                    {reviewForm.avatar && <div style={{ display: "flex", alignItems: "center", gap: 10 }}><img src={reviewForm.avatar} alt="" width="40" height="40" style={{ borderRadius: 8 }} /><span style={{ fontSize: 12, color: "var(--muted)" }}>Аватар загружен</span></div>}
                     <label>Имя пользователя<input className="adm-input" value={reviewForm.user} onChange={(e) => setReviewForm((p) => ({ ...p, user: e.target.value }))} /></label>
-                    <label>Ссылка в Steam<input className="adm-input" placeholder="https://steamcommunity.com/id/..." value={reviewForm.steam} onChange={(e) => setReviewForm((p) => ({ ...p, steam: e.target.value }))} /></label>
-                    <label>Аватар (URL)<input className="adm-input" placeholder="https://avatars.steamstatic.com/..." value={reviewForm.avatar} onChange={(e) => setReviewForm((p) => ({ ...p, avatar: e.target.value }))} /></label>
-                    <label>Текст (EN)<textarea className="adm-input" rows={3} value={reviewForm.textEn} onChange={(e) => setReviewForm((p) => ({ ...p, textEn: e.target.value }))} /></label>
-                    <label>Текст (RU)<textarea className="adm-input" rows={3} value={reviewForm.textRu} onChange={(e) => setReviewForm((p) => ({ ...p, textRu: e.target.value }))} /></label>
+                    <label>Аватар (URL)<input className="adm-input" placeholder="Авто из Steam или вставьте вручную" value={reviewForm.avatar} onChange={(e) => setReviewForm((p) => ({ ...p, avatar: e.target.value }))} /></label>
+                    <label>Текст (RU) <span style={{ fontSize: 10, color: "var(--muted)" }}>— если пусто, отзыв не покажется на RU версии</span><textarea className="adm-input" rows={3} value={reviewForm.textRu} onChange={(e) => setReviewForm((p) => ({ ...p, textRu: e.target.value }))} /></label>
+                    <label>Текст (EN) <span style={{ fontSize: 10, color: "var(--muted)" }}>— если пусто, отзыв не покажется на EN версии</span><textarea className="adm-input" rows={3} value={reviewForm.textEn} onChange={(e) => setReviewForm((p) => ({ ...p, textEn: e.target.value }))} /></label>
                     <div style={{ display: "flex", gap: 10 }}>
                       <label style={{ flex: 1 }}>Игра
                         <select className="adm-input" value={reviewForm.game} onChange={(e) => setReviewForm((p) => ({ ...p, game: e.target.value }))}>

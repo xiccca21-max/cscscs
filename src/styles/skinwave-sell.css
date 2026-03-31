@@ -5,13 +5,14 @@
 /* Page wrapper */
 .sell-page-wrap {
   display: grid;
-  grid-template-columns: 1fr 30%;
+  grid-template-columns: 1fr;
   grid-template-rows: auto 1fr;
   min-height: calc(100vh - var(--header-h) + 180px);
   overflow-x: hidden;
   overflow-y: visible;
   position: relative;
   max-width: 100%;
+  margin-right: 30%;
 }
 .sell-page-wrap::after {
   content: '';
@@ -1855,12 +1856,11 @@
 
 /* ── Sidebar (Right) ── */
 .sell-sidebar {
-  position: sticky;
-  top: calc(var(--header-h, 64px) - 6px);
-  align-self: start;
-  grid-column: 2;
-  grid-row: 1 / -1;
-  max-height: calc(100vh - var(--header-h, 64px));
+  position: fixed;
+  top: var(--header-h, 64px);
+  right: 0;
+  width: 30%;
+  height: calc(100vh - var(--header-h, 64px));
   overflow-y: auto;
   background: linear-gradient(180deg, #f4f3fa 0%, #eceaf6 50%, #e6e4f2 100%);
   border-left: none;
@@ -3374,10 +3374,10 @@
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 1024px) {
   .sell-page-wrap {
-    grid-template-columns: 1fr 35%;
+    margin-right: 35%;
   }
-  .sell-page-wrap::after {
-    right: 35%;
+  .sell-sidebar {
+    width: 35%;
   }
   .sell-inventory__grid {
     grid-template-columns: repeat(5, 1fr);
@@ -3393,7 +3393,7 @@
     overflow-x: hidden;
     overflow-y: visible;
     max-width: 100vw;
-    grid-template-columns: 1fr;
+    margin-right: 0;
   }
   .sell-topbar {
     gap: 8px;
@@ -3438,9 +3438,6 @@
     right: auto;
     height: auto;
     max-height: none;
-    align-self: auto;
-    grid-column: auto;
-    grid-row: auto;
     background: transparent;
     border-left: none;
     border-top: 1px solid #e4e2ee;

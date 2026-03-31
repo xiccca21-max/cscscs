@@ -816,22 +816,24 @@ export default function SellPage() {
                 </div>
               </div>
               <div className="sell-toolbar__left">
-                <div className="sell-toolbar__wear-filters" id="wearFilters">
-                  {(["all", "FN", "MW", "FT", "WW", "BS"] as const).map((w) => {
-                    const tooltips: Record<string, string> = { all: "All Conditions", FN: "Factory New", MW: "Minimal Wear", FT: "Field-Tested", WW: "Well-Worn", BS: "Battle-Scarred" };
-                    return (
-                      <button
-                        key={w}
-                        className={`wear-pill${activeWear === w ? " active" : ""}`}
-                        data-wear={w}
-                        data-tooltip={tooltips[w]}
-                        onClick={() => setActiveWear(w)}
-                      >
-                        {w === "all" ? t("all") : w}
-                      </button>
-                    );
-                  })}
-                </div>
+                {activeGame === "cs2" && (
+                  <div className="sell-toolbar__wear-filters" id="wearFilters">
+                    {(["all", "FN", "MW", "FT", "WW", "BS"] as const).map((w) => {
+                      const tooltips: Record<string, string> = { all: "All Conditions", FN: "Factory New", MW: "Minimal Wear", FT: "Field-Tested", WW: "Well-Worn", BS: "Battle-Scarred" };
+                      return (
+                        <button
+                          key={w}
+                          className={`wear-pill${activeWear === w ? " active" : ""}`}
+                          data-wear={w}
+                          data-tooltip={tooltips[w]}
+                          onClick={() => setActiveWear(w)}
+                        >
+                          {w === "all" ? t("all") : w}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
                 <div className="sell-toolbar__price-range">
                   <span className="sell-toolbar__price-icon">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>

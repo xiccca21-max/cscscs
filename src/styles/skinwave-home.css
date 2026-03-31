@@ -1271,12 +1271,9 @@ section + section::before {
 .carousel__arrow--prev { left: max(16px, calc(50% - 580px)); }
 .carousel__arrow--next { right: max(16px, calc(50% - 580px)); }
 
-/* Dots */
+/* Dots — hidden, navigation via arrows only */
 .carousel__dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 28px;
+  display: none;
 }
 .carousel__dot {
   width: 10px; height: 10px;

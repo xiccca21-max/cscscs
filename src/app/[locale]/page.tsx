@@ -14,7 +14,38 @@ const PAYOUT_NAMES = [
   "pinkgose", "maz1k", "MADMAX", "mARNESY", "Mag1st0r",
 ];
 
-const SLIDE_COUNT = 7;
+const REVIEWS = [
+  { user: "DonationTrashBot", steam: "https://steamcommunity.com/id/DonationTrashBot", text: "Listed a few surplus items and the whole flow took minutes. Payout hit my wallet faster than I expected.", game: "CS2", av1: "#1e3a5f", av2: "#4a90d9", stars: 5 },
+  { user: "nZarr", steam: "https://steamcommunity.com/id/nZarr", text: "Quick payout, love it! Super easy to list skins.", game: "CS2", av1: "#2d1f3d", av2: "#c77dff", stars: 5 },
+  { user: "ubrtwelie", steam: "https://steamcommunity.com/id/ubrtwelie", text: "Sold my knife here after comparing a few sites — best offer and zero hassle.", game: "CS2", av1: "#0f2d26", av2: "#3ecf8e", stars: 5 },
+  { user: "amnyam_mode", steam: "https://steamcommunity.com/id/amnyam_mode", text: "Interface is clean and I didn't have to dig through menus. Cashout was smooth.", game: "CS2", av1: "#3d2817", av2: "#e8a838", stars: 4 },
+  { user: "hotojour", steam: "https://steamcommunity.com/id/hotojour", text: "First time selling skins online and it was straightforward from login to payout. Good prices.", game: "Dota 2", av1: "#1a0a2e", av2: "#ff6b9d", stars: 5 },
+  { user: "deshumitsu", steam: "https://steamcommunity.com/id/deshumitsu", text: "Traded out some Dota arcanas. Speed was great — order cleared and I had funds the same evening.", game: "Dota 2", av1: "#142850", av2: "#64b5f6", stars: 5 },
+  { user: "lilxant", steam: "https://steamcommunity.com/id/lilxant", text: "Reliable for high-tier CS skins. Support answered my question quickly too.", game: "CS2", av1: "#2e1065", av2: "#a78bfa", stars: 5 },
+  { user: "kerfmit", steam: "https://steamcommunity.com/id/kerfmit", text: "Payout came through without chasing anyone. Ease of use is top tier.", game: "CS2", av1: "#0d3b2c", av2: "#2dd4bf", stars: 5 },
+  { user: "vikk01", steam: "https://steamcommunity.com/id/vikk01", text: "Solid rates on gloves. Everything felt transparent; no surprises when the sale completed.", game: "CS2", av1: "#3b0764", av2: "#f472b6", stars: 4 },
+  { user: "SilenseMS", steam: "https://steamcommunity.com/id/SilenseMS", text: "Been using this for a while. Consistent speed, good liquidity, prices track the market well.", game: "CS2", av1: "#1c1917", av2: "#a8a29e", stars: 5 },
+  { user: "ProVatan", steam: "https://steamcommunity.com/id/ProVatan", text: "Quick sale on a mid-tier rifle skin. Site is easy to navigate and the payout didn't drag.", game: "CS2", av1: "#7f1d1d", av2: "#fca5a5", stars: 5 },
+  { user: "TheTanyaVonDegurechaff", steam: "https://steamcommunity.com/id/TheTanyaVonDegurechaff", text: "Long review short: I trust this place more than random Discord buyers. Fair quote, fast settlement.", game: "Dota 2", av1: "#312e81", av2: "#818cf8", stars: 5 },
+  { user: "alwaysbeingmad", steam: "https://steamcommunity.com/id/alwaysbeingmad", text: "TF2 unusual sold without drama. Price was competitive and I didn't have to babysit the trade.", game: "TF2", av1: "#713f12", av2: "#fbbf24", stars: 5 },
+  { user: "sh_oomg", steam: "https://steamcommunity.com/id/sh_oomg", text: "Rust skins aren't always easy to cash out — here it was painless and the offer beat my expectations.", game: "Rust", av1: "#422006", av2: "#fb923c", stars: 5 },
+  { user: "rubututu", steam: "https://steamcommunity.com/id/rubututu", text: "Five stars for simplicity. Upload, confirm, get paid — that's it.", game: "CS2", av1: "#134e4a", av2: "#5eead4", stars: 5 },
+  { user: "MES4000", steam: "https://steamcommunity.com/id/MES4000", text: "Good experience overall. Payout arrived quickly once the trade was accepted.", game: "CS2", av1: "#4c0519", av2: "#fb7185", stars: 4 },
+  { user: "Af1_piece", steam: "https://steamcommunity.com/id/Af1_piece", text: "CS inventory cleanup done right — sold a stack of skins in one session, rates were fair.", game: "CS2", av1: "#164e63", av2: "#38bdf8", stars: 5 },
+  { user: "m8chnix", steam: "https://steamcommunity.com/id/m8chnix", text: "Dota sets moved fast. I like that I can see what I'm getting before I commit to sell.", game: "Dota 2", av1: "#3f3f46", av2: "#d4d4d8", stars: 5 },
+  { user: "Kazuki", steam: "https://steamcommunity.com/profiles/76561198358221005", text: "Steam trade went through cleanly and money followed shortly after. No stress.", game: "CS2", av1: "#581c87", av2: "#c084fc", stars: 5 },
+  { user: "FrostByte", steam: "https://steamcommunity.com/profiles/76561198215365185", text: "Prices aligned with what I saw on trackers. Payout speed is the main reason I keep coming back.", game: "Dota 2", av1: "#0c4a6e", av2: "#7dd3fc", stars: 5 },
+  { user: "Nexus", steam: "https://steamcommunity.com/profiles/76561198089414875", text: "Easy for bulk selling — listed several items and didn't get lost in the UI.", game: "CS2", av1: "#14532d", av2: "#86efac", stars: 5 },
+  { user: "Cipher", steam: "https://steamcommunity.com/profiles/76561198070671099", text: "TF2 hats: sold a couple, both trades completed fast. Would recommend.", game: "TF2", av1: "#831843", av2: "#f9a8d4", stars: 4 },
+  { user: "Phantom", steam: "https://steamcommunity.com/profiles/76561199483113949", text: "Rust item sale was smooth; offer was upfront and payout didn't make me wait.", game: "Rust", av1: "#1e293b", av2: "#94a3b8", stars: 5 },
+  { user: "Volt", steam: "https://steamcommunity.com/profiles/76561199275399375", text: "CS2 knife out, cash in — exactly what I needed. Site feels modern and process is quick.", game: "CS2", av1: "#422006", av2: "#fcd34d", stars: 5 },
+  { user: "Storm", steam: "https://steamcommunity.com/profiles/76561199212382946", text: "Dota courier sold at a price I was happy with. Support was responsive too.", game: "Dota 2", av1: "#1e3a8a", av2: "#93c5fd", stars: 5 },
+  { user: "Pulse", steam: "https://steamcommunity.com/profiles/76561199649161705", text: "Straightforward selling — no endless forms. Payout landed when they said it would.", game: "CS2", av1: "#365314", av2: "#bef264", stars: 5 },
+  { user: "Drift", steam: "https://steamcommunity.com/profiles/76561199172392618", text: "Mixed Dota immortals with CS skins; both went fine. Good prices and fast turnaround.", game: "Dota 2", av1: "#4a044e", av2: "#e879f9", stars: 4 },
+  { user: "Shadow", steam: "https://steamcommunity.com/profiles/76561199222494168", text: "TF2 trading can be a mess — this was the opposite. Clear steps, quick payout.", game: "TF2", av1: "#0f172a", av2: "#64748b", stars: 5 },
+];
+
+const SLIDE_COUNT = REVIEWS.length;
 
 /** Mostly under $500; rarely above $1000 (trust display). */
 function randomPayoutAmountUsd(): number {
@@ -584,133 +615,29 @@ export default function HomePage() {
           onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
         >
           <div className="carousel__viewport">
-
-            <div className={`carousel__slide ${getSlideClass(0)}`} data-index="0">
-              <div className="review-card" style={{"--av1":"#6366f1","--av2":"#818cf8"} as React.CSSProperties}>
-                <span className="review-card__quote">&ldquo;</span>
-                <div className="review-card__header">
-                  <div className="review-card__avatar"><span>N</span></div>
-                  <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/nugaev" className="review-card__name" target="_blank" rel="noopener">Nugaev</a>
-                    <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
+            {REVIEWS.map((r, i) => (
+              <div key={r.user} className={`carousel__slide ${getSlideClass(i)}`} data-index={i}>
+                <div className="review-card" style={{"--av1": r.av1, "--av2": r.av2} as React.CSSProperties}>
+                  <span className="review-card__quote">&ldquo;</span>
+                  <div className="review-card__header">
+                    <div className="review-card__avatar"><span>{r.user.charAt(0).toUpperCase()}</span></div>
+                    <div className="review-card__user">
+                      <a href={r.steam} className="review-card__name" target="_blank" rel="noopener">{r.user}</a>
+                      <div className="review-card__stars" aria-label={`${r.stars} out of 5 stars`}>
+                        {Array.from({ length: 5 }, (_, s) => (
+                          <svg key={s} width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity={s < r.stars ? 1 : 0.25}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="review-card__text">{r.text}</p>
+                  <div className="review-card__footer">
+                    <span className="review-card__game">{r.game}</span>
+                    <a href={r.steam} className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                   </div>
                 </div>
-                <p className="review-card__text">{t("review1Text")}</p>
-                <div className="review-card__footer">
-                  <span className="review-card__game">{t("review1Game")}</span>
-                  <a href="https://steamcommunity.com/id/nugaev" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
-                </div>
               </div>
-            </div>
-
-            <div className={`carousel__slide ${getSlideClass(1)}`} data-index="1">
-              <div className="review-card" style={{"--av1":"#e2740e","--av2":"#f59e0b"} as React.CSSProperties}>
-                <span className="review-card__quote">&ldquo;</span>
-                <div className="review-card__header">
-                  <div className="review-card__avatar"><span>M</span></div>
-                  <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/Dracula1999" className="review-card__name" target="_blank" rel="noopener">mango</a>
-                    <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
-                  </div>
-                </div>
-                <p className="review-card__text">{t("review2Text")}</p>
-                <div className="review-card__footer">
-                  <span className="review-card__game">{t("review2Game")}</span>
-                  <a href="https://steamcommunity.com/id/Dracula1999" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
-                </div>
-              </div>
-            </div>
-
-            <div className={`carousel__slide ${getSlideClass(2)}`} data-index="2">
-              <div className="review-card" style={{"--av1":"#4338ca","--av2":"#6366f1"} as React.CSSProperties}>
-                <span className="review-card__quote">&ldquo;</span>
-                <div className="review-card__header">
-                  <div className="review-card__avatar"><span>R</span></div>
-                  <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/razrezoff" className="review-card__name" target="_blank" rel="noopener">Razrez</a>
-                    <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
-                  </div>
-                </div>
-                <p className="review-card__text">{t("review3Text")}</p>
-                <div className="review-card__footer">
-                  <span className="review-card__game">{t("review3Game")}</span>
-                  <a href="https://steamcommunity.com/id/razrezoff" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
-                </div>
-              </div>
-            </div>
-
-            <div className={`carousel__slide ${getSlideClass(3)}`} data-index="3">
-              <div className="review-card" style={{"--av1":"#059669","--av2":"#34d399"} as React.CSSProperties}>
-                <span className="review-card__quote">&ldquo;</span>
-                <div className="review-card__header">
-                  <div className="review-card__avatar"><span>G</span></div>
-                  <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/G7AX" className="review-card__name" target="_blank" rel="noopener">G7AX</a>
-                    <div className="review-card__stars" aria-label="4 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.25"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
-                  </div>
-                </div>
-                <p className="review-card__text">{t("review4Text")}</p>
-                <div className="review-card__footer">
-                  <span className="review-card__game">{t("review4Game")}</span>
-                  <a href="https://steamcommunity.com/id/G7AX" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
-                </div>
-              </div>
-            </div>
-
-            <div className={`carousel__slide ${getSlideClass(4)}`} data-index="4">
-              <div className="review-card" style={{"--av1":"#dc2626","--av2":"#f87171"} as React.CSSProperties}>
-                <span className="review-card__quote">&ldquo;</span>
-                <div className="review-card__header">
-                  <div className="review-card__avatar"><span>M</span></div>
-                  <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/ddoormatts" className="review-card__name" target="_blank" rel="noopener">Matt</a>
-                    <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
-                  </div>
-                </div>
-                <p className="review-card__text">{t("review1Text")}</p>
-                <div className="review-card__footer">
-                  <span className="review-card__game">Rocket League</span>
-                  <a href="https://steamcommunity.com/id/ddoormatts" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
-                </div>
-              </div>
-            </div>
-
-            <div className={`carousel__slide ${getSlideClass(5)}`} data-index="5">
-              <div className="review-card" style={{"--av1":"#7c3aed","--av2":"#a78bfa"} as React.CSSProperties}>
-                <span className="review-card__quote">&ldquo;</span>
-                <div className="review-card__header">
-                  <div className="review-card__avatar"><span>M</span></div>
-                  <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/max1moff_" className="review-card__name" target="_blank" rel="noopener">max1moff_</a>
-                    <div className="review-card__stars" aria-label="5 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
-                  </div>
-                </div>
-                <p className="review-card__text">{t("review2Text")}</p>
-                <div className="review-card__footer">
-                  <span className="review-card__game">Dota 2</span>
-                  <a href="https://steamcommunity.com/id/max1moff_" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
-                </div>
-              </div>
-            </div>
-
-            <div className={`carousel__slide ${getSlideClass(6)}`} data-index="6">
-              <div className="review-card" style={{"--av1":"#0891b2","--av2":"#22d3ee"} as React.CSSProperties}>
-                <span className="review-card__quote">&ldquo;</span>
-                <div className="review-card__header">
-                  <div className="review-card__avatar"><span>M</span></div>
-                  <div className="review-card__user">
-                    <a href="https://steamcommunity.com/id/playajzx" className="review-card__name" target="_blank" rel="noopener">Mangekyō</a>
-                    <div className="review-card__stars" aria-label="4 out of 5 stars"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity="0.25"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg></div>
-                  </div>
-                </div>
-                <p className="review-card__text">{t("review3Text")}</p>
-                <div className="review-card__footer">
-                  <span className="review-card__game">CS2</span>
-                  <a href="https://steamcommunity.com/id/playajzx" className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
-                </div>
-              </div>
-            </div>
-
+            ))}
           </div>
 
           <button className="carousel__arrow carousel__arrow--prev" aria-label="Previous review" onClick={goPrev}>
@@ -719,19 +646,6 @@ export default function HomePage() {
           <button className="carousel__arrow carousel__arrow--next" aria-label="Next review" onClick={goNext}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
           </button>
-
-          <div className="carousel__dots" role="tablist" aria-label="Review navigation">
-            {Array.from({ length: SLIDE_COUNT }, (_, i) => (
-              <button
-                key={i}
-                className={`carousel__dot${i === current ? " is-active" : ""}`}
-                role="tab"
-                aria-label={`Review ${i + 1}`}
-                aria-selected={i === current ? "true" : "false"}
-                onClick={() => setCurrent(i)}
-              />
-            ))}
-          </div>
         </div>
       </section>
 

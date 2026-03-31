@@ -6,10 +6,12 @@ import { cn } from "@/lib/utils";
 
 export type ReviewSlide = {
   user: string;
+  steam: string;
   text: string;
   game: string;
   av1: string;
   av2: string;
+  stars: number;
 };
 
 const AUTO_MS = 5000;
@@ -114,27 +116,27 @@ export function ReviewsCarousel({
                   <span>{s.user.charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="review-card__user">
-                  <span className="review-card__name">{s.user}</span>
-                  <div className="review-card__stars" aria-label="5 stars">
-                    <Star />
-                    <Star />
-                    <Star />
-                    <Star />
-                    <Star />
+                  <a href={s.steam} className="review-card__name" target="_blank" rel="noopener">{s.user}</a>
+                  <div className="review-card__stars" aria-label={`${s.stars} out of 5 stars`}>
+                    {Array.from({ length: 5 }, (_, idx) => (
+                      <svg key={idx} width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity={idx < s.stars ? 1 : 0.25}>
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    ))}
                   </div>
                 </div>
               </div>
               <p className="review-card__text">{s.text}</p>
               <div className="review-card__footer">
                 <span className="review-card__game">{s.game}</span>
-                <span className="review-card__steam-btn">
+                <a href={s.steam} className="review-card__steam-btn" target="_blank" rel="noopener">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                     <polyline points="15 3 21 3 21 9" />
                     <line x1="10" y1="14" x2="21" y2="3" />
                   </svg>
                   {steamProfileLabel}
-                </span>
+                </a>
               </div>
             </div>
           </div>
@@ -162,19 +164,6 @@ export function ReviewsCarousel({
         </svg>
       </button>
 
-      <div className="carousel__dots" role="tablist" aria-label="Reviews">
-        {slides.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            className={cn("carousel__dot", i === current && "active")}
-            role="tab"
-            aria-label={`Review ${i + 1}`}
-            aria-selected={i === current}
-            onClick={() => go(i)}
-          />
-        ))}
-      </div>
     </div>
   );
 }

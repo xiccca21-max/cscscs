@@ -7,10 +7,9 @@ import { cn } from "@/lib/utils";
 export type ReviewSlide = {
   user: string;
   steam: string;
+  avatar: string;
   text: string;
   game: string;
-  av1: string;
-  av2: string;
   stars: number;
 };
 
@@ -104,16 +103,11 @@ export function ReviewsCarousel({
             role="group"
             aria-roledescription="slide"
           >
-            <div
-              className="review-card"
-              style={
-                { "--av1": s.av1, "--av2": s.av2 } as React.CSSProperties
-              }
-            >
+            <div className="review-card">
               <span className="review-card__quote">&ldquo;</span>
               <div className="review-card__header">
                 <div className="review-card__avatar">
-                  <span>{s.user.charAt(0).toUpperCase()}</span>
+                  <img src={s.avatar} alt={s.user} loading="lazy" />
                 </div>
                 <div className="review-card__user">
                   <a href={s.steam} className="review-card__name" target="_blank" rel="noopener">{s.user}</a>

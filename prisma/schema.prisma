@@ -61,7 +61,6 @@ model Order {
   botAccount      BotAccount? @relation(fields: [botAccountId], references: [id])
   status          OrderStatus @default(CREATED)
   adminComment    String?
-  tradeOfferUrl   String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   tradeSentAt     DateTime?

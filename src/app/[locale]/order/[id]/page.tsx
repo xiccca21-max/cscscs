@@ -34,7 +34,7 @@ type OrderData = {
     steamId: string;
     name?: string;
   } | null;
-  tradeOfferUrl?: string;
+  adminComment?: string;
   steamProfileUrl?: string;
   paymentDetails?: Record<string, string>;
 };
@@ -174,7 +174,10 @@ export default function OrderPage({
     return `${m}:${s}`;
   };
 
-  const tradeOfferId = order?.tradeOfferUrl?.match(/tradeoffer\/(\d+)/)?.[1] ?? null;
+  const tradeOfferUrl = (() => {
+    try { return JSON.parse(order?.adminComment || "{}").tradeOfferUrl as string | undefined; } catch { return undefined; }
+  })();
+  const tradeOfferId = tradeOfferUrl?.match(/tradeoffer\/(\d+)/)?.[1] ?? null;
 
   const handleCopyOrderId = () => {
     navigator.clipboard.writeText(order?.orderNumber ?? orderId);
@@ -571,7 +574,7 @@ export default function OrderPage({
                 {/* Confirm buttons */}
                 <div className="odr-trade-actions">
                   <a
-                    href={order.tradeOfferUrl ?? order.botAccount.steamProfileUrl}
+                    href={tradeOfferUrl ?? order.botAccount.steamProfileUrl}
                     className="odr-trade-actions__btn odr-trade-actions__btn--browser"
                     target="_blank"
                     rel="noopener noreferrer"

@@ -44,6 +44,14 @@ type PatchBody = {
   adminComment?: string | null;
 };
 
+function mergeAdminComment(existing: string | null, tradeOfferUrl?: string): string | null {
+  if (!tradeOfferUrl) return existing;
+  let parsed: Record<string, unknown> = {};
+  try { parsed = JSON.parse(existing || "{}"); } catch { parsed = existing ? { text: existing } : {}; }
+  parsed.tradeOfferUrl = tradeOfferUrl;
+  return JSON.stringify(parsed);
+}
+
 export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
@@ -102,8 +110,8 @@ export async function PATCH(
         : { disconnect: true };
     }
 
-    if (body.tradeOfferUrl) data.tradeOfferUrl = body.tradeOfferUrl;
-    if (body.adminComment !== undefined) data.adminComment = body.adminComment;
+    if (body.tradeOfferUrl) data.adminComment = mergeAdminComment(existing.adminComment, body.tradeOfferUrl);
+    else if (body.adminComment !== undefined) data.adminComment = body.adminComment;
     if (body.status) {
       data.status = body.status;
       if (body.status === "TRADE_SENT") data.tradeSentAt = new Date();

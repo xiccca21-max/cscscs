@@ -552,7 +552,7 @@ export default function OrderPage({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {botProfile?.name ?? order.botAccount.name ?? "SKINWAVE Bot"}
+                      {botProfile?.name ?? order.botAccount.name ?? "SKINSELL Bot"}
                     </a>
                     {botProfile?.level != null && (
                       <span className="odr-trade-bot__level">

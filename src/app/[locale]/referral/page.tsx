@@ -140,7 +140,7 @@ export default function ReferralPage() {
   }
 
   const refCode = data?.code || "";
-  const refLink = `${typeof window !== "undefined" ? window.location.origin : "https://skinwave.com"}/?ref=${refCode}`;
+  const refLink = `${typeof window !== "undefined" ? window.location.origin : "https://skinsell.com"}/?ref=${refCode}`;
 
   const filteredUsers = (data?.users || []).filter((u) => {
     if (!userSearch) return true;

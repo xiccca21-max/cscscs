@@ -1343,7 +1343,7 @@ export default function SellPage() {
                   </div>
                   <div>
                     <strong>Instant Payout</strong>
-                    <p>Funds will be credited to your SKINWAVE balance instantly.</p>
+                    <p>Funds will be credited to your SKINSELL balance instantly.</p>
                   </div>
                 </div>
               )}

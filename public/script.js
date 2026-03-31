@@ -8,7 +8,7 @@
   /* ═══════════════════════════════════════════
      AUTH SYSTEM
      ═══════════════════════════════════════════ */
-  var STORAGE_KEY = 'skinwave_auth';
+  var STORAGE_KEY = 'skinsell_auth';
   var isLoggedIn = localStorage.getItem(STORAGE_KEY) === '1';
 
   var protectedPages = ['orders.html', 'order.html', 'balance.html', 'referral.html'];
@@ -1468,7 +1468,7 @@
     saveRefCode.addEventListener('click', () => {
       const code = refCodeInput.value.trim();
       if (!code) { toast('Please enter a referral code', 'error'); return; }
-      refLink.value = 'https://skinwave.com/ref/' + code;
+      refLink.value = 'https://skinsell.com/ref/' + code;
       saveRefCode.classList.add('ref-code__btn--done');
       setTimeout(() => saveRefCode.classList.remove('ref-code__btn--done'), 2000);
     });

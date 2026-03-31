@@ -38,7 +38,7 @@ export function Footer() {
         gameRust: "Rust",
         helpCenter: "Help Center",
         contact: "Contact Us",
-        disclaimer: "© 2026 SKINWAVE. Not affiliated with Valve Corp.",
+        disclaimer: "© 2026 SKINSELL. Not affiliated with Valve Corp.",
       };
       return fallback[key] || key;
     };
@@ -58,7 +58,7 @@ export function Footer() {
         )}
         <div className="footer__grid">
           <div className="footer__brand">
-            <span className="footer__brand-name">SKINWAVE</span>
+            <span className="footer__brand-name">SKINSELL</span>
             <p>{t("brandTagline")}</p>
           </div>
           <div className="footer__col">

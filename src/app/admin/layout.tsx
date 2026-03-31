@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export const metadata = { title: "Admin - SKINWAVE" };
+export const metadata = { title: "Admin - SKINSELL" };
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;

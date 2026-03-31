@@ -293,7 +293,7 @@ export default function AdminPage() {
       {/* Header */}
       <header className="adm-header">
         <Link href="/" className="adm-header__logo">
-          SKINWAVE <span className="adm-header__badge">admin</span>
+          SKINSELL <span className="adm-header__badge">admin</span>
         </Link>
         <nav className="adm-tabs">
           {tabs.map((t) => (

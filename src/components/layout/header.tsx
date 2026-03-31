@@ -120,7 +120,7 @@ export function Header() {
                 <path className="header__wave header__wave--1" d="M2 20c3-6 6-10 9-4s5 8 10 2 7-10 9-6" stroke="url(#logoGrad)" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
                 <path className="header__wave header__wave--2" d="M2 16c3-6 6-10 9-4s5 8 10 2 7-10 9-6" stroke="url(#logoGrad)" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.35"/>
               </svg>
-              <span className="header__logo-text">SKINWAVE</span>
+              <span className="header__logo-text">SKINSELL</span>
             </Link>
           </div>
 

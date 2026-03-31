@@ -606,7 +606,7 @@ export default function OrderPage({
                   </a>
                 </div>
               </div>
-            ) : !order.botAccount ? (
+            ) : order.status === "CREATED" && !order.botAccount ? (
               <div className="tw3">
                 <div className="tw3__decor">
                   <div className="tw3__decor-grid" />

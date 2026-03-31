@@ -109,27 +109,7 @@ export function Header() {
         <div className="header__inner">
           <div className="header__left">
             <Link href="/" className="header__logo">
-              <svg className="header__logo-icon" width="28" height="28" viewBox="0 0 100 100" fill="none">
-                <defs>
-                  <linearGradient id="logoGrad" x1="10" y1="10" x2="90" y2="90" gradientUnits="userSpaceOnUse">
-                    <stop offset="0%" stopColor="#4338ca"/>
-                    <stop offset="50%" stopColor="#6366f1"/>
-                    <stop offset="100%" stopColor="#818cf8"/>
-                  </linearGradient>
-                </defs>
-                <g transform="translate(50,50) rotate(45)">
-                  {/* Left (bottom-left in screen) block */}
-                  <rect className="header__logo-block header__logo-block--left" x="-44" y="-16" width="40" height="32" rx="7" fill="url(#logoGrad)"/>
-                  {/* Right (top-right in screen) block */}
-                  <rect className="header__logo-block header__logo-block--right" x="4" y="-16" width="40" height="32" rx="7" fill="url(#logoGrad)"/>
-                  {/* Top-right small diamond (top-left in screen) */}
-                  <rect className="header__logo-diamond header__logo-diamond--top" x="-7" y="-32" width="14" height="14" rx="4" fill="url(#logoGrad)"/>
-                  {/* Bottom-left small diamond (bottom-right in screen) */}
-                  <rect className="header__logo-diamond header__logo-diamond--bottom" x="-7" y="18" width="14" height="14" rx="4" fill="url(#logoGrad)"/>
-                  {/* White diagonal slash */}
-                  <line className="header__logo-slash" x1="-20" y1="20" x2="20" y2="-20" stroke="#fff" strokeWidth="7" strokeLinecap="round"/>
-                </g>
-              </svg>
+              <img className="header__logo-icon" src="/images/logo.png" alt="SKINSELL" width={28} height={28} />
               <span className="header__logo-text">SKINSELL</span>
             </Link>
           </div>

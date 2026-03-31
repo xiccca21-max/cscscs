@@ -27,7 +27,7 @@
     rgba(99,102,241,0.2) 50%,
     rgba(99,102,241,0.3) 85%,
     transparent 100%);
-  z-index: 1;
+  z-index: 10;
   pointer-events: none;
   box-shadow: 0 0 12px rgba(99,102,241,0.08), 0 0 4px rgba(99,102,241,0.1);
 }
@@ -39,7 +39,7 @@
 .sell-page-wrap ~ .footer {
   margin-top: 30px;
   position: relative;
-  z-index: 20;
+  z-index: 100;
 }
 
 /* ── Inventory (Left) ── */

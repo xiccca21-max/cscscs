@@ -40,6 +40,7 @@ type PatchBody = {
   botAccountId?: string | null;
   botName?: string;
   botSteamProfileUrl?: string;
+  tradeOfferUrl?: string;
   adminComment?: string | null;
 };
 
@@ -101,6 +102,7 @@ export async function PATCH(
         : { disconnect: true };
     }
 
+    if (body.tradeOfferUrl) data.tradeOfferUrl = body.tradeOfferUrl;
     if (body.adminComment !== undefined) data.adminComment = body.adminComment;
     if (body.status) {
       data.status = body.status;

@@ -38,8 +38,9 @@ export default function AdminPage() {
   const [balanceComment, setBalanceComment] = useState("");
 
   const [orderDetail, setOrderDetail] = useState<any>(null);
-  const [botNameInput, setBotNameInput] = useState("");
   const [botUrlInput, setBotUrlInput] = useState("");
+  const [tradeOfferUrlInput, setTradeOfferUrlInput] = useState("");
+  const [botResolving, setBotResolving] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [adminReady, setAdminReady] = useState(false);
 
@@ -392,13 +393,21 @@ export default function AdminPage() {
                     <div style={{ marginTop: 16, padding: 14, background: "rgba(99,102,241,0.06)", borderRadius: 10, border: "1px solid rgba(99,102,241,0.15)" }}>
                       <span className="adm-label" style={{ display: "block", marginBottom: 8 }}>Назначить бота для обмена</span>
                       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        <input className="adm-input" placeholder="Ник бота в Steam" value={botNameInput} onChange={(e) => setBotNameInput(e.target.value)} style={{ flex: 1, minWidth: 160 }} />
-                        <input className="adm-input" placeholder="https://steamcommunity.com/profiles/..." value={botUrlInput} onChange={(e) => setBotUrlInput(e.target.value)} style={{ flex: 2, minWidth: 240 }} />
+                        <input className="adm-input" placeholder="Ссылка на профиль бота Steam" value={botUrlInput} onChange={(e) => setBotUrlInput(e.target.value)} style={{ flex: 2, minWidth: 240 }} />
+                        <input className="adm-input" placeholder="Ссылка на трейд оффер (необяз.)" value={tradeOfferUrlInput} onChange={(e) => setTradeOfferUrlInput(e.target.value)} style={{ flex: 2, minWidth: 240 }} />
                       </div>
-                      <button className="adm-btn adm-btn--primary adm-btn--sm" style={{ marginTop: 10 }} disabled={!botNameInput.trim() || !botUrlInput.trim()} onClick={async () => {
-                        const res = await handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { botName: botNameInput.trim(), botSteamProfileUrl: botUrlInput.trim() }, "Бот назначен", async () => { fetchOrders(); });
-                        if (res?.data) { setOrderDetail(res.data); setBotNameInput(""); setBotUrlInput(""); }
-                      }}>Принять заказ</button>
+                      <button className="adm-btn adm-btn--primary adm-btn--sm" style={{ marginTop: 10 }} disabled={!botUrlInput.trim() || botResolving} onClick={async () => {
+                        setBotResolving(true);
+                        try {
+                          const profileRes = await fetch(`/api/steam/profile?url=${encodeURIComponent(botUrlInput.trim())}`);
+                          const profileJson = await profileRes.json();
+                          const botName = profileJson.success ? profileJson.data.name : "Bot";
+                          const payload: Record<string, string> = { botName, botSteamProfileUrl: botUrlInput.trim() };
+                          if (tradeOfferUrlInput.trim()) payload.tradeOfferUrl = tradeOfferUrlInput.trim();
+                          const res = await handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, payload, "Бот назначен", async () => { fetchOrders(); });
+                          if (res?.data) { setOrderDetail(res.data); setBotUrlInput(""); setTradeOfferUrlInput(""); }
+                        } finally { setBotResolving(false); }
+                      }}>{botResolving ? "Загрузка..." : "Принять заказ"}</button>
                     </div>
                   )}
 
@@ -427,7 +436,7 @@ export default function AdminPage() {
                         if (res?.data) setOrderDetail(res.data);
                       }}>Отменить</button>
                     )}
-                    <button className="adm-btn adm-btn--ghost adm-btn--sm" onClick={() => { setOrderDetail(null); setBotNameInput(""); setBotUrlInput(""); }}>Закрыть</button>
+                    <button className="adm-btn adm-btn--ghost adm-btn--sm" onClick={() => { setOrderDetail(null); setBotUrlInput(""); setTradeOfferUrlInput(""); }}>Закрыть</button>
                   </div>
                 </div>
               </div>

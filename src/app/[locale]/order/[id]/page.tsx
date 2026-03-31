@@ -26,6 +26,7 @@ type OrderData = {
   currency: string;
   tradeUrl: string;
   createdAt: string;
+  tradeSentAt?: string;
   items: OrderItem[];
   paymentMethod: { name: string; type: string } | null;
   botAccount: {
@@ -33,8 +34,16 @@ type OrderData = {
     steamId: string;
     name?: string;
   } | null;
+  tradeOfferUrl?: string;
   steamProfileUrl?: string;
   paymentDetails?: Record<string, string>;
+};
+
+type BotProfile = {
+  name: string;
+  avatarUrl: string;
+  level: number;
+  profileUrl: string;
 };
 
 const TIMELINE_STEPS = ["CREATED", "TRADE_SENT", "TRADE_COMPLETED", "PAID"];
@@ -82,7 +91,10 @@ export default function OrderPage({
   const [orderId, setOrderId] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [payerModalOpen, setPayerModalOpen] = useState(false);
+  const [botProfile, setBotProfile] = useState<BotProfile | null>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchOrder = useCallback(async (id: string) => {
     try {
@@ -124,6 +136,45 @@ export default function OrderPage({
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [orderId, order?.status, fetchOrder]);
+
+  useEffect(() => {
+    if (!order?.botAccount?.steamProfileUrl) return;
+    const url = order.botAccount.steamProfileUrl;
+    fetch(`/api/steam/profile?url=${encodeURIComponent(url)}`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success) setBotProfile(json.data);
+      })
+      .catch(() => {});
+  }, [order?.botAccount?.steamProfileUrl]);
+
+  useEffect(() => {
+    if (!order?.tradeSentAt || order.status !== "TRADE_SENT") {
+      setCountdown(null);
+      return;
+    }
+    const sentTime = new Date(order.tradeSentAt).getTime();
+    const deadline = sentTime + 10 * 60 * 1000;
+
+    const tick = () => {
+      const remaining = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+      setCountdown(remaining);
+      if (remaining <= 0 && timerRef.current) clearInterval(timerRef.current);
+    };
+    tick();
+    timerRef.current = setInterval(tick, 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [order?.tradeSentAt, order?.status]);
+
+  const formatCountdown = (secs: number) => {
+    const m = Math.floor(secs / 60).toString().padStart(2, "0");
+    const s = (secs % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+  const tradeOfferId = order?.tradeOfferUrl?.match(/tradeoffer\/(\d+)/)?.[1] ?? null;
 
   const handleCopyOrderId = () => {
     navigator.clipboard.writeText(order?.orderNumber ?? orderId);
@@ -466,35 +517,83 @@ export default function OrderPage({
               </div>
             ) : (
               <div className="odr-trade-ready">
+                {/* Bot info */}
                 <div className="odr-trade-bot">
-                  <div className="odr-trade-bot__avatar">B</div>
+                  <div className="odr-trade-bot__avatar">
+                    {botProfile?.avatarUrl ? (
+                      <img src={botProfile.avatarUrl} alt="" />
+                    ) : (
+                      <span>{(order.botAccount.name ?? "B").charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
                   <div className="odr-trade-bot__info">
-                    <span className="odr-trade-bot__name">
-                      {order.botAccount.name ?? "SKINWAVE Bot"}
-                    </span>
                     <a
                       href={order.botAccount.steamProfileUrl}
-                      className="odr-link"
+                      className="odr-trade-bot__name odr-trade-bot__name--link"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {t("viewSteamProfile")}
+                      {botProfile?.name ?? order.botAccount.name ?? "SKINWAVE Bot"}
                     </a>
+                    {botProfile?.level != null && (
+                      <span className="odr-trade-bot__level">
+                        {t("botLevel")} {botProfile.level}
+                      </span>
+                    )}
                   </div>
                 </div>
-                <a
-                  href={order.botAccount.steamProfileUrl}
-                  className="odr-steam-btn"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M22 2 11 13" />
-                    <path d="m22 2-7 20-4-9-9-4 20-7z" />
-                  </svg>
-                  <span>{t("openTradeSteam")}</span>
-                </a>
+
+                {/* Timer */}
+                {countdown !== null && order.status === "TRADE_SENT" && (
+                  <div className="odr-trade-timer">
+                    <div className="odr-trade-timer__head">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                      </svg>
+                      <span>{t("awaitingConfirmation")}</span>
+                    </div>
+                    <div className={`odr-trade-timer__clock${countdown <= 60 ? " odr-trade-timer__clock--warn" : ""}`}>
+                      {formatCountdown(countdown)}
+                    </div>
+                  </div>
+                )}
+
+                {tradeOfferId && (
+                  <div className="odr-trade-deal">
+                    <span className="odr-trade-deal__label">{t("dealNumber")}</span>
+                    <span className="odr-trade-deal__val">#{tradeOfferId}</span>
+                  </div>
+                )}
+
                 <p className="odr-trade-note">{t("tradeNote")}</p>
+
+                {/* Confirm buttons */}
+                <div className="odr-trade-actions">
+                  <a
+                    href={order.tradeOfferUrl ?? order.botAccount.steamProfileUrl}
+                    className="odr-trade-actions__btn odr-trade-actions__btn--browser"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                    <span>{t("confirmBrowser")}</span>
+                  </a>
+                  <a
+                    href={tradeOfferId ? `steam://url/ShowTradeOffer/${tradeOfferId}` : `steam://openurl/${order.botAccount.steamProfileUrl}`}
+                    className="odr-trade-actions__btn odr-trade-actions__btn--client"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M22 2 11 13" />
+                      <path d="m22 2-7 20-4-9-9-4 20-7z" />
+                    </svg>
+                    <span>{t("confirmClient")}</span>
+                  </a>
+                </div>
               </div>
             )}
           </div>

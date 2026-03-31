@@ -1452,6 +1452,12 @@
   font-weight: 700 !important;
 }
 .odr-status--created { background: rgba(255,255,255,0.12) !important; color: #fff !important; }
+.odr-fields .odr-status--created { background: #f1f5f9 !important; color: #475569 !important; }
+.odr-fields .odr-status--trade-sent { background: #fef3c7 !important; color: #b45309 !important; }
+.odr-fields .odr-status--cancelled { background: #fee2e2 !important; color: #dc2626 !important; }
+.odr-fields .odr-status--paid,
+.odr-fields .odr-status--received { background: #d1fae5 !important; color: #059669 !important; }
+.odr-fields .odr-status--pending { background: #fef3c7 !important; color: #b45309 !important; }
 .odr-crumbs a { color: rgba(255,255,255,0.5) !important; }
 .odr-crumbs a:hover { color: #fff !important; }
 .odr-crumbs span { color: #fff !important; }

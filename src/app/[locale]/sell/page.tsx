@@ -230,7 +230,6 @@ export default function SellPage() {
   const cryptoDropRef = useRef<HTMLDivElement>(null);
 
   const offerItemsRef = useRef<HTMLDivElement>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null);
 
   /* ---- fetch inventory ---- */
   const fetchGame = useCallback(async (game: string) => {
@@ -579,26 +578,6 @@ export default function SellPage() {
 
   const selectedCountry = COUNTRIES.find(c => c.code === payDetails.country);
 
-  useEffect(() => {
-    const sidebar = sidebarRef.current;
-    if (!sidebar) return;
-    const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--header-h") || "64", 10);
-    const onScroll = () => {
-      const footer = document.querySelector(".footer") as HTMLElement | null;
-      if (!footer) return;
-      const footerTop = footer.getBoundingClientRect().top;
-      const viewH = window.innerHeight;
-      if (footerTop < viewH) {
-        sidebar.style.height = `${footerTop - headerH}px`;
-      } else {
-        sidebar.style.height = `calc(100vh - ${headerH}px)`;
-      }
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    onScroll();
-    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
-  }, []);
 
   /* ================================================================ JSX */
   return (
@@ -1115,7 +1094,7 @@ export default function SellPage() {
         </div>
 
         {/* ── RIGHT: Payment Details ── */}
-        <div ref={sidebarRef} className={`sell-sidebar${mobilePayStep === 2 ? " sell-sidebar--mobile-active" : ""}`}>
+        <div className={`sell-sidebar${mobilePayStep === 2 ? " sell-sidebar--mobile-active" : ""}`}>
 
           {/* Back button - mobile step 2 */}
           <button

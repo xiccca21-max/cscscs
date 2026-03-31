@@ -148,15 +148,19 @@ export default function OrderPage({
   }, [orderId, order?.status, fetchOrder]);
 
   useEffect(() => {
-    if (!order?.botAccount?.steamProfileUrl) return;
-    const url = order.botAccount.steamProfileUrl;
-    fetch(`/api/steam/profile?url=${encodeURIComponent(url)}`)
+    const url = order?.botAccount?.steamProfileUrl;
+    const sid = order?.botAccount?.steamId;
+    if (!url && !sid) return;
+    const query = url
+      ? `url=${encodeURIComponent(url)}`
+      : `steamId=${encodeURIComponent(sid!)}`;
+    fetch(`/api/steam/profile?${query}`)
       .then((r) => r.json())
       .then((json) => {
         if (json.success) setBotProfile(json.data);
       })
       .catch(() => {});
-  }, [order?.botAccount?.steamProfileUrl]);
+  }, [order?.botAccount?.steamProfileUrl, order?.botAccount?.steamId]);
 
   useEffect(() => {
     if (!order?.tradeSentAt || order.status !== "TRADE_SENT") {

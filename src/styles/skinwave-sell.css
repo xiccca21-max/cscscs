@@ -1865,6 +1865,7 @@
   background: linear-gradient(180deg, #f4f3fa 0%, #eceaf6 50%, #e6e4f2 100%);
   border-left: none;
   padding: 0 14px 14px 14px;
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
   gap: 8px;

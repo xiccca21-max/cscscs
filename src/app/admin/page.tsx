@@ -535,7 +535,7 @@ export default function AdminPage() {
                       <td className="adm-actions-cell">
                         <button className="adm-btn adm-btn--sm" onClick={() => { setPmEditModal(pm); setPmEditForm({ name: pm.name, commission: String(pm.commission), minAmount: String(pm.minAmount) }); }}>Ред.</button>
                         <button className="adm-btn adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/payments/${pm.id}`, { isActive: pm.isActive === false }, pm.isActive === false ? "Включён" : "Выключен", fetchPayments)}>{pm.isActive === false ? "Вкл" : "Выкл"}</button>
-                        {!["balance","card","btc","usdt-trc20","usdt-erc20","eth","ltc","bank"].includes(pm.type) ? (
+                        {!["balance","card","crypto","btc","usdt-trc20","usdt-erc20","eth","ltc","bank"].includes(pm.type) ? (
                           <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => handleDeletePayment(pm.id)}>Удалить</button>
                         ) : (
                           <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", padding: "4px 8px" }}>Системный</span>

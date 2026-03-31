@@ -83,6 +83,17 @@ type PaymentMethodDB = {
   currencies: string[];
 };
 
+const FALLBACK_METHODS: PaymentMethodDB[] = [
+  { id: "fb-balance",    name: "Balance",            type: "balance",    commission: "0",   minAmount: "0",  currencies: ["USD"] },
+  { id: "fb-card",       name: "Visa / Mastercard",  type: "card",       commission: "2.5", minAmount: "1",  currencies: ["USD"] },
+  { id: "fb-btc",        name: "Bitcoin (BTC)",       type: "btc",        commission: "1",   minAmount: "10", currencies: ["USD"] },
+  { id: "fb-usdt-trc20", name: "USDT (TRC-20)",      type: "usdt-trc20", commission: "0",   minAmount: "5",  currencies: ["USD"] },
+  { id: "fb-eth",        name: "Ethereum (ERC-20)",   type: "eth",        commission: "1",   minAmount: "10", currencies: ["USD"] },
+  { id: "fb-usdt-erc20", name: "USDT (ERC-20)",      type: "usdt-erc20", commission: "1",   minAmount: "10", currencies: ["USD"] },
+  { id: "fb-ltc",        name: "Litecoin (LTC)",      type: "ltc",        commission: "1",   minAmount: "5",  currencies: ["USD"] },
+  { id: "fb-bank",       name: "Bank / Банк",         type: "bank",       commission: "3",   minAmount: "50", currencies: ["USD"] },
+];
+
 const PAYOUT_CARD_COLORS: Record<string, string> = {
   balance:      "#f59e0b",
   card:         "#1A1F71",
@@ -109,8 +120,22 @@ function PayoutCardIcon({ type }: { type: string }) {
         </>
       );
     case "crypto":
+    case "btc":
       return (
         <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A" /><path d="M22.5 14c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.6 2.6c-.4-.1-.9-.2-1.3-.3l.7-2.6-1.7-.4-.7 2.7c-.4-.1-.7-.2-1-.2v-.1l-2.3-.6-.4 1.8s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c0 .1.1.1.1.1h-.1l-1.2 4.7c-.1.2-.3.6-.8.4 0 0-1.2-.3-1.2-.3l-.8 1.9 2.2.5c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.7.4.7-2.8c2.8.5 5 .3 5.9-2.2.7-2-.1-3.2-1.5-3.9 1.1-.3 1.9-1 2.1-2.6zm-3.7 5.2c-.5 2.1-4.1 1-5.3.7l1-3.8c1.1.3 4.9.8 4.3 3.1zm.5-5.3c-.5 1.9-3.5.9-4.4.7l.8-3.4c1 .2 4.1.7 3.6 2.7z" fill="#fff" /></svg>
+      );
+    case "usdt-trc20":
+    case "usdt-erc20":
+      return (
+        <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B" /><path d="M17.9 17.2v0c-.1 0-.7.1-2 .1-1 0-1.7 0-1.9-.1v0c-3.8-.2-6.6-.8-6.6-1.6s2.8-1.5 6.6-1.6v2.6c.3 0 1 .1 2 .1 1.2 0 1.8-.1 1.9-.1v-2.6c3.8.2 6.6.8 6.6 1.6s-2.8 1.4-6.6 1.6zm0-3.5V11h5.3V8H8.9v3h5.3v2.7c-4.3.2-7.5 1.1-7.5 2.1s3.2 1.9 7.5 2.1v7.6h3.7v-7.6c4.3-.2 7.5-1.1 7.5-2.1s-3.2-1.9-7.5-2.1z" fill="#fff" /></svg>
+      );
+    case "eth":
+      return (
+        <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#627eea"/><path d="M16.5 4v8.87l7.5 3.35L16.5 4z" fill="#fff" opacity=".6"/><path d="M16.5 4L9 16.22l7.5-3.35V4z" fill="#fff"/><path d="M16.5 21.97v6.03L24 17.62l-7.5 4.35z" fill="#fff" opacity=".6"/><path d="M16.5 28V21.97L9 17.62 16.5 28z" fill="#fff"/><path d="M16.5 20.57l7.5-4.35-7.5-3.35v7.7z" fill="#fff" opacity=".2"/><path d="M9 16.22l7.5 4.35v-7.7L9 16.22z" fill="#fff" opacity=".6"/></svg>
+      );
+    case "ltc":
+      return (
+        <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#bfbbbb"/><path d="M16 5l-1 .4v14.2l1 .6 7-4.1L16 5z" fill="#fff" opacity=".5"/><path d="M16 5L9 16.1l7 4.1V5z" fill="#fff"/><path d="M16 21.5l-.1.1v5.4l.1.3 7-9.8-7 4z" fill="#fff" opacity=".5"/><path d="M16 27.3v-5.8L9 17.5l7 9.8z" fill="#fff"/></svg>
       );
     case "bank":
       return (
@@ -553,7 +578,7 @@ export default function HomePage() {
           <h2 className="payouts-section__title">{t("payoutTitle")} <span>{t("payoutTitleAccent")}</span></h2>
           <p className="payouts-section__sub">{t("payoutSub")}</p>
           <div className="payouts-grid">
-            {homePaymentMethods.length > 0 ? homePaymentMethods.map((pm) => {
+            {(homePaymentMethods.length > 0 ? homePaymentMethods : FALLBACK_METHODS).map((pm) => {
               const color = PAYOUT_CARD_COLORS[pm.type] ?? PAYOUT_CARD_COLORS.other;
               const fee = parseFloat(pm.commission);
               const minAmt = parseFloat(pm.minAmount);
@@ -576,58 +601,7 @@ export default function HomePage() {
                   </div>
                 </div>
               );
-            }) : (
-              <>
-                <div className="payout-card" style={{"--pc":"#1A1F71"} as React.CSSProperties}>
-                  <div className="payout-card__inner payout-card__front">
-                    <div className="payout-card__logo-wrap"><PayoutCardIcon type="card" /></div>
-                    <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
-                    <h3>{t("payoutVisa")}</h3>
-                    <p>{t("payoutVisaDesc")}</p>
-                  </div>
-                  <div className="payout-card__inner payout-card__back">
-                    <h4>{t("payoutDetails")}</h4>
-                    <ul><li>{t("payoutMinWd")}: 1$</li><li>{t("payoutFee")}: 0%</li></ul>
-                  </div>
-                </div>
-                <div className="payout-card" style={{"--pc":"#F7931A"} as React.CSSProperties}>
-                  <div className="payout-card__inner payout-card__front">
-                    <div className="payout-card__logo-wrap"><PayoutCardIcon type="crypto" /></div>
-                    <span className="payout-card__badge">{t("payoutBadge10m")}</span>
-                    <h3>{t("payoutBtc")}</h3>
-                    <p>{t("payoutBtcDesc")}</p>
-                  </div>
-                  <div className="payout-card__inner payout-card__back">
-                    <h4>{t("payoutDetails")}</h4>
-                    <ul><li>{t("payoutMinWd")}: 10$</li><li>{t("payoutFee")}: 0%</li></ul>
-                  </div>
-                </div>
-                <div className="payout-card" style={{"--pc":"#6366f1"} as React.CSSProperties}>
-                  <div className="payout-card__inner payout-card__front">
-                    <div className="payout-card__logo-wrap"><PayoutCardIcon type="bank" /></div>
-                    <span className="payout-card__badge">{t("payoutBadge12d")}</span>
-                    <h3>{t("payoutBank")}</h3>
-                    <p>{t("payoutBankDesc")}</p>
-                  </div>
-                  <div className="payout-card__inner payout-card__back">
-                    <h4>{t("payoutDetails")}</h4>
-                    <ul><li>{t("payoutMinWd")}: 50$</li><li>{t("payoutFee")}: 0%</li></ul>
-                  </div>
-                </div>
-                <div className="payout-card" style={{"--pc":"#f59e0b"} as React.CSSProperties}>
-                  <div className="payout-card__inner payout-card__front">
-                    <div className="payout-card__logo-wrap"><PayoutCardIcon type="balance" /></div>
-                    <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
-                    <h3>Balance</h3>
-                    <p>Instant credit to your account</p>
-                  </div>
-                  <div className="payout-card__inner payout-card__back">
-                    <h4>{t("payoutDetails")}</h4>
-                    <ul><li>{t("payoutMinWd")}: 0$</li><li>{t("payoutFee")}: 0%</li></ul>
-                  </div>
-                </div>
-              </>
-            )}
+            })}
           </div>
 
           <div className="payouts-notice">

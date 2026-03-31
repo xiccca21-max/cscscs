@@ -2048,6 +2048,7 @@
 .odr-trade-ready {
   display: flex !important;
   flex-direction: column !important;
+  flex: 1 !important;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%) !important;
   border-radius: 0 0 16px 16px !important;
   padding: 28px 24px 24px !important;

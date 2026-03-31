@@ -248,6 +248,21 @@ model SiteSettings {
   updatedAt DateTime @updatedAt
 }
 
+model Review {
+  id        String   @id @default(cuid())
+  user      String
+  steam     String
+  avatar    String   @default("")
+  textEn    String
+  textRu    String
+  game      String   @default("CS2")
+  stars     Int      @default(5)
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model AuditLog {
   id        String   @id @default(cuid())
   actorId   String

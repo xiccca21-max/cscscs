@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 
-type Section = "orders" | "users" | "payments" | "prices" | "balances" | "cashouts" | "bots" | "referrals" | "logs" | "social";
+type Section = "orders" | "users" | "payments" | "prices" | "balances" | "cashouts" | "bots" | "referrals" | "logs" | "social" | "reviews";
 
 function Toast({ message, onDone }: { message: string; onDone: () => void }) {
   useEffect(() => {
@@ -52,6 +52,10 @@ export default function AdminPage() {
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
   const [socialSaving, setSocialSaving] = useState(false);
 
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
+  const [reviewModal, setReviewModal] = useState<any | null>(null);
+  const [reviewForm, setReviewForm] = useState({ user: "", steam: "", avatar: "", textEn: "", textRu: "", game: "CS2", stars: "5" });
+
   const [exchangeRate, setExchangeRate] = useState("");
   const [eurRate, setEurRate] = useState("");
   const [exchangeRateSaving, setExchangeRateSaving] = useState(false);
@@ -94,6 +98,7 @@ export default function AdminPage() {
   const fetchAuditLogs = useCallback(async () => { const d = await safeFetch("/api/admin/audit"); if (d) setAuditLogs(d.data?.logs ?? []); }, [safeFetch]);
   const fetchPayments = useCallback(async () => { const d = await safeFetch("/api/admin/payments"); if (d) setPaymentMethods(d.data ?? []); }, [safeFetch]);
   const fetchPrices = useCallback(async () => { const d = await safeFetch("/api/admin/prices"); if (d) setPricingRules(Array.isArray(d.data) ? d.data : []); }, [safeFetch]);
+  const fetchReviews = useCallback(async () => { const d = await safeFetch("/api/admin/reviews"); if (d?.data) setReviewsList(d.data); }, [safeFetch]);
 
   useEffect(() => {
     const init = async () => {
@@ -109,6 +114,7 @@ export default function AdminPage() {
       safeFetch("/api/admin/bots").then((d) => { if (d) setBots(d.data ?? []); });
       safeFetch("/api/admin/referrals").then((d) => { if (d) setReferrals(d.data ?? []); });
       fetchAuditLogs();
+      fetchReviews();
       safeFetch("/api/admin/settings").then((d) => {
         if (d?.data) {
           setSocialLinks(d.data);
@@ -118,7 +124,7 @@ export default function AdminPage() {
       });
     };
     init();
-  }, [fetchOrders, fetchUsers, fetchCashouts, fetchAuditLogs, fetchPayments, fetchPrices, safeFetch]);
+  }, [fetchOrders, fetchUsers, fetchCashouts, fetchAuditLogs, fetchPayments, fetchPrices, fetchReviews, safeFetch]);
 
   useEffect(() => {
     if (!adminReady || authError) return;
@@ -312,6 +318,7 @@ export default function AdminPage() {
     { key: "referrals", label: "Рефералы" },
     { key: "logs", label: "Логи" },
     { key: "social", label: "Ссылки" },
+    { key: "reviews", label: "Отзывы" },
   ];
 
   if (!adminReady) return <div className="adm-loading">Загрузка...</div>;
@@ -978,6 +985,81 @@ export default function AdminPage() {
                 <button className="adm-btn adm-btn--primary" onClick={handleSaveSocial} disabled={socialSaving}>{socialSaving ? "Сохранение..." : "Сохранить"}</button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ── REVIEWS ── */}
+        {section === "reviews" && (
+          <div className="adm-section">
+            <div className="adm-section__top">
+              <h1>Отзывы ({reviewsList.length})</h1>
+              <button className="adm-btn adm-btn--primary" onClick={() => { setReviewModal("new"); setReviewForm({ user: "", steam: "", avatar: "", textEn: "", textRu: "", game: "CS2", stars: "5" }); }}>+ Добавить</button>
+            </div>
+            <div className="adm-card">
+              <table className="adm-table">
+                <thead><tr><th>Юзер</th><th>Игра</th><th>★</th><th>Текст (EN)</th><th>Steam</th><th>Активен</th><th></th></tr></thead>
+                <tbody>
+                  {reviewsList.map((rv) => (
+                    <tr key={rv.id}>
+                      <td style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        {rv.avatar && <img src={rv.avatar} alt="" width="24" height="24" style={{ borderRadius: 6 }} />}
+                        <span style={{ maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{rv.user}</span>
+                      </td>
+                      <td>{rv.game}</td>
+                      <td>{rv.stars}</td>
+                      <td style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{rv.textEn}</td>
+                      <td><a href={rv.steam} target="_blank" rel="noopener" style={{ color: "#818cf8", fontSize: 11 }}>профиль</a></td>
+                      <td>{rv.isActive ? "✅" : "❌"}</td>
+                      <td className="adm-actions-cell">
+                        <button className="adm-btn adm-btn--sm" onClick={() => { setReviewModal(rv); setReviewForm({ user: rv.user, steam: rv.steam, avatar: rv.avatar ?? "", textEn: rv.textEn, textRu: rv.textRu, game: rv.game, stars: String(rv.stars) }); }}>Ред.</button>
+                        <button className="adm-btn adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/reviews/${rv.id}`, { isActive: !rv.isActive }, rv.isActive ? "Скрыт" : "Показан", fetchReviews)}>{rv.isActive ? "Скрыть" : "Показать"}</button>
+                        <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={async () => { if (!confirm("Удалить отзыв?")) return; await handleAction("DELETE", `/api/admin/reviews/${rv.id}`, undefined, "Удалён", fetchReviews); }}>Удалить</button>
+                      </td>
+                    </tr>
+                  ))}
+                  {reviewsList.length === 0 && <tr><td colSpan={7} className="adm-empty">Нет отзывов</td></tr>}
+                </tbody>
+              </table>
+            </div>
+
+            {reviewModal && (
+              <div className="adm-overlay" onClick={() => setReviewModal(null)}>
+                <div className="adm-modal" onClick={(e) => e.stopPropagation()}>
+                  <h2>{reviewModal === "new" ? "Новый отзыв" : "Редактировать отзыв"}</h2>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <label>Имя пользователя<input className="adm-input" value={reviewForm.user} onChange={(e) => setReviewForm((p) => ({ ...p, user: e.target.value }))} /></label>
+                    <label>Ссылка в Steam<input className="adm-input" placeholder="https://steamcommunity.com/id/..." value={reviewForm.steam} onChange={(e) => setReviewForm((p) => ({ ...p, steam: e.target.value }))} /></label>
+                    <label>Аватар (URL)<input className="adm-input" placeholder="https://avatars.steamstatic.com/..." value={reviewForm.avatar} onChange={(e) => setReviewForm((p) => ({ ...p, avatar: e.target.value }))} /></label>
+                    <label>Текст (EN)<textarea className="adm-input" rows={3} value={reviewForm.textEn} onChange={(e) => setReviewForm((p) => ({ ...p, textEn: e.target.value }))} /></label>
+                    <label>Текст (RU)<textarea className="adm-input" rows={3} value={reviewForm.textRu} onChange={(e) => setReviewForm((p) => ({ ...p, textRu: e.target.value }))} /></label>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <label style={{ flex: 1 }}>Игра
+                        <select className="adm-input" value={reviewForm.game} onChange={(e) => setReviewForm((p) => ({ ...p, game: e.target.value }))}>
+                          <option value="CS2">CS2</option><option value="Dota 2">Dota 2</option><option value="TF2">TF2</option><option value="Rust">Rust</option>
+                        </select>
+                      </label>
+                      <label style={{ flex: 1 }}>Звёзды
+                        <select className="adm-input" value={reviewForm.stars} onChange={(e) => setReviewForm((p) => ({ ...p, stars: e.target.value }))}>
+                          {[5,4,3,2,1].map((n) => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                    <button className="adm-btn adm-btn--primary" onClick={async () => {
+                      const payload = { ...reviewForm, stars: Number(reviewForm.stars) };
+                      if (reviewModal === "new") {
+                        await handleAction("POST", "/api/admin/reviews", payload, "Отзыв добавлен", fetchReviews);
+                      } else {
+                        await handleAction("PATCH", `/api/admin/reviews/${reviewModal.id}`, payload, "Отзыв обновлён", fetchReviews);
+                      }
+                      setReviewModal(null);
+                    }}>{reviewModal === "new" ? "Добавить" : "Сохранить"}</button>
+                    <button className="adm-btn adm-btn--ghost" onClick={() => setReviewModal(null)}>Отмена</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

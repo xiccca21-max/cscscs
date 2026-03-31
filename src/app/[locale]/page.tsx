@@ -214,6 +214,17 @@ export default function HomePage() {
   }, []);
 
   /* ── B) Reviews carousel ── */
+  const [liveReviews, setLiveReviews] = useState<typeof REVIEWS | null>(null);
+  useEffect(() => {
+    fetch("/api/reviews").then((r) => r.json()).then((d) => {
+      if (d?.data?.length) {
+        setLiveReviews(d.data.map((r: any) => ({ user: r.user, steam: r.steam, avatar: r.avatar, en: r.textEn, ru: r.textRu, game: r.game, stars: r.stars })));
+      }
+    }).catch(() => {});
+  }, []);
+  const reviewData = liveReviews ?? REVIEWS;
+  const slideCount = reviewData.length;
+
   const [current, setCurrent] = useState(0);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dragStartX = useRef(0);
@@ -229,25 +240,25 @@ export default function HomePage() {
   const startAuto = useCallback(() => {
     stopAuto();
     autoRef.current = setInterval(() => {
-      setCurrent((c) => (c + 1) % SLIDE_COUNT);
+      setCurrent((c) => (c + 1) % slideCount);
     }, 5000);
-  }, [stopAuto]);
+  }, [stopAuto, slideCount]);
 
   useEffect(() => {
     startAuto();
     return stopAuto;
   }, [startAuto, stopAuto]);
 
-  const goPrev = () => setCurrent((c) => (c - 1 + SLIDE_COUNT) % SLIDE_COUNT);
-  const goNext = () => setCurrent((c) => (c + 1) % SLIDE_COUNT);
+  const goPrev = () => setCurrent((c) => (c - 1 + slideCount) % slideCount);
+  const goNext = () => setCurrent((c) => (c + 1) % slideCount);
 
   const getSlideClass = (index: number) => {
-    const diff = ((index - current) % SLIDE_COUNT + SLIDE_COUNT) % SLIDE_COUNT;
+    const diff = ((index - current) % slideCount + slideCount) % slideCount;
     if (diff === 0) return "is-active";
     if (diff === 1) return "is-next";
-    if (diff === SLIDE_COUNT - 1) return "is-prev";
+    if (diff === slideCount - 1) return "is-prev";
     if (diff === 2) return "is-far-next";
-    if (diff === SLIDE_COUNT - 2) return "is-far-prev";
+    if (diff === slideCount - 2) return "is-far-prev";
     return "";
   };
 
@@ -631,7 +642,7 @@ export default function HomePage() {
           onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
         >
           <div className="carousel__viewport">
-            {REVIEWS.map((r, i) => (
+            {reviewData.map((r, i) => (
               <div key={`${r.steam}-${i}`} className={`carousel__slide ${getSlideClass(i)}`} data-index={i}>
                 <div className="review-card">
                   <span className="review-card__quote">&ldquo;</span>

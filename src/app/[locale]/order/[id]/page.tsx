@@ -607,6 +607,24 @@ export default function OrderPage({
 
                 <p className="odr-trade-note">{t("tradeNote")}</p>
 
+                <div className="odr-trade-warning">
+                  <div className="odr-trade-warning__icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                    </svg>
+                  </div>
+                  <div className="odr-trade-warning__content">
+                    <span className="odr-trade-warning__title">{t("warningTitle")}</span>
+                    <p className="odr-trade-warning__desc">
+                      {t("warningDesc").split("{link}")[0]}
+                      <a href="https://help.steampowered.com/en/faqs/view/451E-96B3-D194-50FC" target="_blank" rel="noopener noreferrer">
+                        {t("warningLink")}
+                      </a>
+                      {t("warningDesc").split("{link}")[1]}
+                    </p>
+                  </div>
+                </div>
+
                 {/* Confirm buttons */}
                 <div className="odr-trade-actions">
                   <a

@@ -2081,7 +2081,7 @@
 .odr-trade-ready .odr-trade-deal { order: 2 !important; }
 .odr-trade-ready .odr-trade-note { order: 4 !important; }
 .odr-trade-ready .odr-trade-bot { order: 3 !important; }
-.odr-trade-ready .odr-trade-actions { order: 5 !important; }
+.odr-trade-ready .odr-trade-actions { order: 6 !important; }
 
 /* ── Timer (dark) ── */
 .odr-trade-ready .odr-trade-timer {
@@ -2165,10 +2165,63 @@
   z-index: 1;
 }
 
+/* ── Warning block (dark) ── */
+.odr-trade-warning {
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  background: rgba(234,179,8,0.08);
+  border: 1px solid rgba(234,179,8,0.15);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+  order: 5 !important;
+}
+.odr-trade-warning__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(234,179,8,0.2), rgba(234,179,8,0.1));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #eab308;
+  flex-shrink: 0;
+}
+.odr-trade-warning__content {
+  flex: 1;
+  min-width: 0;
+}
+.odr-trade-warning__title {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.odr-trade-warning__desc {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  line-height: 1.6;
+  margin: 0;
+}
+.odr-trade-warning__desc a {
+  color: #60a5fa;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s;
+}
+.odr-trade-warning__desc a:hover {
+  color: #93bbfc;
+}
+
 /* ── Action buttons (dark) ── */
 .odr-trade-ready .odr-trade-actions {
   position: relative;
   z-index: 1;
+  margin-top: auto;
 }
 .odr-trade-ready .odr-trade-actions__btn--browser {
   background: linear-gradient(135deg, #6366f1, #818cf8) !important;

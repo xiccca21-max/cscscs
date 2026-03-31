@@ -866,7 +866,7 @@ export default function OrderPage({
                     {botProfile?.avatarUrl ? (
                       <img src={botProfile.avatarUrl} alt="" />
                     ) : (
-                      <span>{(order.botAccount.name ?? "B").charAt(0).toUpperCase()}</span>
+                      <span>{(order.botAccount?.name ?? "B").charAt(0).toUpperCase()}</span>
                     )}
                   </div>
                   <div className="odr-trade-bot__info">
@@ -876,7 +876,7 @@ export default function OrderPage({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {botProfile?.name ?? order.botAccount.name ?? "SKINSELL Bot"}
+                      {botProfile?.name ?? order.botAccount?.name ?? "SKINSELL Bot"}
                     </a>
                     {botProfile?.level != null && (
                       <span className="odr-trade-bot__level">

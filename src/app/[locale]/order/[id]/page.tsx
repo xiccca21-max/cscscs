@@ -554,6 +554,40 @@ export default function OrderPage({
                   </span>
                 </div>
               </div>
+            ) : (order.status === "TRADE_COMPLETED" || order.status === "PAYMENT_PENDING") ? (
+              <div className="odr-trade-done">
+                <div className="odr-trade-done__decor">
+                  <div className="odr-trade-done__decor-grid" />
+                  <div className="odr-trade-done__decor-circle odr-trade-done__decor-circle--1" />
+                  <div className="odr-trade-done__decor-circle odr-trade-done__decor-circle--2" />
+                </div>
+                <div className="odr-trade-done__icon">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
+                  </svg>
+                </div>
+                <h4 className="odr-trade-done__title">{t("tradeReceivedTitle")}</h4>
+                <p className="odr-trade-done__desc">{t("tradeReceivedDesc")}</p>
+
+                <div className="odr-trade-done__info">
+                  <div className="odr-trade-done__info-row">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>{t("tradeReceivedHold")}</span>
+                  </div>
+                  <div className="odr-trade-done__info-row">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    <span>{t("tradeReceivedPayout")}</span>
+                  </div>
+                </div>
+
+                {tradeOfferId && (
+                  <div className="odr-trade-done__deal">
+                    <span>{t("dealNumber")}</span>
+                    <span>#{tradeOfferId}</span>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="odr-trade-ready">
                 {/* Bot info */}

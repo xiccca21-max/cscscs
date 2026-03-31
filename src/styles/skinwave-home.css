@@ -387,6 +387,9 @@ section + section::before {
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
+.payouts-grid--row2 {
+  margin-top: 16px;
+}
 
 /* flip card container */
 .payout-card {

@@ -411,6 +411,22 @@ export function LandingPageView() {
               </div>
             ))}
           </div>
+          <div className="payouts-grid payouts-grid--row2">
+            {[
+              { pc: "#627eea", badge: "~5 min", h: "Ethereum (ERC-20)", p: "Fast on-chain ETH transfer" },
+              { pc: "#26A17B", badge: t("payoutBadgeInstant"), h: "USDT (ERC-20)", p: "Stablecoin via Ethereum network" },
+              { pc: "#bfbbbb", badge: "~10 min", h: "Litecoin (LTC)", p: "Low-fee crypto payments" },
+              { pc: "#f59e0b", badge: t("payoutBadgeInstant"), h: "Balance", p: "Instant credit to your account" },
+            ].map((c) => (
+              <div key={c.h} className="payout-card" style={{ "--pc": c.pc } as CSSProperties}>
+                <div className="payout-card__inner payout-card__front">
+                  <span className="payout-card__badge">{c.badge}</span>
+                  <h3>{c.h}</h3>
+                  <p>{c.p}</p>
+                </div>
+              </div>
+            ))}
+          </div>
           <div className="payouts-notice">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />

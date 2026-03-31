@@ -361,6 +361,16 @@ section + section::before {
 .hero__stats-inner { display: flex; align-items: center; gap: 16px; }
 .hero__stats-inner strong { color: rgba(255,255,255,0.7); font-weight: 700; }
 .hero__stats-dot { opacity: 0.3; }
+.hero__trustpilot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.hero__trustpilot:hover { opacity: 0.8; }
+.hero__trustpilot img { display: block; }
 
 /* ═══ PAYOUT METHODS (flip + badges + color accents) ═══ */
 .payouts-section {

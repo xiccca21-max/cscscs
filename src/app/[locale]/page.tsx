@@ -372,7 +372,10 @@ export default function HomePage() {
             <span className="hero__stats-dot">&bull;</span>
             <span><strong>12K+</strong> {t("statsSellers")}</span>
             <span className="hero__stats-dot">&bull;</span>
-            <span><strong>4.87</strong> {t("statsRating")}</span>
+            <a href="https://www.trustpilot.com/review/skinsell.com" target="_blank" rel="noopener noreferrer" className="hero__trustpilot">
+              <img src="/trustpilot.png" alt="Trustpilot" width="18" height="18" />
+              <strong>4.2</strong> Trustpilot
+            </a>
           </div>
         </div>
       </section>

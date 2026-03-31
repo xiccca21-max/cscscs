@@ -1523,7 +1523,7 @@
   align-self: start !important;
 }
 .odr-grid > .odr-card:last-child {
-  align-self: start !important;
+  align-self: stretch !important;
 }
 .odr-card:hover {
   border-color: #c7d2fe !important;

@@ -109,11 +109,12 @@ export function Header() {
         <div className="header__inner">
           <div className="header__left">
             <Link href="/" className="header__logo">
-              <svg className="header__logo-icon" width="36" height="36" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="header__logo-icon" width="44" height="44" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#818cf8" />
-                    <stop offset="100%" stopColor="#6366f1" />
+                    <stop offset="0%" stopColor="#4338ca" />
+                    <stop offset="50%" stopColor="#6366f1" />
+                    <stop offset="100%" stopColor="#818cf8" />
                   </linearGradient>
                 </defs>
                 <g transform="translate(0,1024) scale(0.1,-0.1)" fill="url(#logoGrad)">

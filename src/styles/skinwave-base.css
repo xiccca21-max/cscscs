@@ -270,8 +270,8 @@ input, select, textarea { font: inherit; }
   font-size: 24px;
 }
 .header.is-scrolled .header__logo-icon {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
 }
 .header__inner {
   position: relative;

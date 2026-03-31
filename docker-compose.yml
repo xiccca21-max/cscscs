@@ -23,10 +23,12 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: "postgresql://postgres:postgres@db:5432/cs_ne_go?schema=public"
+      DIRECT_URL: "postgresql://postgres:postgres@db:5432/cs_ne_go?schema=public"
       SESSION_SECRET: "${SESSION_SECRET}"
       STEAM_API_KEY: "${STEAM_API_KEY}"
+      STEAMAPIS_KEY: "${STEAMAPIS_KEY}"
       NEXT_PUBLIC_APP_URL: "${NEXT_PUBLIC_APP_URL:-http://localhost:3000}"
-      TM_MARKET_API_KEY: "${TM_MARKET_API_KEY}"
+      ADMIN_STEAM_IDS: "${ADMIN_STEAM_IDS}"
     depends_on:
       db:
         condition: service_healthy

@@ -10,11 +10,14 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
+    "db:seed": "npx tsx prisma/seed-payments.ts",
+    "db:setup": "prisma db push && npx tsx prisma/seed-payments.ts",
     "db:studio": "prisma studio",
     "docker:db": "docker compose up db -d",
     "docker:build": "docker compose build app",
     "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "setup": "npm install && prisma generate && prisma db push && npx tsx prisma/seed-payments.ts"
   },
   "dependencies": {
     "@prisma/adapter-neon": "^7.5.0",

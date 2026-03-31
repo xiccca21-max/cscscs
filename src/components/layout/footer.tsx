@@ -81,6 +81,10 @@ export function Footer() {
         </div>
         <div className="footer__bottom">
           <span>{t("disclaimer")}</span>
+          <a href="https://www.trustpilot.com/review/skinsell.com" target="_blank" rel="noopener noreferrer" className="footer__trustpilot">
+            <img src="/trustpilot.png" alt="Trustpilot" width="16" height="16" />
+            <strong>4.2</strong> Trustpilot
+          </a>
           <div className="footer__socials">
             {socialLinks.discord && (
               <a href={socialLinks.discord} aria-label="Discord" target="_blank" rel="noopener noreferrer">

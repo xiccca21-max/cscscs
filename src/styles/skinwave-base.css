@@ -786,6 +786,19 @@ input, select, textarea { font: inherit; }
   padding-top: 24px;
   font-size: 12px;
 }
+.footer__trustpilot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.footer__trustpilot:hover { color: #fff; }
+.footer__trustpilot img { display: block; }
+.footer__trustpilot strong { color: rgba(255,255,255,0.85); font-weight: 700; }
 .footer__socials {
   display: flex;
   gap: 12px;

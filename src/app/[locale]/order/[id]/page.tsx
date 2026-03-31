@@ -495,27 +495,43 @@ export default function OrderPage({
             </h3>
 
             {!order.botAccount ? (
-              <div className="odr-trade-wait odr-trade-wait--v2">
-                <div className="odr-trade-wait__visual">
-                  <div className="odr-trade-wait__pulse"></div>
-                  <div className="odr-trade-wait__icon-wrap">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <div className="tw3">
+                <div className="tw3__decor">
+                  <div className="tw3__decor-grid" />
+                  <div className="tw3__decor-circle tw3__decor-circle--1" />
+                  <div className="tw3__decor-circle tw3__decor-circle--2" />
+                </div>
+                <div className="tw3__ring">
+                  <svg className="tw3__spinner" viewBox="0 0 80 80" fill="none">
+                    <circle cx="40" cy="40" r="36" stroke="rgba(99,102,241,0.12)" strokeWidth="3" />
+                    <circle cx="40" cy="40" r="36" stroke="url(#twGrad)" strokeWidth="3" strokeLinecap="round" strokeDasharray="60 170" />
+                    <defs><linearGradient id="twGrad" x1="0" y1="0" x2="80" y2="80"><stop stopColor="#818cf8" /><stop offset="1" stopColor="#6366f1" /></linearGradient></defs>
+                  </svg>
+                  <div className="tw3__icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
                   </div>
                 </div>
-                <div className="odr-trade-wait__text">
-                  <p className="odr-trade-wait__title">
-                    <span>{t("tradeWaitTitle")}</span>
-                    <span className="odr-dots"></span>
-                  </p>
-                  <span className="odr-trade-wait__hint">
-                    {t("tradeWaitHint")}
+                <p className="tw3__title">{t("tradeWaitTitle")}<span className="odr-dots" /></p>
+                <span className="tw3__hint">{t("tradeWaitHint")}</span>
+                <div className="tw3__bar"><div className="tw3__bar-fill" /></div>
+                <div className="tw3__steps">
+                  <span className="tw3__step tw3__step--active">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    {locale === "ru" ? "Поиск" : "Searching"}
                   </span>
-                </div>
-                <div className="odr-trade-wait__bar">
-                  <div className="odr-trade-wait__bar-fill"></div>
+                  <span className="tw3__step-line" />
+                  <span className="tw3__step">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+                    {locale === "ru" ? "Подключение" : "Connecting"}
+                  </span>
+                  <span className="tw3__step-line" />
+                  <span className="tw3__step">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    {locale === "ru" ? "Готово" : "Ready"}
+                  </span>
                 </div>
               </div>
             ) : (

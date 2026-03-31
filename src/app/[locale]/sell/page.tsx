@@ -63,6 +63,8 @@ const ICON_WRAP_CLS: Record<string, string> = {
   bank: "pay-btn__icon pay-btn__icon--bank",
 };
 
+const CRYPTO_TYPES = new Set(["crypto", "btc", "usdt-trc20", "usdt-erc20", "eth", "ltc"]);
+
 const TRADE_URL_RE =
   /^https:\/\/steamcommunity\.com\/tradeoffer\/new\/\?partner=\d+&token=.+$/;
 
@@ -198,6 +200,8 @@ export default function SellPage() {
   const [tradeUrl, setTradeUrl] = useState("");
   const [tradeUrlSaved, setTradeUrlSaved] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("balance");
+  const [selectedCrypto, setSelectedCrypto] = useState<string | null>(null);
+  const [cryptoDropOpen, setCryptoDropOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [dbPaymentMethods, setDbPaymentMethods] = useState<any[]>([]);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -207,7 +211,6 @@ export default function SellPage() {
   const [countryOpen, setCountryOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
   const countryRef = useRef<HTMLDivElement>(null);
-  const [cryptoDropOpen, setCryptoDropOpen] = useState(false);
   const cryptoDropRef = useRef<HTMLDivElement>(null);
 
   const offerItemsRef = useRef<HTMLDivElement>(null);
@@ -286,7 +289,10 @@ export default function SellPage() {
       .then((d) => {
         if (d.success && Array.isArray(d.data) && d.data.length > 0) {
           setDbPaymentMethods(d.data);
-          setPaymentMethod(d.data[0].type);
+          const first = d.data.find((m: any) => !CRYPTO_TYPES.has(m.type));
+          setPaymentMethod(first?.type ?? "balance");
+          const firstCrypto = d.data.find((m: any) => CRYPTO_TYPES.has(m.type));
+          if (firstCrypto) setSelectedCrypto(firstCrypto.type);
         }
       })
       .catch(() => {});
@@ -347,11 +353,22 @@ export default function SellPage() {
     [selectedItems],
   );
 
+  const effectivePayType = paymentMethod === "crypto" && selectedCrypto ? selectedCrypto : paymentMethod;
+
+  const cryptoMethods = useMemo(
+    () => dbPaymentMethods.filter((m) => CRYPTO_TYPES.has(m.type)),
+    [dbPaymentMethods],
+  );
+  const mainMethods = useMemo(
+    () => dbPaymentMethods.filter((m) => !CRYPTO_TYPES.has(m.type)),
+    [dbPaymentMethods],
+  );
+
   const commission = useMemo(() => {
-    const fromDb = dbPaymentMethods.find((m) => m.type === paymentMethod);
+    const fromDb = dbPaymentMethods.find((m) => m.type === effectivePayType);
     if (fromDb) return parseFloat(fromDb.commission) / 100;
-    return COMMISSION_FALLBACK[paymentMethod] ?? 0;
-  }, [paymentMethod, dbPaymentMethods]);
+    return COMMISSION_FALLBACK[effectivePayType] ?? COMMISSION_FALLBACK[paymentMethod] ?? 0;
+  }, [effectivePayType, paymentMethod, dbPaymentMethods]);
   const youReceive = selectedTotal * (1 - commission);
   const tradeUrlValid = TRADE_URL_RE.test(tradeUrl);
 
@@ -451,8 +468,8 @@ export default function SellPage() {
     setSubmitError(null);
     try {
       const gameApiMap: Record<string, string> = { cs2: "CS2", dota2: "DOTA2", tf2: "TF2", rust: "RUST" };
-      const fromDb = dbPaymentMethods.find((m) => m.type === paymentMethod);
-      const commissionRate = fromDb ? parseFloat(fromDb.commission) / 100 : (COMMISSION_FALLBACK[paymentMethod] ?? 0);
+      const fromDb = dbPaymentMethods.find((m) => m.type === effectivePayType);
+      const commissionRate = fromDb ? parseFloat(fromDb.commission) / 100 : (COMMISSION_FALLBACK[effectivePayType] ?? COMMISSION_FALLBACK[paymentMethod] ?? 0);
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -467,7 +484,7 @@ export default function SellPage() {
             currency: "USD",
           })),
           tradeUrl,
-          paymentMethodId: dbPaymentMethods.find((m) => m.type === paymentMethod)?.id ?? paymentMethod,
+          paymentMethodId: fromDb?.id ?? paymentMethod,
           currency: "USD",
           paymentDetails: payDetails,
         }),
@@ -483,7 +500,7 @@ export default function SellPage() {
       setSubmitError("Network error. Please check your connection and try again.");
       setSubmitting(false);
     }
-  }, [canSubmit, validateFields, selectedItems, tradeUrl, paymentMethod, dbPaymentMethods, payDetails, locale]);
+  }, [canSubmit, validateFields, selectedItems, tradeUrl, paymentMethod, effectivePayType, dbPaymentMethods, payDetails, locale]);
 
   useEffect(() => {
     if (!user) return;
@@ -1152,58 +1169,79 @@ export default function SellPage() {
 
             <div className="sell-pay__methods" id="paymentMethods">
               <div className="pay-grid">
-                {dbPaymentMethods.length > 0 ? dbPaymentMethods.map((pm) => {
-                  const icon = PAY_ICONS[pm.type] ?? PAY_ICONS.other;
-                  const wrapCls = ICON_WRAP_CLS[pm.type] ?? "pay-btn__icon";
-                  const commPct = parseFloat(pm.commission);
-                  const isFirst = dbPaymentMethods[0]?.id === pm.id;
+                {/* Balance */}
+                {(() => {
+                  const balPm = mainMethods.find((m) => m.type === "balance");
                   return (
-                    <button
-                      key={pm.id}
-                      className={`pay-btn${paymentMethod === pm.type ? " active" : ""}`}
-                      data-method={pm.type}
-                      onClick={() => setPaymentMethod(pm.type)}
-                    >
-                      <span className={wrapCls}>
-                        <img src={icon.src} alt={pm.name} className={icon.cls} />
-                      </span>
-                      <span className="pay-btn__name">
-                        {pm.name}
-                        {isFirst && commPct === 0 && <span className="pay-btn__best-dot" />}
-                      </span>
+                    <button className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`} data-method="balance" onClick={() => { setPaymentMethod("balance"); setCryptoDropOpen(false); }}>
+                      <span className="pay-btn__icon"><img src="/icons/pay-balance.png" alt="Balance" className="pay-btn__img pay-btn__img--circle" /></span>
+                      <span className="pay-btn__name">{balPm?.name ?? t("payBalance")}{(!balPm || parseFloat(balPm.commission) === 0) && <span className="pay-btn__best-dot" />}</span>
                     </button>
                   );
-                }) : <>
-                  <button className={`pay-btn${paymentMethod === "balance" ? " active" : ""}`} data-method="balance" onClick={() => setPaymentMethod("balance")}>
-                    <span className="pay-btn__icon"><img src="/icons/pay-balance.png" alt="Balance" className="pay-btn__img pay-btn__img--circle" /></span>
-                    <span className="pay-btn__name">{t("payBalance")}<span className="pay-btn__best-dot" /></span>
-                  </button>
-                  <button className={`pay-btn${paymentMethod === "card" ? " active" : ""}`} data-method="card" onClick={() => setPaymentMethod("card")}>
-                    <span className="pay-btn__icon pay-btn__icon--card"><img src="/icons/pay-card.png" alt="Card" className="pay-btn__img" /></span>
-                    <span className="pay-btn__name">{t("payCard")}</span>
-                  </button>
-                  <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" onClick={() => setPaymentMethod("crypto")}>
-                    <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
-                    <span className="pay-btn__name">{t("payCrypto")}</span>
-                  </button>
-                  <button className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`} data-method="bank" onClick={() => setPaymentMethod("bank")}>
-                    <span className="pay-btn__icon pay-btn__icon--bank"><img src="/icons/pay-bank.png" alt="Bank" className="pay-btn__img" /></span>
-                    <span className="pay-btn__name">{t("payBank")}</span>
-                  </button>
-                </>}
+                })()}
+                {/* Card */}
+                {(() => {
+                  const cardPm = mainMethods.find((m) => m.type === "card");
+                  return (
+                    <button className={`pay-btn${paymentMethod === "card" ? " active" : ""}`} data-method="card" onClick={() => { setPaymentMethod("card"); setCryptoDropOpen(false); }}>
+                      <span className="pay-btn__icon pay-btn__icon--card"><img src="/icons/pay-card.png" alt="Card" className="pay-btn__img" /></span>
+                      <span className="pay-btn__name">{cardPm?.name ?? t("payCard")}</span>
+                    </button>
+                  );
+                })()}
+                {/* Crypto (grouped) */}
+                <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" onClick={() => { setPaymentMethod("crypto"); setCryptoDropOpen((o) => !o); }}>
+                  <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
+                  <span className="pay-btn__name">{t("payCrypto")}</span>
+                </button>
+                {/* Bank */}
+                {(() => {
+                  const bankPm = mainMethods.find((m) => m.type === "bank");
+                  return (
+                    <button className={`pay-btn${paymentMethod === "bank" ? " active" : ""}`} data-method="bank" onClick={() => { setPaymentMethod("bank"); setCryptoDropOpen(false); }}>
+                      <span className="pay-btn__icon pay-btn__icon--bank"><img src="/icons/pay-bank.png" alt="Bank" className="pay-btn__img" /></span>
+                      <span className="pay-btn__name">{bankPm?.name ?? t("payBank")}</span>
+                    </button>
+                  );
+                })()}
               </div>
+
+              {/* Crypto sub-selector */}
+              {paymentMethod === "crypto" && cryptoDropOpen && cryptoMethods.length > 0 && (
+                <div className="pay-crypto-select">
+                  {cryptoMethods.map((cm) => {
+                    const icon = PAY_ICONS[cm.type] ?? PAY_ICONS.crypto;
+                    const active = selectedCrypto === cm.type;
+                    return (
+                      <button
+                        key={cm.id}
+                        className={`pay-crypto-opt${active ? " active" : ""}`}
+                        onClick={() => { setSelectedCrypto(cm.type); setCryptoDropOpen(false); }}
+                      >
+                        <img src={icon.src} alt={cm.name} className={icon.cls} width="20" height="20" />
+                        <span>{cm.name}</span>
+                        <span className="pay-crypto-opt__fee">{parseFloat(cm.commission)}%</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Info bar */}
               <div className="pay-info-bar" data-method={paymentMethod}>
                 <span className="pay-info-bar__icon">%</span>
-                {paymentMethod === "balance" && <span>{t("fee0")}</span>}
-                {paymentMethod === "card" && <span>{t("fee25")} · {t("minLabel")}: {format(1)}</span>}
-                {paymentMethod === "crypto" && <span>{t("fee1")} · {t("minLabel")}: {format(5)}</span>}
-                {paymentMethod === "bank" && <span>{t("fee3")} · {t("minLabel")}: {format(10)}</span>}
-                {dbPaymentMethods.length > 0 && (() => {
-                  const pm = dbPaymentMethods.find((m: any) => m.type === paymentMethod);
-                  if (!pm) return null;
-                  const commPct = parseFloat(pm.commission);
-                  const minAmt = parseFloat(pm.minAmount);
-                  return <span>{t("feeLabel")}: {commPct}% · {t("minLabel")}: {format(minAmt)}</span>;
+                {(() => {
+                  const pm = dbPaymentMethods.find((m: any) => m.type === effectivePayType);
+                  if (pm) {
+                    const commPct = parseFloat(pm.commission);
+                    const minAmt = parseFloat(pm.minAmount);
+                    return <span>{t("feeLabel")}: {commPct}% · {t("minLabel")}: {format(minAmt)}</span>;
+                  }
+                  if (paymentMethod === "balance") return <span>{t("fee0")}</span>;
+                  if (paymentMethod === "card") return <span>{t("fee25")} · {t("minLabel")}: {format(1)}</span>;
+                  if (paymentMethod === "crypto") return <span>{t("fee1")} · {t("minLabel")}: {format(5)}</span>;
+                  if (paymentMethod === "bank") return <span>{t("fee3")} · {t("minLabel")}: {format(10)}</span>;
+                  return null;
                 })()}
               </div>
             </div>

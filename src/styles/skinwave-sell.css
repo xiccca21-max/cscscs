@@ -2651,6 +2651,57 @@
   height: 38px;
 }
 
+/* Crypto network selector */
+.pay-crypto-select {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(245,158,11,0.06);
+  border: 1px solid rgba(245,158,11,0.15);
+  border-radius: 10px;
+  animation: cryptoSlide 0.2s ease-out;
+}
+@keyframes cryptoSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.pay-crypto-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pay-crypto-opt:hover {
+  background: rgba(245,158,11,0.1);
+  color: #fff;
+}
+.pay-crypto-opt.active {
+  background: rgba(245,158,11,0.15);
+  border-color: rgba(245,158,11,0.3);
+  color: #fbbf24;
+}
+.pay-crypto-opt img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.pay-crypto-opt__fee {
+  margin-left: auto;
+  font-size: 11px;
+  opacity: 0.6;
+}
+
 /* Fee info bar below grid */
 .pay-info-bar {
   display: flex;

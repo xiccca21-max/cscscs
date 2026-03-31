@@ -324,7 +324,7 @@ export default function OrderPage({
                       <span className="odr-tl__label">
                         {t(STEP_LABEL_KEYS[i])}
                       </span>
-                      <span className="odr-tl__time">&mdash;</span>
+                      
                     </div>
                     {i < TIMELINE_STEPS.length - 1 && (
                       <div className="odr-tl__line"></div>

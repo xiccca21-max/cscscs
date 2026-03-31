@@ -12,6 +12,23 @@ const PAYOUT_NAMES = [
   "zxcLOVE", "dR_phiL", "Tr1ple", "FANTOM", "sh4rk",
   "icecoLd", "BiBa", "Sn1per_X", "volchok", "ДЕМОН",
   "kroshka", "T0xic", "freez", "Gl1tch", "sobaka228",
+  "cr4zy_", "ВЕЗУНЧИК", "fl0wer", "D1kiy", "xNova",
+  "sneg0vik", "БАРСУК", "ch1ef", "r3kt", "SULTAN",
+  "pixeL_", "кот_учёный", "Bl4ze", "zefir", "ГРОЗА",
+  "sw1ft", "l1ght", "ШТУРМ", "chill_guy", "pr0xy",
+  "t0aster", "ВЕТЕР", "h4cker", "sk1ll", "МОЛНИЯ",
+  "n1ce_one", "ТАЙФУН", "dr1ft", "echo_", "КОБРА",
+  "v1per_", "СКАЛА", "s0lar", "byte_me", "ЛАВИНА",
+  "qu4ntum", "ПЛАМЯ", "gr1nd", "sh1ft_", "КОМЕТА",
+  "xtr3me", "ВИХРЬ", "cl0ud9", "sp4rk_", "ТИТАН",
+  "n0mercy", "БУРАН", "ph4ntom", "r1der_", "ГЕПАРД",
+  "z3n1th", "ИСКРА", "bl1tz_", "cr0ss", "ШТОРМ",
+  "d4wn_", "ИМПУЛЬС", "fr0st", "gl0w_", "ОРИОН",
+  "k1ng_", "РАКЕТА", "m1nder", "sp0t_", "СОКОЛ",
+  "wr4th_", "ЭФИР", "turb0", "v0rtex", "ПРИЗРАК",
+  "ax10m", "МЕТЕОР", "cy8er", "j0ker_", "СТРЕЛА",
+  "p1xel", "РАССВЕТ", "q_tip", "st0rm_", "УРАГАН",
+  "d3lta_", "ОГОНЬ", "thr1ve", "zenith", "ЯКОРЬ",
 ];
 
 const REVIEWS: { user: string; steam: string; avatar: string; en: string; ru: string; game: string; stars: number }[] = [
@@ -65,6 +82,7 @@ export default function HomePage() {
   /* ── A) Payout rotation ── */
   const payoutIdxRef = useRef(0);
   const payoutRowRefs = useRef<(HTMLDivElement | null)[]>([null, null, null, null, null, null]);
+  const usedNamesRef = useRef<Set<string>>(new Set(["Wa1halla", "kukas", "G7AX", "РЫБАК", "Tr1ple", "pinkgose"]));
 
   const formatRef = useRef(format);
   formatRef.current = format;
@@ -77,7 +95,17 @@ export default function HomePage() {
         row.style.opacity = "0";
         row.style.transform = "translateY(-8px)";
         setTimeout(() => {
-          const name = PAYOUT_NAMES[Math.floor(Math.random() * PAYOUT_NAMES.length)];
+          let name: string;
+          const available = PAYOUT_NAMES.filter((n) => !usedNamesRef.current.has(n));
+          if (available.length > 0) {
+            name = available[Math.floor(Math.random() * available.length)];
+          } else {
+            usedNamesRef.current.clear();
+            name = PAYOUT_NAMES[Math.floor(Math.random() * PAYOUT_NAMES.length)];
+          }
+          const oldName = row.querySelector(".hero__payout-user")?.textContent?.trim();
+          if (oldName) usedNamesRef.current.delete(oldName);
+          usedNamesRef.current.add(name);
           const amountUsd = randomPayoutAmountUsd();
           const userEl = row.querySelector(".hero__payout-user");
           const amountEl = row.querySelector(".hero__payout-amount");

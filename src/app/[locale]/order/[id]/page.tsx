@@ -96,6 +96,7 @@ export default function OrderPage({
   const [payerModalOpen, setPayerModalOpen] = useState(false);
   const [botProfile, setBotProfile] = useState<BotProfile | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -969,11 +970,11 @@ export default function OrderPage({
 
         {payerModalOpen && (
           <div className="odr-modal-overlay active" onClick={() => setPayerModalOpen(false)}>
-            <div className="odr-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="odr-modal__accent" />
+            <div className="odr-modal odr-modal--dark" onClick={(e) => e.stopPropagation()}>
+              <div className="odr-modal__accent odr-modal__accent--purple" />
               <div className="odr-modal__head">
                 <div className="odr-modal__head-left">
-                  <div className="odr-modal__avatar">
+                  <div className="odr-modal__avatar odr-modal__avatar--purple">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                       <circle cx="12" cy="7" r="4" />
@@ -997,17 +998,49 @@ export default function OrderPage({
                 {payerDetailsEntries.length > 0 ? (
                   payerDetailsEntries.map(([key, value]) => (
                     <div key={key} className="odr-modal__field">
-                      <div className="odr-modal__field-head">
+                      <div className="odr-modal__field-top">
+                        <div className="odr-modal__field-icon">
+                          {key === "cardNumber" || key === "iban" ? (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                          ) : key === "cardName" || key === "recipientName" ? (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                          ) : key === "email" ? (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                          ) : key === "walletAddress" ? (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4h-4z"/></svg>
+                          ) : key === "network" ? (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                          ) : key === "country" ? (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                          ) : (
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                          )}
+                        </div>
                         <span className="odr-modal__label">{getPayerFieldLabel(key)}</span>
                       </div>
-                      <div className="odr-modal__val">{String(value)}</div>
+                      <div className="odr-modal__field-bottom">
+                        <div className="odr-modal__val">{String(value)}</div>
+                        <button
+                          className={`odr-modal__copy-btn${copiedField === key ? " odr-modal__copy-btn--done" : ""}`}
+                          onClick={() => {
+                            navigator.clipboard.writeText(String(value));
+                            setCopiedField(key);
+                            setTimeout(() => setCopiedField(null), 2000);
+                          }}
+                        >
+                          {copiedField === key ? (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                          ) : (
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   ))
                 ) : (
-                  <div className="odr-modal__field">
-                    <div className="odr-modal__val">
-                      {locale === "ru" ? "Реквизиты не заполнены" : "No payout details provided"}
-                    </div>
+                  <div className="odr-modal__field odr-modal__field--empty">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>{locale === "ru" ? "Реквизиты не заполнены" : "No payout details provided"}</span>
                   </div>
                 )}
               </div>

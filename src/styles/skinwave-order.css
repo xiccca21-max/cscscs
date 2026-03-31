@@ -1801,6 +1801,144 @@
 /* ── Old details btn hide ── */
 .odr-details-btn { display: none !important; }
 
+/* ══════════════════════════════════════════════
+   PAYER MODAL — dark theme redesign
+   ══════════════════════════════════════════════ */
+.odr-modal--dark {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #172554 100%) !important;
+  border: 1px solid rgba(99,102,241,0.15) !important;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4), 0 0 0 1px rgba(99,102,241,0.08) !important;
+}
+.odr-modal__accent--purple {
+  height: 3px !important;
+  background: linear-gradient(90deg, #6366f1, #818cf8, #a78bfa, #818cf8, #6366f1) !important;
+  background-size: 200% 100% !important;
+}
+.odr-modal--dark .odr-modal__head {
+  padding: 22px 24px 0 !important;
+}
+.odr-modal__avatar--purple {
+  background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.3) !important;
+}
+.odr-modal--dark .odr-modal__head h3 {
+  color: #fff !important;
+  font-size: 17px !important;
+}
+.odr-modal--dark .odr-modal__sub {
+  color: rgba(255,255,255,0.4) !important;
+}
+.odr-modal--dark .odr-modal__close {
+  border-color: rgba(255,255,255,0.08) !important;
+  background: rgba(255,255,255,0.04) !important;
+  color: rgba(255,255,255,0.4) !important;
+}
+.odr-modal--dark .odr-modal__close:hover {
+  background: rgba(239,68,68,0.12) !important;
+  border-color: rgba(239,68,68,0.3) !important;
+  color: #ef4444 !important;
+}
+.odr-modal--dark .odr-modal__fields {
+  padding: 18px 24px 24px !important;
+  gap: 6px !important;
+}
+.odr-modal--dark .odr-modal__field {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+  border-radius: 10px !important;
+  padding: 12px 14px !important;
+}
+.odr-modal--dark .odr-modal__field:hover {
+  background: rgba(255,255,255,0.06) !important;
+  border-color: rgba(99,102,241,0.15) !important;
+}
+.odr-modal--dark .odr-modal__field-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.odr-modal--dark .odr-modal__field-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(99,102,241,0.1);
+  color: #a5b4fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.odr-modal--dark .odr-modal__label {
+  color: rgba(255,255,255,0.4) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.8px !important;
+}
+.odr-modal--dark .odr-modal__field-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 8px;
+}
+.odr-modal--dark .odr-modal__val {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  word-break: break-all;
+  flex: 1;
+  min-width: 0;
+  font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+}
+.odr-modal__copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.35);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.odr-modal__copy-btn:hover {
+  background: rgba(99,102,241,0.15);
+  border-color: rgba(99,102,241,0.3);
+  color: #a5b4fc;
+}
+.odr-modal__copy-btn--done {
+  background: rgba(34,197,94,0.1) !important;
+  border-color: rgba(34,197,94,0.3) !important;
+  color: #34d399 !important;
+}
+.odr-modal--dark .odr-modal__field--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px !important;
+  text-align: center;
+  background: transparent !important;
+  border: 1px dashed rgba(255,255,255,0.08) !important;
+}
+.odr-modal--dark .odr-modal__field--empty svg {
+  color: rgba(255,255,255,0.2);
+}
+.odr-modal--dark .odr-modal__field--empty span {
+  font-size: 13px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 500;
+}
+
 /* ── Trade Wait V2 ── */
 .odr-trade-wait--v2 {
   display: flex !important;

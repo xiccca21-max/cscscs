@@ -568,8 +568,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 10px;
+  gap: 6px;
+  padding: 10px 10px;
   border-radius: var(--radius);
   font-size: 12px;
   font-weight: 700;
@@ -1522,6 +1522,9 @@
 .odr-grid > .odr-card:first-child {
   align-self: start !important;
 }
+.odr-grid > .odr-card:last-child {
+  align-self: start !important;
+}
 .odr-card:hover {
   border-color: #c7d2fe !important;
   box-shadow: 0 8px 24px rgba(99,102,241,0.08), 0 2px 8px rgba(0,0,0,0.04) !important;
@@ -1835,7 +1838,7 @@
   position: relative;
   background: linear-gradient(135deg, #1a0a0a 0%, #2d1212 40%, #1c0e0e 100%);
   border-radius: 16px;
-  padding: 36px 28px 28px;
+  padding: 20px 20px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1875,15 +1878,15 @@
 
 /* Animated X icon */
 .odr-trade-cancelled__icon {
-  width: 64px;
-  height: 64px;
-  margin-bottom: 18px;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 10px;
   position: relative;
   z-index: 1;
 }
 .odr-trade-cancelled__icon svg {
-  width: 64px;
-  height: 64px;
+  width: 44px;
+  height: 44px;
 }
 .odr-trade-cancelled__circle {
   stroke: rgba(239,68,68,0.3);
@@ -1914,19 +1917,19 @@
 }
 
 .odr-trade-cancelled__title {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
   color: #fca5a5;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   position: relative;
   z-index: 1;
 }
 .odr-trade-cancelled__desc {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(252,165,165,0.5);
-  line-height: 1.6;
+  line-height: 1.4;
   max-width: 320px;
-  margin-bottom: 22px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
 }
@@ -1935,17 +1938,17 @@
 .odr-trade-cancelled__info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
 }
 .odr-trade-cancelled__info-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 8px 12px;
   background: rgba(239,68,68,0.06);
   border: 1px solid rgba(239,68,68,0.1);
   border-radius: 10px;
@@ -1954,9 +1957,9 @@
   line-height: 1.5;
 }
 .odr-trade-cancelled__info-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   background: rgba(239,68,68,0.1);
   color: #f87171;
   display: flex;
@@ -1982,10 +1985,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-size: 14px;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
@@ -2020,7 +2023,7 @@
   position: relative;
   background: linear-gradient(135deg, #1a1000 0%, #2d2200 40%, #1c1500 100%);
   border-radius: 16px;
-  padding: 36px 28px 28px;
+  padding: 20px 20px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2060,15 +2063,15 @@
 
 /* Animated clock icon */
 .odr-trade-expired__icon {
-  width: 64px;
-  height: 64px;
-  margin-bottom: 18px;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 10px;
   position: relative;
   z-index: 1;
 }
 .odr-trade-expired__icon svg {
-  width: 64px;
-  height: 64px;
+  width: 44px;
+  height: 44px;
 }
 .odr-trade-expired__circle {
   stroke: rgba(234,179,8,0.3);
@@ -2091,19 +2094,19 @@
 }
 
 .odr-trade-expired__title {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
   color: #fde68a;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   position: relative;
   z-index: 1;
 }
 .odr-trade-expired__desc {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(253,230,138,0.5);
-  line-height: 1.6;
+  line-height: 1.4;
   max-width: 320px;
-  margin-bottom: 22px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
 }
@@ -2112,17 +2115,17 @@
 .odr-trade-expired__info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
 }
 .odr-trade-expired__info-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 8px 12px;
   background: rgba(234,179,8,0.06);
   border: 1px solid rgba(234,179,8,0.1);
   border-radius: 10px;
@@ -2131,9 +2134,9 @@
   line-height: 1.5;
 }
 .odr-trade-expired__info-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   background: rgba(234,179,8,0.1);
   color: #facc15;
   display: flex;
@@ -2155,10 +2158,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-size: 14px;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   text-decoration: none;
@@ -2330,17 +2333,16 @@
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 32px 24px 24px !important;
+  padding: 24px 20px 20px !important;
   gap: 0 !important;
   text-align: center;
   flex: 1;
-  min-height: 260px;
 }
 .odr-trade-wait__visual {
   position: relative;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 20px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
 }
 .odr-trade-wait__icon-wrap {
   position: absolute;
@@ -2366,16 +2368,16 @@
 }
 
 .odr-trade-wait__text {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 .odr-trade-wait--v2 .odr-trade-wait__title {
-  font-size: 15px !important;
+  font-size: 14px !important;
   font-weight: 700 !important;
   color: #1e293b !important;
-  margin: 0 0 6px !important;
+  margin: 0 0 4px !important;
 }
 .odr-trade-wait--v2 .odr-trade-wait__hint {
-  font-size: 13px !important;
+  font-size: 12px !important;
   color: #94a3b8 !important;
   line-height: 1.5;
   max-width: 320px;
@@ -2427,8 +2429,7 @@
   justify-content: center;
   text-align: center;
   flex: 1;
-  min-height: 280px;
-  padding: 40px 24px 32px;
+  padding: 28px 20px 24px;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%);
   overflow: hidden;
   border-radius: 0 0 16px 16px;
@@ -2467,9 +2468,9 @@
 
 .tw3__ring {
   position: relative;
-  width: 80px;
-  height: 80px;
-  margin-bottom: 24px;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 14px;
   z-index: 1;
 }
 .tw3__spinner {
@@ -2495,7 +2496,7 @@
 .tw3__title {
   position: relative;
   z-index: 1;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #fff;
   margin: 0 0 6px;
@@ -2504,7 +2505,7 @@
 .tw3__hint {
   position: relative;
   z-index: 1;
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(255,255,255,0.45);
   line-height: 1.5;
   margin-bottom: 24px;
@@ -2519,7 +2520,7 @@
   background: rgba(255,255,255,0.06);
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
 }
 .tw3__bar-fill {
   width: 40%;
@@ -2577,7 +2578,7 @@
   align-items: center;
   text-align: center;
   flex: 1;
-  padding: 36px 24px 28px;
+  padding: 20px 20px 18px;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%);
   border-radius: 0 0 16px 16px;
   position: relative;
@@ -2617,9 +2618,9 @@
 
 /* ── Animated checkmark ── */
 .odr-trade-done__check {
-  width: 72px;
-  height: 72px;
-  margin-bottom: 18px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
   position: relative;
   z-index: 1;
 }
@@ -2653,7 +2654,7 @@
 
 /* ── Title ── */
 .odr-trade-done__title {
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 700;
   color: #fff;
   margin: 0 0 6px;
@@ -2664,18 +2665,18 @@
 
 /* ── Payout amount ── */
 .odr-trade-done__amount {
-  font-size: 36px;
-  font-weight: 900;
+  font-size: 22px;
+  font-weight: 800;
   color: #fff;
-  letter-spacing: -1px;
-  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
   position: relative;
   z-index: 1;
   text-shadow: 0 0 30px rgba(34,197,94,0.35);
   font-variant-numeric: tabular-nums;
 }
 .odr-trade-done__amount small {
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 700;
   color: #34d399;
   margin-left: 2px;
@@ -2683,11 +2684,11 @@
 
 /* ── Description ── */
 .odr-trade-done__desc {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(255,255,255,0.45);
-  line-height: 1.6;
+  line-height: 1.5;
   max-width: 340px;
-  margin: 0 0 20px;
+  margin: 0 0 12px;
   position: relative;
   z-index: 1;
 }
@@ -2723,7 +2724,7 @@
   display: flex;
   align-items: center;
   gap: 0;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
 }
@@ -2770,17 +2771,17 @@
 .odr-trade-done__info-row {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 8px 12px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 10px;
   text-align: left;
 }
 .odr-trade-done__info-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2810,12 +2811,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
   max-width: 380px;
   position: relative;
   z-index: 1;
-  padding-top: 14px;
+  padding-top: 10px;
   border-top: 1px solid rgba(255,255,255,0.06);
   margin-top: auto;
 }
@@ -2894,7 +2895,7 @@
   align-items: center;
   text-align: center;
   flex: 1;
-  padding: 36px 24px 28px;
+  padding: 20px 20px 18px;
   background: linear-gradient(135deg, #022c22 0%, #064e3b 50%, #065f46 100%);
   border-radius: 0 0 16px 16px;
   position: relative;
@@ -2984,9 +2985,9 @@
 
 /* ── Animated checkmark ── */
 .odr-trade-paid__check {
-  width: 80px;
-  height: 80px;
-  margin-bottom: 18px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 10px;
   position: relative;
   z-index: 3;
 }
@@ -3013,39 +3014,39 @@
 }
 
 .odr-trade-paid__title {
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 15px;
+  font-weight: 700;
   color: #fff;
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   position: relative;
   z-index: 1;
   letter-spacing: -0.3px;
 }
 
 .odr-trade-paid__amount {
-  font-size: 42px;
-  font-weight: 900;
+  font-size: 24px;
+  font-weight: 800;
   color: #fff;
-  letter-spacing: -1.5px;
-  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
   position: relative;
   z-index: 1;
   text-shadow: 0 0 40px rgba(34,197,94,0.4);
   font-variant-numeric: tabular-nums;
 }
 .odr-trade-paid__amount small {
-  font-size: 24px;
+  font-size: 16px;
   font-weight: 700;
   color: #34d399;
   margin-left: 2px;
 }
 
 .odr-trade-paid__desc {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(255,255,255,0.5);
-  line-height: 1.6;
+  line-height: 1.5;
   max-width: 340px;
-  margin: 0 0 20px;
+  margin: 0 0 10px;
   position: relative;
   z-index: 1;
 }
@@ -3056,9 +3057,9 @@
   max-width: 380px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 12px;
-  padding: 4px 0;
-  margin-bottom: 20px;
+  border-radius: 10px;
+  padding: 2px 0;
+  margin-bottom: 10px;
   position: relative;
   z-index: 1;
   backdrop-filter: blur(4px);
@@ -3067,19 +3068,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 18px;
+  padding: 6px 14px;
   border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .odr-trade-paid__receipt-row:last-of-type {
   border-bottom: none;
 }
 .odr-trade-paid__receipt-row span:first-child {
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(255,255,255,0.4);
   font-weight: 500;
 }
 .odr-trade-paid__receipt-row strong {
-  font-size: 13px;
+  font-size: 12px;
   color: #fff;
   font-weight: 600;
 }
@@ -3098,7 +3099,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 18px;
+  padding: 8px 14px;
   background: rgba(34,197,94,0.08);
   border-top: 1px solid rgba(34,197,94,0.12);
   border-radius: 0 0 12px 12px;
@@ -3111,8 +3112,8 @@
   letter-spacing: 0.5px;
 }
 .odr-trade-paid__receipt-total span:last-child {
-  font-size: 20px;
-  font-weight: 900;
+  font-size: 16px;
+  font-weight: 800;
   color: #fff;
   font-variant-numeric: tabular-nums;
 }
@@ -3127,7 +3128,7 @@
 .odr-trade-paid__actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
   max-width: 380px;
   position: relative;
@@ -3136,16 +3137,16 @@
 .odr-trade-paid__actions-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
 }
 .odr-trade-paid__btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 13px 10px;
-  border-radius: 12px;
-  font-size: 13px;
+  gap: 6px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  font-size: 12px;
   font-weight: 700;
   text-decoration: none;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3211,7 +3212,7 @@
   flex: 1 !important;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%) !important;
   border-radius: 0 0 16px 16px !important;
-  padding: 28px 24px 24px !important;
+  padding: 20px 20px 18px !important;
   position: relative !important;
   overflow: hidden !important;
 }
@@ -3247,14 +3248,14 @@
 .odr-trade-ready .odr-trade-timer {
   background: rgba(255,255,255,0.04) !important;
   border: 1px solid rgba(255,255,255,0.06) !important;
-  padding: 16px 20px !important;
-  margin-bottom: 16px !important;
+  padding: 10px 14px !important;
+  margin-bottom: 10px !important;
   position: relative;
   z-index: 1;
 }
 .odr-trade-ready .odr-trade-timer__head {
   color: #fff !important;
-  font-size: 15px !important;
+  font-size: 13px !important;
   font-weight: 700 !important;
 }
 .odr-trade-ready .odr-trade-timer__head svg {
@@ -3262,7 +3263,7 @@
 }
 .odr-trade-ready .odr-trade-timer__clock {
   color: #f97316 !important;
-  font-size: 32px !important;
+  font-size: 24px !important;
   font-weight: 800 !important;
   text-shadow: 0 0 20px rgba(249,115,22,0.3);
 }
@@ -3276,8 +3277,8 @@
   background: rgba(255,255,255,0.03) !important;
   border: 1px solid rgba(255,255,255,0.05) !important;
   border-radius: 10px !important;
-  padding: 10px 16px !important;
-  margin-bottom: 16px !important;
+  padding: 8px 14px !important;
+  margin-bottom: 10px !important;
   position: relative;
   z-index: 1;
 }
@@ -3298,7 +3299,7 @@
   background: rgba(255,255,255,0.04) !important;
   border: 1px solid rgba(255,255,255,0.06) !important;
   border-radius: 10px !important;
-  margin-bottom: 12px !important;
+  margin-bottom: 8px !important;
   position: relative;
   z-index: 1;
 }
@@ -3319,8 +3320,8 @@
 /* ── Note / instruction (dark) ── */
 .odr-trade-ready .odr-trade-note {
   color: rgba(255,255,255,0.4) !important;
-  font-size: 13px !important;
-  margin-bottom: 8px !important;
+  font-size: 12px !important;
+  margin-bottom: 6px !important;
   position: relative;
   z-index: 1;
 }
@@ -3328,20 +3329,20 @@
 /* ── Warning block (dark) ── */
 .odr-trade-warning {
   display: flex;
-  gap: 14px;
-  padding: 16px 18px;
+  gap: 10px;
+  padding: 10px 14px;
   background: rgba(234,179,8,0.08);
   border: 1px solid rgba(234,179,8,0.15);
-  border-radius: 10px;
-  margin-bottom: 16px;
+  border-radius: 8px;
+  margin-bottom: 10px;
   position: relative;
   z-index: 1;
   order: 5 !important;
 }
 .odr-trade-warning__icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background: linear-gradient(135deg, rgba(234,179,8,0.2), rgba(234,179,8,0.1));
   display: flex;
   align-items: center;
@@ -3355,15 +3356,15 @@
 }
 .odr-trade-warning__title {
   display: block;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 6px;
+  margin-bottom: 3px;
 }
 .odr-trade-warning__desc {
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(255,255,255,0.5);
-  line-height: 1.6;
+  line-height: 1.4;
   margin: 0;
 }
 .odr-trade-warning__desc a {

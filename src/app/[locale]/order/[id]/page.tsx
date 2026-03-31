@@ -50,7 +50,9 @@ const TIMELINE_STEPS = ["CREATED", "TRADE_SENT", "TRADE_COMPLETED", "PAID"];
 
 function getTimelineIndex(status: string): number {
   const idx = TIMELINE_STEPS.indexOf(status);
-  return idx >= 0 ? idx : 0;
+  if (idx < 0) return 0;
+  if (status === "TRADE_COMPLETED" || status === "PAYMENT_PENDING") return 3;
+  return idx;
 }
 
 const STATUS_CSS: Record<string, string> = {

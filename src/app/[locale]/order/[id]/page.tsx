@@ -174,10 +174,30 @@ export default function OrderPage({
     return `${m}:${s}`;
   };
 
-  const tradeOfferUrl = (() => {
-    try { return JSON.parse(order?.adminComment || "{}").tradeOfferUrl as string | undefined; } catch { return undefined; }
+  const ensureAbsUrl = (url: string | undefined | null): string | undefined => {
+    if (!url) return undefined;
+    const trimmed = url.trim();
+    if (!trimmed) return undefined;
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
+
+  const rawTradeOfferValue = (() => {
+    try {
+      return (JSON.parse(order?.adminComment || "{}").tradeOfferUrl as string) ?? null;
+    } catch { return null; }
   })();
-  const tradeOfferId = tradeOfferUrl?.match(/tradeoffer\/(\d+)/)?.[1] ?? null;
+  const tradeOfferId = (() => {
+    if (!rawTradeOfferValue) return null;
+    const m = rawTradeOfferValue.match(/tradeoffer\/(\d+)/);
+    if (m) return m[1];
+    const digits = rawTradeOfferValue.replace(/\D/g, "");
+    return digits || null;
+  })();
+  const tradeOfferUrl = tradeOfferId
+    ? `https://steamcommunity.com/tradeoffer/${tradeOfferId}/`
+    : null;
+  const botSteamUrl = ensureAbsUrl(order?.botAccount?.steamProfileUrl);
 
   const handleCopyOrderId = () => {
     navigator.clipboard.writeText(order?.orderNumber ?? orderId);
@@ -547,7 +567,7 @@ export default function OrderPage({
                   </div>
                   <div className="odr-trade-bot__info">
                     <a
-                      href={order.botAccount.steamProfileUrl}
+                      href={botSteamUrl ?? "#"}
                       className="odr-trade-bot__name odr-trade-bot__name--link"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -590,7 +610,7 @@ export default function OrderPage({
                 {/* Confirm buttons */}
                 <div className="odr-trade-actions">
                   <a
-                    href={tradeOfferUrl ?? order.botAccount.steamProfileUrl}
+                    href={tradeOfferUrl ?? botSteamUrl ?? "#"}
                     className="odr-trade-actions__btn odr-trade-actions__btn--browser"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -603,7 +623,7 @@ export default function OrderPage({
                     <span>{t("confirmBrowser")}</span>
                   </a>
                   <a
-                    href={tradeOfferId ? `steam://url/ShowTradeOffer/${tradeOfferId}` : `steam://openurl/${order.botAccount.steamProfileUrl}`}
+                    href={tradeOfferId ? `steam://url/ShowTradeOffer/${tradeOfferId}` : `steam://openurl/${botSteamUrl ?? ""}`}
                     className="odr-trade-actions__btn odr-trade-actions__btn--client"
                   >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

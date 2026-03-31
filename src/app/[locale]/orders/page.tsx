@@ -137,7 +137,10 @@ const TIMELINE_LABELS: Record<string, string> = {
 
 function getTimelineIndex(status: string): number {
   const idx = TIMELINE_STEPS.indexOf(status);
-  return idx >= 0 ? idx : 0;
+  if (idx < 0) return 0;
+  if (status === "TRADE_COMPLETED" || status === "PAYMENT_PENDING") return 3;
+  if (status === "PAID") return 4;
+  return idx;
 }
 
 function paymentIcon(type: string | undefined) {

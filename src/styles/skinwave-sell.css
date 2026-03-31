@@ -38,6 +38,8 @@
 .sell-page-wrap + .footer,
 .sell-page-wrap ~ .footer {
   margin-top: 30px;
+  position: relative;
+  z-index: 20;
 }
 
 /* ── Inventory (Left) ── */

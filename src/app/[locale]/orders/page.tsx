@@ -797,7 +797,7 @@ export default function OrdersPage() {
                               {STATUS_ICON[displayStatus]}
                               <span>{t(STATUS_I18N[displayStatus] ?? "statusCreated")}</span>
                             </span>
-                            {estimate && <span className="ord-row__estimate">{estimate}</span>}
+                            {/* estimate removed */}
                           </div>
                         </td>
                         <td>

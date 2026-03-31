@@ -46,6 +46,7 @@ export async function GET() {
       totalAmount: o.totalAmount.toString(),
       currency: o.currency,
       createdAt: o.createdAt.toISOString(),
+      tradeSentAt: o.tradeSentAt ? o.tradeSentAt.toISOString() : null,
       itemCount: o._count.items,
       paymentMethod: o.paymentMethod
         ? { name: o.paymentMethod.name, type: o.paymentMethod.type }

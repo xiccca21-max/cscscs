@@ -26,6 +26,7 @@ type OrderRow = {
   totalAmount: string;
   currency: string;
   createdAt: string;
+  tradeSentAt?: string | null;
   itemCount: number;
   paymentMethod: { name: string; type: string } | null;
   items?: OrderItem[];
@@ -41,10 +42,11 @@ type OrderRow = {
 const STATUS_BADGE: Record<string, string> = {
   CREATED: "ord-badge--created",
   TRADE_SENT: "ord-badge--sent",
-  TRADE_COMPLETED: "ord-badge--paid",
+  TRADE_COMPLETED: "ord-badge--completed",
   PAYMENT_PENDING: "ord-badge--processing",
   PAID: "ord-badge--paid",
   TRADE_CANCELLED: "ord-badge--cancelled",
+  EXPIRED: "ord-badge--expired",
 };
 
 const STATUS_I18N: Record<string, string> = {
@@ -54,15 +56,17 @@ const STATUS_I18N: Record<string, string> = {
   PAYMENT_PENDING: "statusProcessing",
   PAID: "statusPaid",
   TRADE_CANCELLED: "statusCancelled",
+  EXPIRED: "statusExpired",
 };
 
 const STATUS_DATA_ATTR: Record<string, string> = {
   CREATED: "created",
   TRADE_SENT: "trade_sent",
-  TRADE_COMPLETED: "paid",
+  TRADE_COMPLETED: "completed",
   PAYMENT_PENDING: "processing",
   PAID: "paid",
   TRADE_CANCELLED: "cancelled",
+  EXPIRED: "expired",
 };
 
 const STATUS_ICON: Record<string, React.ReactNode> = {
@@ -83,6 +87,9 @@ const STATUS_ICON: Record<string, React.ReactNode> = {
   ),
   TRADE_CANCELLED: (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
+  ),
+  EXPIRED: (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /><line x1="4" y1="4" x2="20" y2="20" /></svg>
   ),
 };
 
@@ -109,6 +116,7 @@ const PROGRESS_PERCENT: Record<string, number> = {
   PAYMENT_PENDING: 80,
   PAID: 100,
   TRADE_CANCELLED: 0,
+  EXPIRED: 40,
 };
 
 const NEEDS_ACTION = new Set(["CREATED", "TRADE_SENT"]);
@@ -172,9 +180,21 @@ function paymentIcon(type: string | undefined) {
   }
 }
 
+function isOrderExpired(order: OrderRow): boolean {
+  if (order.status !== "TRADE_SENT" || !order.tradeSentAt) return false;
+  const deadline = new Date(order.tradeSentAt).getTime() + 10 * 60 * 1000;
+  return Date.now() >= deadline;
+}
+
+function getDisplayStatus(order: OrderRow): string {
+  if (isOrderExpired(order)) return "EXPIRED";
+  return order.status;
+}
+
 function amtClass(status: string): string {
-  if (status === "PAID" || status === "TRADE_COMPLETED") return "ord-row__amt ord-row__amt--paid";
-  if (status === "TRADE_CANCELLED") return "ord-row__amt ord-row__amt--cancelled";
+  if (status === "PAID") return "ord-row__amt ord-row__amt--paid";
+  if (status === "TRADE_COMPLETED") return "ord-row__amt ord-row__amt--completed";
+  if (status === "TRADE_CANCELLED" || status === "EXPIRED") return "ord-row__amt ord-row__amt--cancelled";
   return "ord-row__amt";
 }
 
@@ -309,6 +329,7 @@ export default function OrdersPage() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [updatedRows, setUpdatedRows] = useState<Set<string>>(new Set());
   const prevStatusRef = useRef<Record<string, string>>({});
+  const [, setTick] = useState(0);
 
   const fetchOrders = useCallback(() => {
     if (!user) return;
@@ -358,6 +379,15 @@ export default function OrdersPage() {
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, [user, orders, fetchOrders]);
+
+  useEffect(() => {
+    const hasPendingExpiry = orders.some(
+      (o) => o.status === "TRADE_SENT" && o.tradeSentAt && !isOrderExpired(o)
+    );
+    if (!hasPendingExpiry) return;
+    const timer = setInterval(() => setTick((t) => t + 1), 5000);
+    return () => clearInterval(timer);
+  }, [orders]);
 
   const handleCopyId = useCallback((e: React.MouseEvent, orderNumber: string) => {
     e.stopPropagation();
@@ -541,7 +571,9 @@ export default function OrdersPage() {
   const isSearching = search.trim().length > 0 || activeFilter !== "all" || methodFilter !== "all";
 
   const detail = modalDetail ?? modalOrder;
-  const isCancelled = detail?.status === "TRADE_CANCELLED";
+  const detailDisplayStatus = detail ? getDisplayStatus(detail) : "";
+  const isCancelled = detailDisplayStatus === "TRADE_CANCELLED";
+  const isExpired = detailDisplayStatus === "EXPIRED";
   const activeStep = detail ? getTimelineIndex(detail.status) : 0;
 
   function thClass(key: SortKey) {
@@ -723,15 +755,16 @@ export default function OrdersPage() {
                 <tbody>
                   {paginated.map((order) => {
                     const rel = formatRelativeDate(order.createdAt);
-                    const estimate = PAYOUT_ESTIMATE[order.status];
+                    const displayStatus = getDisplayStatus(order);
+                    const estimate = PAYOUT_ESTIMATE[displayStatus];
                     const isFlashing = updatedRows.has(order.id);
-                    const progress = PROGRESS_PERCENT[order.status] ?? 0;
-                    const needsAction = NEEDS_ACTION.has(order.status);
+                    const progress = PROGRESS_PERCENT[displayStatus] ?? 0;
+                    const needsAction = NEEDS_ACTION.has(displayStatus);
                     return (
                       <tr
                         key={order.id}
                         className={`ord-row${isFlashing ? " ord-row--flash" : ""}`}
-                        data-status={STATUS_DATA_ATTR[order.status] ?? "created"}
+                        data-status={STATUS_DATA_ATTR[displayStatus] ?? "created"}
                         onClick={() => openModal(order)}
                       >
                         <td data-label={t("colOrder")}>
@@ -747,7 +780,7 @@ export default function OrdersPage() {
                           <span className="ord-row__items">{order.itemCount} {order.itemCount === 1 ? t("item") : t("items_count")}</span>
                         </td>
                         <td data-label={t("colAmount")}>
-                          <span className={amtClass(order.status)}>
+                          <span className={amtClass(displayStatus)}>
                             {parseFloat(order.totalAmount).toFixed(2)}<small>$</small>
                           </span>
                         </td>
@@ -759,10 +792,10 @@ export default function OrdersPage() {
                         </td>
                         <td data-label={t("colStatus")}>
                           <div className="ord-status-cell">
-                            <span className={`ord-badge ${STATUS_BADGE[order.status] ?? "ord-badge--created"}`}>
+                            <span className={`ord-badge ${STATUS_BADGE[displayStatus] ?? "ord-badge--created"}`}>
                               {needsAction && <span className="ord-badge__pulse" />}
-                              {STATUS_ICON[order.status]}
-                              <span>{t(STATUS_I18N[order.status] ?? "statusCreated")}</span>
+                              {STATUS_ICON[displayStatus]}
+                              <span>{t(STATUS_I18N[displayStatus] ?? "statusCreated")}</span>
                             </span>
                             {estimate && <span className="ord-row__estimate">{estimate}</span>}
                           </div>
@@ -772,7 +805,7 @@ export default function OrdersPage() {
                             <button className="ord-row__action-btn ord-row__action-btn--view" title={t("view")} onClick={(e) => { e.stopPropagation(); openModal(order); }}>
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                             </button>
-                            {(order.status === "TRADE_CANCELLED") && (
+                            {(displayStatus === "TRADE_CANCELLED" || displayStatus === "EXPIRED") && (
                               <Link href="/sell" className="ord-row__action-btn ord-row__action-btn--retry" title="Retry" onClick={(e) => e.stopPropagation()}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
                               </Link>
@@ -783,7 +816,7 @@ export default function OrdersPage() {
                           </span>
                           {/* Mini progress bar */}
                           <div className="ord-row__progress">
-                            <div className="ord-row__progress-fill" style={{ width: `${progress}%` }} data-status={STATUS_DATA_ATTR[order.status] ?? "created"} />
+                            <div className="ord-row__progress-fill" style={{ width: `${progress}%` }} data-status={STATUS_DATA_ATTR[displayStatus] ?? "created"} />
                           </div>
                         </td>
                       </tr>
@@ -859,13 +892,13 @@ export default function OrdersPage() {
                       {new Date(detail.createdAt).toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US", { month: "long", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
-                  <span className={`ord-badge ${STATUS_BADGE[detail.status] ?? "ord-badge--created"}`}>
-                    {STATUS_ICON[detail.status]}
-                    <span>{t(STATUS_I18N[detail.status] ?? "statusCreated")}</span>
+                  <span className={`ord-badge ${STATUS_BADGE[detailDisplayStatus] ?? "ord-badge--created"}`}>
+                    {STATUS_ICON[detailDisplayStatus]}
+                    <span>{t(STATUS_I18N[detailDisplayStatus] ?? "statusCreated")}</span>
                   </span>
                 </div>
 
-                {!isCancelled && (
+                {!isCancelled && !isExpired && (
                   <div className="ord-modal__timeline">
                     {TIMELINE_STEPS.map((step, i) => {
                       const isDone = i < activeStep;
@@ -940,7 +973,7 @@ export default function OrdersPage() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                     {t("view")}
                   </Link>
-                  {detail.status === "TRADE_CANCELLED" && (
+                  {(isCancelled || isExpired) && (
                     <Link href="/sell" className="ord-modal__action-btn ord-modal__action-btn--retry" onClick={closeModal}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
                       Retry

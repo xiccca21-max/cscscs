@@ -366,6 +366,7 @@
     "statusProcessing": "Обработка",
     "statusPaid": "Оплачено",
     "statusCancelled": "Отменено",
+    "statusExpired": "Истекло",
     "signInPrompt": "Войдите, чтобы увидеть ваши ордера.",
     "signInBtn": "Войти через Steam",
     "loading": "Загрузка…",

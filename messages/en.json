@@ -368,6 +368,7 @@
     "statusProcessing": "Processing",
     "statusPaid": "Paid",
     "statusCancelled": "Cancelled",
+    "statusExpired": "Expired",
     "signInPrompt": "Please sign in to view your orders.",
     "signInBtn": "Sign in with Steam",
     "loading": "Loading…",

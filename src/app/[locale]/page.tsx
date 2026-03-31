@@ -6,12 +6,12 @@ import { useTranslations, useLocale } from "next-intl";
 import { useCurrency } from "@/components/currency-provider";
 
 const PAYOUT_NAMES = [
-  "Nugaev", "kukas", "Nomad", "hokage", "Conq3r",
-  "Razrez", "G7AX", "maestro", "mango", "Matt",
-  "MauseR", "max1moff_", "Mason", "mayONEZY", "MaF1ozee",
-  "madnothappy", "Maisie", "MakaR", "MAXIS", "mataso",
-  "Mangekyō", "NoT1cE", "anger", "РЫБАК", "Wa1halla",
-  "pinkgose", "maz1k", "MADMAX", "mARNESY", "Mag1st0r",
+  "hokage", "Wa1halla", "РЫБАК", "kukas", "pinkgose",
+  "G7AX", "Conq3r", "anger", "Razrez", "NoT1cE",
+  "maestro", "max1moff_", "Nugaev", "Nomad", "Matt",
+  "zxcLOVE", "dR_phiL", "Tr1ple", "FANTOM", "sh4rk",
+  "icecoLd", "BiBa", "Sn1per_X", "volchok", "ДЕМОН",
+  "kroshka", "T0xic", "freez", "Gl1tch", "sobaka228",
 ];
 
 const REVIEWS: { user: string; steam: string; avatar: string; en: string; ru: string; game: string; stars: number }[] = [
@@ -64,7 +64,7 @@ export default function HomePage() {
 
   /* ── A) Payout rotation ── */
   const payoutIdxRef = useRef(0);
-  const payoutRowRefs = useRef<(HTMLDivElement | null)[]>([null, null, null]);
+  const payoutRowRefs = useRef<(HTMLDivElement | null)[]>([null, null, null, null, null, null]);
 
   const formatRef = useRef(format);
   formatRef.current = format;
@@ -87,7 +87,7 @@ export default function HomePage() {
           row.style.transform = "translateY(0)";
         }, 300);
       }
-      payoutIdxRef.current = (idx + 1) % 3;
+      payoutIdxRef.current = (idx + 1) % 6;
     }, 3500);
     return () => clearInterval(id);
   }, []);
@@ -312,16 +312,28 @@ export default function HomePage() {
                 {t("recentPayouts")}
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[0] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
-                <div className="hero__payout-user"><span>N</span> Nugaev</div>
+                <div className="hero__payout-user"><span>W</span> Wa1halla</div>
                 <span className="hero__payout-amount">{format(412)}</span>
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[1] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
-                <div className="hero__payout-user"><span>M</span> max1moff_</div>
+                <div className="hero__payout-user"><span>k</span> kukas</div>
                 <span className="hero__payout-amount">{format(89.5)}</span>
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[2] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
-                <div className="hero__payout-user"><span>R</span> Razrez</div>
+                <div className="hero__payout-user"><span>G</span> G7AX</div>
                 <span className="hero__payout-amount">{format(267)}</span>
+              </div>
+              <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[3] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
+                <div className="hero__payout-user"><span>Р</span> РЫБАК</div>
+                <span className="hero__payout-amount">{format(154)}</span>
+              </div>
+              <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[4] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
+                <div className="hero__payout-user"><span>T</span> Tr1ple</div>
+                <span className="hero__payout-amount">{format(38.7)}</span>
+              </div>
+              <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[5] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
+                <div className="hero__payout-user"><span>p</span> pinkgose</div>
+                <span className="hero__payout-amount">{format(491)}</span>
               </div>
             </div>
           </div>

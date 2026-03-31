@@ -109,16 +109,21 @@ export function Header() {
         <div className="header__inner">
           <div className="header__left">
             <Link href="/" className="header__logo">
-              <svg className="header__logo-icon" width="28" height="28" viewBox="0 0 32 32" fill="none">
+              <svg className="header__logo-icon" width="28" height="28" viewBox="0 0 100 100" fill="none">
                 <defs>
-                  <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                  <linearGradient id="logoGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
                     <stop offset="0%" stopColor="#4338ca"/>
                     <stop offset="50%" stopColor="#6366f1"/>
                     <stop offset="100%" stopColor="#818cf8"/>
                   </linearGradient>
                 </defs>
-                <path className="header__wave header__wave--1" d="M2 20c3-6 6-10 9-4s5 8 10 2 7-10 9-6" stroke="url(#logoGrad)" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-                <path className="header__wave header__wave--2" d="M2 16c3-6 6-10 9-4s5 8 10 2 7-10 9-6" stroke="url(#logoGrad)" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.35"/>
+                <g transform="translate(50,50) rotate(45)">
+                  <rect className="header__logo-block header__logo-block--left" x="-38" y="-12" width="32" height="24" rx="5" fill="url(#logoGrad)"/>
+                  <rect className="header__logo-block header__logo-block--right" x="6" y="-12" width="32" height="24" rx="5" fill="url(#logoGrad)"/>
+                  <rect className="header__logo-diamond header__logo-diamond--top" x="-4" y="-28" width="8" height="8" rx="2" fill="url(#logoGrad)"/>
+                  <rect className="header__logo-diamond header__logo-diamond--bottom" x="-4" y="20" width="8" height="8" rx="2" fill="url(#logoGrad)"/>
+                  <line className="header__logo-slash" x1="-12" y1="12" x2="12" y2="-12" stroke="#fff" strokeWidth="5" strokeLinecap="round"/>
+                </g>
               </svg>
               <span className="header__logo-text">SKINSELL</span>
             </Link>

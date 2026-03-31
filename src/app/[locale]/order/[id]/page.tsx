@@ -561,32 +561,92 @@ export default function OrderPage({
                   <div className="odr-trade-done__decor-circle odr-trade-done__decor-circle--1" />
                   <div className="odr-trade-done__decor-circle odr-trade-done__decor-circle--2" />
                 </div>
-                <div className="odr-trade-done__icon">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
+
+                {/* Animated checkmark */}
+                <div className="odr-trade-done__check">
+                  <svg className="odr-trade-done__check-svg" viewBox="0 0 52 52">
+                    <circle className="odr-trade-done__check-circle" cx="26" cy="26" r="24" fill="none" />
+                    <path className="odr-trade-done__check-path" fill="none" d="M14 27l7 7 16-16" />
                   </svg>
                 </div>
+
                 <h4 className="odr-trade-done__title">{t("tradeReceivedTitle")}</h4>
+
+                {/* Payout amount */}
+                <div className="odr-trade-done__amount">
+                  {totalAmount}<small>$</small>
+                </div>
+
                 <p className="odr-trade-done__desc">{t("tradeReceivedDesc")}</p>
 
+                {/* Progress bar */}
+                <div className="odr-trade-done__progress">
+                  <div className="odr-trade-done__progress-fill" />
+                </div>
+
+                {/* Mini timeline */}
+                <div className="odr-trade-done__timeline">
+                  <div className="odr-trade-done__tl-step odr-trade-done__tl-step--done">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>{t("tradeStepReceived")}</span>
+                  </div>
+                  <span className="odr-trade-done__tl-line odr-trade-done__tl-line--done" />
+                  <div className="odr-trade-done__tl-step odr-trade-done__tl-step--active">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>{t("tradeStepProcessing")}</span>
+                  </div>
+                  <span className="odr-trade-done__tl-line" />
+                  <div className="odr-trade-done__tl-step">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    <span>{t("tradeStepPayout")}</span>
+                  </div>
+                </div>
+
+                {/* Info rows */}
                 <div className="odr-trade-done__info">
                   <div className="odr-trade-done__info-row">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <div className="odr-trade-done__info-icon odr-trade-done__info-icon--clock">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
                     <span>{t("tradeReceivedHold")}</span>
                   </div>
                   <div className="odr-trade-done__info-row">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                    <span>{t("tradeReceivedPayout")}</span>
+                    <div className="odr-trade-done__info-icon odr-trade-done__info-icon--date">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <span>
+                      {t("tradeEstimatedDate")}{" "}
+                      <strong>
+                        {new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toLocaleDateString(
+                          locale === "ru" ? "ru-RU" : "en-US",
+                          { month: "long", day: "numeric", year: "numeric" }
+                        )}
+                      </strong>
+                    </span>
                   </div>
                 </div>
 
-                {tradeOfferId && (
-                  <div className="odr-trade-done__deal">
-                    <span>{t("dealNumber")}</span>
-                    <span>#{tradeOfferId}</span>
-                  </div>
-                )}
+                {/* Bot badge + deal */}
+                <div className="odr-trade-done__footer">
+                  {botProfile && (
+                    <div className="odr-trade-done__bot-badge">
+                      <div className="odr-trade-done__bot-avatar">
+                        {botProfile.avatarUrl ? (
+                          <img src={botProfile.avatarUrl} alt="" />
+                        ) : (
+                          <span>{(order.botAccount?.name ?? "B").charAt(0)}</span>
+                        )}
+                      </div>
+                      <span>{t("tradeDoneBot")} {botProfile.name ?? order.botAccount?.name ?? "Bot"}</span>
+                    </div>
+                  )}
+                  {tradeOfferId && (
+                    <div className="odr-trade-done__deal">
+                      <span>{t("dealNumber")}</span>
+                      <span>#{tradeOfferId}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="odr-trade-ready">

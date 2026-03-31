@@ -413,10 +413,15 @@ export default function AdminPage() {
 
                   <div className="adm-modal__actions" style={{ marginTop: 16 }}>
                     {orderDetail.status === "CREATED" && orderDetail.botAccount && (
-                      <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={async () => {
-                        const res = await handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_SENT" }, "Трейд отправлен", () => { fetchOrders(); });
-                        if (res?.data) setOrderDetail(res.data);
-                      }}>Трейд отправлен</button>
+                      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", width: "100%" }}>
+                        <input className="adm-input" placeholder="ID или ссылка на трейд оффер" value={tradeOfferUrlInput} onChange={(e) => setTradeOfferUrlInput(e.target.value)} style={{ flex: 1, minWidth: 200 }} />
+                        <button className="adm-btn adm-btn--primary adm-btn--sm" disabled={!tradeOfferUrlInput.trim()} onClick={async () => {
+                          const raw = tradeOfferUrlInput.trim();
+                          const offerUrl = /^\d+$/.test(raw) ? `https://steamcommunity.com/tradeoffer/${raw}/` : raw;
+                          const res = await handleAction("PATCH", `/api/admin/orders/${orderDetail.id}`, { status: "TRADE_SENT", tradeOfferUrl: offerUrl }, "Трейд отправлен", () => { fetchOrders(); });
+                          if (res?.data) { setOrderDetail(res.data); setTradeOfferUrlInput(""); }
+                        }}>Трейд отправлен</button>
+                      </div>
                     )}
                     {orderDetail.status === "TRADE_SENT" && (
                       <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={async () => {

@@ -1034,47 +1034,69 @@ export default function OrderPage({
           </div>
         </div>
 
-        {/* ── Chat ── */}
-        <div className="odr-chat odr-fade" style={{ "--delay": 5 } as React.CSSProperties}>
-          <button className="odr-chat__toggle" onClick={() => setChatOpen((o) => !o)}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-            <span>{t("chat")}</span>
-            {chatMessages.length > 0 && <span className="odr-chat__badge">{chatMessages.length}</span>}
-            <svg className={`odr-chat__chevron${chatOpen ? " open" : ""}`} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+        {/* ── Floating Chat ── */}
+        <div className={`odr-fchat${chatOpen ? " odr-fchat--open" : ""}`}>
+          <button className="odr-fchat__fab" onClick={() => setChatOpen((o) => !o)} aria-label="Chat">
+            {chatOpen ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            )}
+            {!chatOpen && chatMessages.length > 0 && (
+              <span className="odr-fchat__fab-count">{chatMessages.length}</span>
+            )}
           </button>
+
           {chatOpen && (
-            <div className="odr-chat__body">
-              <div className="odr-chat__messages">
-                {chatMessages.length === 0 && (
-                  <div className="odr-chat__empty">
-                    {locale === "ru" ? "Нет сообщений. Напишите, если вам нужна помощь." : "No messages yet. Write if you need help."}
+            <div className="odr-fchat__panel">
+              <div className="odr-fchat__accent" />
+              <div className="odr-fchat__header">
+                <div className="odr-fchat__header-left">
+                  <div className="odr-fchat__header-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                   </div>
-                )}
-                {chatMessages.map((m: any) => (
-                  <div key={m.id} className={`odr-chat__msg odr-chat__msg--${m.authorRole}`}>
-                    <div className="odr-chat__bubble">
-                      {m.body}
+                  <div>
+                    <h4 className="odr-fchat__title">{locale === "ru" ? "Поддержка" : "Support"}</h4>
+                    <span className="odr-fchat__sub">#{order.orderNumber}</span>
+                  </div>
+                </div>
+                <div className="odr-fchat__status">
+                  <span className="odr-fchat__status-dot" />
+                  <span>{locale === "ru" ? "Онлайн" : "Online"}</span>
+                </div>
+              </div>
+
+              <div className="odr-fchat__messages">
+                {chatMessages.length === 0 ? (
+                  <div className="odr-fchat__empty">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>{locale === "ru" ? "Нет сообщений" : "No messages yet"}</span>
+                    <small>{locale === "ru" ? "Напишите, если нужна помощь" : "Write if you need help"}</small>
+                  </div>
+                ) : (
+                  chatMessages.map((m: any) => (
+                    <div key={m.id} className={`odr-fchat__msg odr-fchat__msg--${m.authorRole}`}>
+                      <div className="odr-fchat__bubble">{m.body}</div>
+                      <span className="odr-fchat__time">
+                        {m.authorRole === "admin" ? (locale === "ru" ? "Поддержка" : "Support") : (locale === "ru" ? "Вы" : "You")} · {new Date(m.createdAt).toLocaleTimeString(locale === "ru" ? "ru-RU" : "en-US", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
                     </div>
-                    <span className="odr-chat__time">
-                      {m.authorRole === "admin" ? (locale === "ru" ? "Поддержка" : "Support") : (locale === "ru" ? "Вы" : "You")} · {new Date(m.createdAt).toLocaleTimeString(locale === "ru" ? "ru-RU" : "en-US", { hour: "2-digit", minute: "2-digit" })}
-                    </span>
-                  </div>
-                ))}
+                  ))
+                )}
                 <div ref={chatEndRef} />
               </div>
-              <div className="odr-chat__input-row">
+
+              <div className="odr-fchat__input-area">
                 <input
-                  className="odr-chat__input"
+                  className="odr-fchat__input"
                   placeholder={locale === "ru" ? "Ваше сообщение..." : "Your message..."}
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChatMessage(); } }}
                   maxLength={2000}
                 />
-                <button className="odr-chat__send" disabled={chatSending || !chatInput.trim()} onClick={sendChatMessage}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" /></svg>
+                <button className="odr-fchat__send" disabled={chatSending || !chatInput.trim()} onClick={sendChatMessage}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 </button>
               </div>
             </div>

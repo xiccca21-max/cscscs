@@ -4824,12 +4824,29 @@
   flex-direction: column;
   gap: 7px;
 }
-.checkout-modal__field > span {
+.checkout-modal__field > span:first-child {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: rgba(255,255,255,0.4);
+}
+.checkout-modal__field.has-error .checkout-modal__input-wrap input,
+.checkout-modal__field.has-error .checkout-modal__input-wrap select,
+.checkout-modal__field.has-error .ck-crypto__btn {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239,68,68,0.15);
+}
+.checkout-modal__field-error {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ef4444;
+  margin-top: -2px;
+  animation: fieldErrorIn 0.25s ease;
+}
+@keyframes fieldErrorIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .checkout-modal__input-wrap {
   position: relative;

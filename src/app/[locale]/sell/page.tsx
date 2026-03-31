@@ -197,6 +197,7 @@ export default function SellPage() {
   const [dbPaymentMethods, setDbPaymentMethods] = useState<any[]>([]);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [payDetails, setPayDetails] = useState<Record<string, string>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [mobilePayStep, setMobilePayStep] = useState<1 | 2>(1);
   const [countryOpen, setCountryOpen] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
@@ -418,8 +419,29 @@ export default function SellPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [gameMixPopup, setGameMixPopup] = useState<"cs2" | "other" | null>(null);
 
+  const validateFields = useCallback((): boolean => {
+    const errs: Record<string, string> = {};
+    const req = (key: string, label: string) => {
+      if (!payDetails[key]?.trim()) errs[key] = `${label} is required`;
+    };
+    if (paymentMethod === "card") {
+      req("cardNumber", "Card number");
+      req("cardName", "Cardholder name");
+    } else if (paymentMethod === "crypto") {
+      if (!payDetails.network) errs.network = "Select a network";
+      req("walletAddress", "Wallet address");
+    } else if (paymentMethod === "bank") {
+      req("iban", "IBAN");
+      req("swift", "SWIFT / BIC");
+      req("recipientName", "Recipient name");
+    }
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  }, [paymentMethod, payDetails]);
+
   const handleSubmit = useCallback(async () => {
     if (!canSubmit) return;
+    if (!validateFields()) return;
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -456,7 +478,7 @@ export default function SellPage() {
       setSubmitError("Network error. Please check your connection and try again.");
       setSubmitting(false);
     }
-  }, [canSubmit, selectedItems, tradeUrl, paymentMethod, dbPaymentMethods, payDetails, locale]);
+  }, [canSubmit, validateFields, selectedItems, tradeUrl, paymentMethod, dbPaymentMethods, payDetails, locale]);
 
   useEffect(() => {
     if (!user) return;
@@ -1225,7 +1247,7 @@ export default function SellPage() {
                 className="sell-btn"
                 id="submitOrder"
                 disabled={!canSubmit}
-                onClick={() => { setPayDetails({}); setCheckoutOpen(true); }}
+                onClick={() => { setPayDetails({}); setFieldErrors({}); setCheckoutOpen(true); }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>
                 {t("sellNow")}
@@ -1328,30 +1350,32 @@ export default function SellPage() {
 
               {paymentMethod === "card" && (
                 <>
-                  <label className="checkout-modal__field">
+                  <label className={`checkout-modal__field${fieldErrors.cardNumber ? " has-error" : ""}`}>
                     <span>{t("checkoutCardNumber")}</span>
                     <div className="checkout-modal__input-wrap">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                       <input type="text" placeholder="0000 0000 0000 0000" maxLength={19}
                         value={payDetails.cardNumber || ""}
-                        onChange={(e) => setPayDetails(p => ({ ...p, cardNumber: e.target.value }))} />
+                        onChange={(e) => { setPayDetails(p => ({ ...p, cardNumber: e.target.value })); setFieldErrors(p => { const n = { ...p }; delete n.cardNumber; return n; }); }} />
                     </div>
+                    {fieldErrors.cardNumber && <span className="checkout-modal__field-error">{fieldErrors.cardNumber}</span>}
                   </label>
-                  <label className="checkout-modal__field">
+                  <label className={`checkout-modal__field${fieldErrors.cardName ? " has-error" : ""}`}>
                     <span>{t("checkoutFullName")}</span>
                     <div className="checkout-modal__input-wrap">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       <input type="text" placeholder="JOHN DOE"
                         value={payDetails.cardName || ""}
-                        onChange={(e) => setPayDetails(p => ({ ...p, cardName: e.target.value }))} />
+                        onChange={(e) => { setPayDetails(p => ({ ...p, cardName: e.target.value })); setFieldErrors(p => { const n = { ...p }; delete n.cardName; return n; }); }} />
                     </div>
+                    {fieldErrors.cardName && <span className="checkout-modal__field-error">{fieldErrors.cardName}</span>}
                   </label>
                 </>
               )}
 
               {paymentMethod === "crypto" && (
                 <>
-                  <label className="checkout-modal__field">
+                  <label className={`checkout-modal__field${fieldErrors.network ? " has-error" : ""}`}>
                     <span>{t("checkoutSelectCrypto")}</span>
                     <div className="ck-crypto" ref={cryptoDropRef}>
                       <button type="button" className="ck-crypto__btn" onClick={() => setCryptoDropOpen(!cryptoDropOpen)}>
@@ -1376,7 +1400,7 @@ export default function SellPage() {
                           ].map(n => (
                             <button key={n.val} type="button"
                               className={`ck-crypto__opt${payDetails.network === n.val ? " active" : ""}`}
-                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPayDetails(p => ({ ...p, network: n.val })); setCryptoDropOpen(false); }}>
+                              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setPayDetails(p => ({ ...p, network: n.val })); setFieldErrors(p => { const ne = { ...p }; delete ne.network; return ne; }); setCryptoDropOpen(false); }}>
                               <span className="ck-crypto__dot" style={{ background: n.color }} />
                               <span className="ck-crypto__opt-label">{n.label}</span>
                               <span className="ck-crypto__opt-tag">{n.tag}</span>
@@ -1385,47 +1409,52 @@ export default function SellPage() {
                         </div>
                       )}
                     </div>
+                    {fieldErrors.network && <span className="checkout-modal__field-error">{fieldErrors.network}</span>}
                   </label>
-                  <label className="checkout-modal__field">
+                  <label className={`checkout-modal__field${fieldErrors.walletAddress ? " has-error" : ""}`}>
                     <span>{t("checkoutWalletAddr")}</span>
                     <div className="checkout-modal__input-wrap">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
                       <input type="text" placeholder="0x... / bc1... / T..."
                         value={payDetails.walletAddress || ""}
-                        onChange={(e) => setPayDetails(p => ({ ...p, walletAddress: e.target.value }))} />
+                        onChange={(e) => { setPayDetails(p => ({ ...p, walletAddress: e.target.value })); setFieldErrors(p => { const n = { ...p }; delete n.walletAddress; return n; }); }} />
                     </div>
+                    {fieldErrors.walletAddress && <span className="checkout-modal__field-error">{fieldErrors.walletAddress}</span>}
                   </label>
                 </>
               )}
 
               {paymentMethod === "bank" && (
                 <>
-                  <label className="checkout-modal__field">
+                  <label className={`checkout-modal__field${fieldErrors.iban ? " has-error" : ""}`}>
                     <span>{t("checkoutIban")}</span>
                     <div className="checkout-modal__input-wrap">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/></svg>
                       <input type="text" placeholder="DE89 3704 0044 0532 0130 00"
                         value={payDetails.iban || ""}
-                        onChange={(e) => setPayDetails(p => ({ ...p, iban: e.target.value }))} />
+                        onChange={(e) => { setPayDetails(p => ({ ...p, iban: e.target.value })); setFieldErrors(p => { const n = { ...p }; delete n.iban; return n; }); }} />
                     </div>
+                    {fieldErrors.iban && <span className="checkout-modal__field-error">{fieldErrors.iban}</span>}
                   </label>
-                  <label className="checkout-modal__field">
+                  <label className={`checkout-modal__field${fieldErrors.swift ? " has-error" : ""}`}>
                     <span>{t("checkoutSwift")}</span>
                     <div className="checkout-modal__input-wrap">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
                       <input type="text" placeholder="COBADEFFXXX"
                         value={payDetails.swift || ""}
-                        onChange={(e) => setPayDetails(p => ({ ...p, swift: e.target.value }))} />
+                        onChange={(e) => { setPayDetails(p => ({ ...p, swift: e.target.value })); setFieldErrors(p => { const n = { ...p }; delete n.swift; return n; }); }} />
                     </div>
+                    {fieldErrors.swift && <span className="checkout-modal__field-error">{fieldErrors.swift}</span>}
                   </label>
-                  <label className="checkout-modal__field">
+                  <label className={`checkout-modal__field${fieldErrors.recipientName ? " has-error" : ""}`}>
                     <span>{t("checkoutFullName")}</span>
                     <div className="checkout-modal__input-wrap">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       <input type="text" placeholder="Full name"
                         value={payDetails.recipientName || ""}
-                        onChange={(e) => setPayDetails(p => ({ ...p, recipientName: e.target.value }))} />
+                        onChange={(e) => { setPayDetails(p => ({ ...p, recipientName: e.target.value })); setFieldErrors(p => { const n = { ...p }; delete n.recipientName; return n; }); }} />
                     </div>
+                    {fieldErrors.recipientName && <span className="checkout-modal__field-error">{fieldErrors.recipientName}</span>}
                   </label>
                 </>
               )}

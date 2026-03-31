@@ -378,56 +378,33 @@ export default function BalancePage() {
 
                 <div className="form-group">
                   <label>{t("selectMethod")}</label>
-                  <div className="bal-methods">
-                    {paymentMethods.length > 0 ? paymentMethods.map((pm) => {
+                  <div className="bal-pay-grid">
+                    {(paymentMethods.length > 0 ? paymentMethods : [
+                      { id: "f-card", name: t("debitCard"), type: "card", commission: "2.5", minAmount: "1", currencies: [] },
+                      { id: "f-crypto", name: t("cryptocurrency"), type: "crypto", commission: "0", minAmount: "5", currencies: [] },
+                      { id: "f-bank", name: t("bankTransfer"), type: "bank", commission: "3", minAmount: "50", currencies: [] },
+                    ] as PaymentMethodDB[]).map((pm) => {
                       const icon = CASHOUT_ICONS[pm.type] ?? CASHOUT_ICONS.other;
-                      const commPct = parseFloat(pm.commission);
-                      const minAmt = parseFloat(pm.minAmount);
                       return (
                         <button
                           key={pm.id}
-                          className={`bal-method${cashoutMethod === pm.type ? " active" : ""}`}
+                          className={`bal-pay-btn${cashoutMethod === pm.type ? " active" : ""}`}
                           onClick={() => setCashoutMethod(pm.type)}
                         >
-                          <div className="bal-method__icon">
-                            <img src={icon} alt={pm.name} width="36" height="36" style={{ objectFit: "contain" }} />
-                          </div>
-                          <span className="bal-method__name">{pm.name}</span>
-                          <div className="bal-method__conditions">
-                            <span>{t("methodMin")}: <strong>{minAmt > 0 ? `${minAmt}$` : "0$"}</strong></span>
-                            <span>{t("methodFee")}: <strong>{commPct > 0 ? `${commPct}%` : "0%"}</strong></span>
-                          </div>
+                          <span className="bal-pay-btn__icon">
+                            <img src={icon} alt={pm.name} width="24" height="24" />
+                          </span>
+                          <span className="bal-pay-btn__name">{pm.name}</span>
                         </button>
                       );
-                    }) : (
-                      <>
-                        <button className={`bal-method${cashoutMethod === "card" ? " active" : ""}`} onClick={() => setCashoutMethod("card")}>
-                          <div className="bal-method__icon"><img src="/icons/pay-card.png" alt="Card" width="36" height="36" style={{ objectFit: "contain" }} /></div>
-                          <span className="bal-method__name">{t("debitCard")}</span>
-                          <div className="bal-method__conditions">
-                            <span>{t("methodMin")}: <strong>1$</strong></span>
-                            <span>{t("methodFee")}: <strong>0%</strong></span>
-                          </div>
-                        </button>
-                        <button className={`bal-method${cashoutMethod === "crypto" ? " active" : ""}`} onClick={() => setCashoutMethod("crypto")}>
-                          <div className="bal-method__icon"><img src="/icons/tether.png" alt="Crypto" width="36" height="36" style={{ objectFit: "contain" }} /></div>
-                          <span className="bal-method__name">{t("cryptocurrency")}</span>
-                          <div className="bal-method__conditions">
-                            <span>{t("methodMin")}: <strong>5$</strong></span>
-                            <span>{t("methodFee")}: <strong>0%</strong></span>
-                          </div>
-                        </button>
-                        <button className={`bal-method${cashoutMethod === "bank" ? " active" : ""}`} onClick={() => setCashoutMethod("bank")}>
-                          <div className="bal-method__icon"><img src="/icons/pay-bank.png" alt="Bank" width="36" height="36" style={{ objectFit: "contain" }} /></div>
-                          <span className="bal-method__name">{t("bankTransfer")}</span>
-                          <div className="bal-method__conditions">
-                            <span>{t("methodMin")}: <strong>50$</strong></span>
-                            <span>{t("methodFee")}: <strong>0%</strong></span>
-                          </div>
-                        </button>
-                      </>
-                    )}
+                    })}
                   </div>
+                  {selectedPM && (
+                    <div className="bal-pay-info">
+                      <span>{t("methodMin")}: <strong>{parseFloat(selectedPM.minAmount) > 0 ? `${parseFloat(selectedPM.minAmount)}$` : "0$"}</strong></span>
+                      <span>{t("methodFee")}: <strong>{parseFloat(selectedPM.commission) > 0 ? `${parseFloat(selectedPM.commission)}%` : "0%"}</strong></span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="bal-summary">

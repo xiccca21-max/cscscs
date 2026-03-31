@@ -713,107 +713,89 @@
 }
 .cashout-available strong { color: #475569; }
 
-/* Methods */
-.bal-methods {
+/* Compact payment grid */
+.bal-pay-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 8px;
 }
-.bal-method {
+.bal-pay-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 22px 12px 18px;
-  border-radius: 14px;
+  gap: 6px;
+  padding: 12px 6px;
+  border-radius: 12px;
   border: 2px solid #e8e5ef;
   background: #faf9fc;
-  color: #64748b;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  text-align: center;
-  position: relative;
+  transition: all 0.2s;
 }
-.bal-method__icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+.bal-pay-btn:hover {
+  border-color: #c7d2fe;
+  background: #f4f2ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99,102,241,0.1);
+}
+.bal-pay-btn.active {
+  border-color: #6366f1;
+  background: #eef2ff;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.18);
+}
+.bal-pay-btn__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   background: #f1f5f9;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: all 0.2s;
 }
-.bal-method__name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1e293b;
+.bal-pay-btn__icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
-.bal-method__desc {
-  font-size: 11px;
-  color: #94a3b8;
-  font-weight: 500;
-}
-.bal-method:hover {
-  border-color: #c7d2fe;
-  background: #faf8ff;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(99,102,241,0.12);
-}
-.bal-method:hover .bal-method__icon {
-  background: #eef2ff;
-  color: #6366f1;
-  box-shadow: 0 4px 14px rgba(99,102,241,0.15);
-}
-.bal-method.active {
-  border: 2px solid transparent;
-  background-image:
-    linear-gradient(#f4f2ff, #eef2ff) padding-box,
-    linear-gradient(135deg, #6366f1, #8b5cf6, #22c55e, #8b5cf6, #6366f1) border-box;
-  background-size: 100% 100%, 400% 400%;
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
-  animation: methodBorderGlow 8s ease infinite;
-  box-shadow: 0 8px 24px rgba(99,102,241,0.2);
-  transform: translateY(-1px);
-}
-@keyframes methodBorderGlow {
-  0%, 100% { background-position: 0 0, 0% 50%; }
-  50% { background-position: 0 0, 100% 50%; }
-}
-.bal-method.active .bal-method__icon {
+.bal-pay-btn.active .bal-pay-btn__icon {
   background: linear-gradient(135deg, #4f46e5, #6366f1);
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(99,102,241,0.35);
+  box-shadow: 0 3px 10px rgba(99,102,241,0.3);
 }
-.bal-method.active .bal-method__name { color: #4f46e5; }
-
-.bal-method__conditions {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #f0eef5;
-  width: 100%;
+.bal-pay-btn.active .bal-pay-btn__icon img {
+  filter: brightness(0) invert(1);
 }
-.bal-method__conditions span {
+.bal-pay-btn__name {
   font-size: 11px;
-  color: #94a3b8;
-  font-weight: 500;
-  display: flex;
-  justify-content: space-between;
-}
-.bal-method__conditions strong {
+  font-weight: 700;
   color: #475569;
-  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
-.bal-method.active .bal-method__conditions {
-  border-top-color: rgba(99,102,241,0.15);
-}
-.bal-method.active .bal-method__conditions strong {
+.bal-pay-btn.active .bal-pay-btn__name {
   color: #4f46e5;
+}
+.bal-pay-info {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f4f2ff;
+  border: 1px solid rgba(99,102,241,0.1);
+}
+.bal-pay-info span {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
+}
+.bal-pay-info strong {
+  color: #4f46e5;
+  font-weight: 700;
 }
 
 /* Continue button */
@@ -1431,26 +1413,16 @@
   .bal-cashout__body { padding: 20px 16px; }
   .bal-cashout__head { padding: 16px; }
 
-  /* Payment methods: 2 cols, 3rd wraps below */
-  .bal-methods {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  .bal-pay-grid {
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+    gap: 6px;
   }
-  .bal-method {
-    padding: 16px 10px 14px;
-    gap: 8px;
-  }
-  .bal-method__icon {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-  }
-  .bal-method__name { font-size: 13px; }
-  .bal-method__conditions {
-    margin-top: 6px;
-    padding-top: 6px;
-  }
-  .bal-method__conditions span { font-size: 10px; }
+  .bal-pay-btn { padding: 10px 4px; gap: 5px; }
+  .bal-pay-btn__icon { width: 32px; height: 32px; border-radius: 8px; }
+  .bal-pay-btn__icon img { width: 20px; height: 20px; }
+  .bal-pay-btn__name { font-size: 10px; }
+  .bal-pay-info { gap: 10px; padding: 6px 10px; }
+  .bal-pay-info span { font-size: 11px; }
 
   /* Summary */
   .bal-summary__row--total { font-size: 15px; }
@@ -1520,31 +1492,14 @@
   .bal-wallet__amount small { font-size: 16px; }
   .bal-wallet__stats { padding: 14px 16px; }
 
-  /* Payment methods: 1 column */
-  .bal-methods { grid-template-columns: 1fr; }
-  .bal-method {
-    flex-direction: row;
-    align-items: center;
-    text-align: left;
-    padding: 14px 16px;
-    gap: 12px;
+  .bal-pay-grid {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 5px;
   }
-  .bal-method__icon {
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-  }
-  .bal-method__conditions {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 6px;
-    padding-top: 6px;
-  }
-  .bal-method__conditions span {
-    flex: none;
-    font-size: 10px;
-  }
+  .bal-pay-btn { padding: 8px 3px; gap: 4px; border-radius: 10px; }
+  .bal-pay-btn__icon { width: 28px; height: 28px; border-radius: 7px; }
+  .bal-pay-btn__icon img { width: 18px; height: 18px; }
+  .bal-pay-btn__name { font-size: 9px; }
 
   .bal-history__title { font-size: 16px; }
   .bal-row { padding: 12px; font-size: 13px; }

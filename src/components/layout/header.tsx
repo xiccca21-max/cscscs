@@ -109,7 +109,7 @@ export function Header() {
         <div className="header__inner">
           <div className="header__left">
             <Link href="/" className="header__logo">
-              <img className="header__logo-icon" src="/images/logo.png" alt="SKINSELL" width={28} height={28} />
+              <img className="header__logo-icon" src="/images/logo.png" alt="SKINSELL" width={36} height={36} />
               <span className="header__logo-text">SKINSELL</span>
             </Link>
           </div>

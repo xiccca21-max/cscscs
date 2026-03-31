@@ -321,27 +321,12 @@ input, select, textarea { font: inherit; }
   flex-shrink: 0;
   filter: drop-shadow(0 0 6px rgba(99,102,241,0.3));
   transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), filter 0.4s;
-}
-.header__logo-block,
-.header__logo-diamond,
-.header__logo-slash {
-  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  mix-blend-mode: multiply;
+  object-fit: contain;
 }
 .header__logo:hover .header__logo-icon {
-  transform: scale(1.12) rotate(-6deg);
+  transform: scale(1.1) rotate(-4deg);
   filter: drop-shadow(0 0 16px rgba(99,102,241,0.5));
-}
-.header__logo:hover .header__logo-block--left {
-  transform: translateX(-2px) translateY(2px);
-}
-.header__logo:hover .header__logo-block--right {
-  transform: translateX(2px) translateY(-2px);
-}
-.header__logo:hover .header__logo-diamond--top {
-  transform: translateY(-3px) scale(1.15);
-}
-.header__logo:hover .header__logo-diamond--bottom {
-  transform: translateY(3px) scale(1.15);
 }
 .header__logo-text {
   line-height: 1;

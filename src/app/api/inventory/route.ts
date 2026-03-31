@@ -33,12 +33,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log(`[inventory] Fetching ${gameParam} for ${session.steamId}`);
 
     const game = gameParam as Game;
     const t1 = Date.now();
     const { items, error } = await getSteamInventory(session.steamId, gameParam);
-    console.log(`[inventory] Steam fetch: ${Date.now() - t1}ms, items: ${items.length}, error: ${error}`);
 
     if (error === "inventory_private") {
       return NextResponse.json(
@@ -72,7 +70,6 @@ export async function GET(request: NextRequest) {
         }));
         const rawMap = await getBulkPrices(priceInputs);
         priceMap = rawMap as Map<string, { buyoutPrice: number }>;
-        console.log(`[inventory] Pricing: ${Date.now() - t2}ms, priced: ${priceMap.size}/${invItems.length}`);
       } catch (e) {
         console.error(`[inventory] Pricing failed:`, e);
       }
@@ -83,7 +80,6 @@ export async function GET(request: NextRequest) {
       price: priceMap.get(item.name)?.buyoutPrice ?? null,
     }));
 
-    console.log(`[inventory] Total: ${Date.now() - t0}ms, returning ${itemsWithPrices.length} items`);
     return NextResponse.json({ success: true, data: { items: itemsWithPrices } });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";

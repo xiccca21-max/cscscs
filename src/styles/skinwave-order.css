@@ -1519,7 +1519,8 @@
   display: flex !important;
   flex-direction: column !important;
 }
-.odr-grid > .odr-card:first-child {
+.odr-grid > .odr-card:first-child,
+.odr-grid > .odr-card:last-child {
   align-self: start !important;
 }
 .odr-card:hover {
@@ -1576,7 +1577,7 @@
 }
 
 /* ── TRADE INFO ── */
-.odr-trade-wait { padding: 32px 24px !important; }
+.odr-trade-wait { padding: 20px 20px !important; }
 .odr-trade-wait__icon {
   width: 64px !important;
   height: 64px !important;
@@ -1835,7 +1836,7 @@
   position: relative;
   background: linear-gradient(135deg, #1a0a0a 0%, #2d1212 40%, #1c0e0e 100%);
   border-radius: 16px;
-  padding: 36px 28px 28px;
+  padding: 24px 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1875,9 +1876,9 @@
 
 /* Animated X icon */
 .odr-trade-cancelled__icon {
-  width: 64px;
-  height: 64px;
-  margin-bottom: 18px;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
 }
@@ -2020,7 +2021,7 @@
   position: relative;
   background: linear-gradient(135deg, #1a1000 0%, #2d2200 40%, #1c1500 100%);
   border-radius: 16px;
-  padding: 36px 28px 28px;
+  padding: 24px 20px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2060,9 +2061,9 @@
 
 /* Animated clock icon */
 .odr-trade-expired__icon {
-  width: 64px;
-  height: 64px;
-  margin-bottom: 18px;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
 }
@@ -2330,11 +2331,10 @@
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 32px 24px 24px !important;
+  padding: 20px 20px 16px !important;
   gap: 0 !important;
   text-align: center;
   flex: 1;
-  min-height: 260px;
 }
 .odr-trade-wait__visual {
   position: relative;
@@ -2427,8 +2427,7 @@
   justify-content: center;
   text-align: center;
   flex: 1;
-  min-height: 280px;
-  padding: 40px 24px 32px;
+  padding: 24px 20px 20px;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%);
   overflow: hidden;
   border-radius: 0 0 16px 16px;
@@ -2577,7 +2576,7 @@
   align-items: center;
   text-align: center;
   flex: 1;
-  padding: 36px 24px 28px;
+  padding: 24px 20px 20px;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%);
   border-radius: 0 0 16px 16px;
   position: relative;
@@ -2617,9 +2616,9 @@
 
 /* ── Animated checkmark ── */
 .odr-trade-done__check {
-  width: 72px;
-  height: 72px;
-  margin-bottom: 18px;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 1;
 }
@@ -2653,7 +2652,7 @@
 
 /* ── Title ── */
 .odr-trade-done__title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: #fff;
   margin: 0 0 6px;
@@ -2664,7 +2663,7 @@
 
 /* ── Payout amount ── */
 .odr-trade-done__amount {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 900;
   color: #fff;
   letter-spacing: -1px;
@@ -2894,7 +2893,7 @@
   align-items: center;
   text-align: center;
   flex: 1;
-  padding: 36px 24px 28px;
+  padding: 24px 20px 20px;
   background: linear-gradient(135deg, #022c22 0%, #064e3b 50%, #065f46 100%);
   border-radius: 0 0 16px 16px;
   position: relative;
@@ -2984,9 +2983,9 @@
 
 /* ── Animated checkmark ── */
 .odr-trade-paid__check {
-  width: 80px;
-  height: 80px;
-  margin-bottom: 18px;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
   position: relative;
   z-index: 3;
 }
@@ -3013,21 +3012,21 @@
 }
 
 .odr-trade-paid__title {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
   color: #fff;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   position: relative;
   z-index: 1;
   letter-spacing: -0.3px;
 }
 
 .odr-trade-paid__amount {
-  font-size: 42px;
+  font-size: 28px;
   font-weight: 900;
   color: #fff;
-  letter-spacing: -1.5px;
-  margin-bottom: 8px;
+  letter-spacing: -1px;
+  margin-bottom: 6px;
   position: relative;
   z-index: 1;
   text-shadow: 0 0 40px rgba(34,197,94,0.4);
@@ -3211,7 +3210,7 @@
   flex: 1 !important;
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #172554 100%) !important;
   border-radius: 0 0 16px 16px !important;
-  padding: 28px 24px 24px !important;
+  padding: 20px 20px 18px !important;
   position: relative !important;
   overflow: hidden !important;
 }

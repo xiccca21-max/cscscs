@@ -133,7 +133,6 @@ export async function getBulkPrices(
     tmPrices = new Map();
   }
 
-  console.log(`[pricing] TM+rules loaded in ${Date.now() - t0}ms, tm=${tmPrices.size}, rules=${allRules.length}`);
 
   const DEFAULT_BUYOUT_RATE = 0.92;
 
@@ -161,6 +160,5 @@ export async function getBulkPrices(
     }
   }
 
-  console.log(`[pricing] TM matched ${priceMap.size}/${items.length} in ${Date.now() - t0}ms`);
   return priceMap;
 }

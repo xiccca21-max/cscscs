@@ -89,24 +89,7 @@ export async function PATCH(
 
     const data: Prisma.OrderUpdateInput = {};
 
-    if (body.botName && body.botSteamProfileUrl) {
-      let botUrl = body.botSteamProfileUrl.trim();
-      if (!/^https?:\/\//i.test(botUrl)) botUrl = `https://${botUrl}`;
-      const steamIdMatch = botUrl.match(/\/(?:profiles|id)\/([^\/\s?]+)/);
-      const botSteamId = steamIdMatch?.[1] ?? `bot_${Date.now()}`;
-      let bot = await db.botAccount.findFirst({ where: { steamId: botSteamId } });
-      if (!bot) {
-        bot = await db.botAccount.create({
-          data: {
-            steamId: botSteamId,
-            steamProfileUrl: botUrl,
-            name: body.botName.trim(),
-            isActive: true,
-          },
-        });
-      }
-      data.botAccount = { connect: { id: bot.id } };
-    } else if (body.botAccountId !== undefined) {
+    if (body.botAccountId !== undefined) {
       data.botAccount = body.botAccountId
         ? { connect: { id: body.botAccountId } }
         : { disconnect: true };

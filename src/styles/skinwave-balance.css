@@ -762,7 +762,7 @@
   box-shadow: 0 3px 10px rgba(99,102,241,0.3);
 }
 .bal-pay-btn.active .bal-pay-btn__icon img {
-  filter: brightness(0) invert(1);
+  filter: none;
 }
 .bal-pay-btn__name {
   font-size: 11px;

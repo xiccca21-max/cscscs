@@ -1206,7 +1206,7 @@ export default function SellPage() {
                   );
                 })()}
                 {/* Crypto (grouped) */}
-                <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" onClick={() => { setPaymentMethod("crypto"); setCryptoDropOpen((o) => !o); }}>
+                <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" onClick={() => { setPaymentMethod("crypto"); }}>
                   <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
                   <span className="pay-btn__name">{t("payCrypto")}</span>
                 </button>
@@ -1222,25 +1222,6 @@ export default function SellPage() {
                 })()}
               </div>
 
-              {/* Crypto sub-selector */}
-              {paymentMethod === "crypto" && cryptoDropOpen && cryptoMethods.length > 0 && (
-                <div className="pay-crypto-select">
-                  {cryptoMethods.map((cm) => {
-                    const active = selectedCrypto === cm.type;
-                    return (
-                      <button
-                        key={cm.id}
-                        className={`pay-crypto-opt${active ? " active" : ""}`}
-                        onClick={() => { setSelectedCrypto(cm.type); setCryptoDropOpen(false); }}
-                      >
-                        <CryptoInlineSvg type={cm.type} />
-                        <span>{cm.name}</span>
-                        <span className="pay-crypto-opt__fee">{parseFloat(cm.commission)}%</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
 
               {/* Info bar */}
               <div className="pay-info-bar" data-method={paymentMethod}>

@@ -91,7 +91,6 @@ async function fetchViaSteamApis(
   if (!apiKey) return { data: null, error: "no_key" };
 
   const url = `https://api.steamapis.com/steam/inventory/${steamId}/${appId}/2?api_key=${apiKey}`;
-  console.log(`[steam] SteamApis: fetching ${appId} for ${steamId}`);
   const t = Date.now();
 
   try {
@@ -102,7 +101,6 @@ async function fetchViaSteamApis(
       cache: "no-store",
     });
     clearTimeout(timeout);
-    console.log(`[steam] SteamApis: ${res.status} in ${Date.now() - t}ms`);
 
     if (res.status === 403) return { data: null, error: "inventory_private" };
     if (!res.ok) return { data: null, error: `api_error_${res.status}` };
@@ -128,7 +126,6 @@ async function fetchViaSteamDirect(
 
     try {
       const url = `https://steamcommunity.com/inventory/${steamId}/${appId}/2?l=english&count=5000`;
-      console.log(`[steam] Direct attempt ${attempt + 1}/${MAX_RETRIES}: appId=${appId}`);
       const t = Date.now();
       const res = await fetch(url, {
         headers: {
@@ -144,7 +141,6 @@ async function fetchViaSteamDirect(
         cache: "no-store",
       });
       clearTimeout(timeout);
-      console.log(`[steam] Direct: ${res.status} in ${Date.now() - t}ms`);
 
       if (res.status === 403) return { data: null, error: "inventory_private" };
       if (res.status === 429 || res.status === 400) {
@@ -166,7 +162,6 @@ async function fetchViaSteamDirect(
       return { data, error: null };
     } catch (e) {
       clearTimeout(timeout);
-      console.error(`[steam] Direct error attempt ${attempt + 1}:`, e instanceof Error ? e.message : e);
       if (attempt < MAX_RETRIES - 1) {
         await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
         continue;
@@ -225,7 +220,6 @@ export async function getSteamInventory(
   const cacheKey = `${steamId}:${appId}`;
   const cached = inventoryCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < INVENTORY_CACHE_TTL) {
-    console.log(`[steam] Cache hit for ${game} ${steamId} (${cached.items.length} items, age ${Math.round((Date.now() - cached.timestamp) / 1000)}s)`);
     return { items: cached.items, error: cached.error };
   }
 
@@ -247,7 +241,6 @@ export async function getSteamInventory(
   }
 
   const items = parseInventoryItems(result.data);
-  console.log(`[steam] Parsed ${items.length} tradable items for ${game}, caching for ${INVENTORY_CACHE_TTL / 1000}s`);
 
   inventoryCache.set(cacheKey, { items, error: null, timestamp: Date.now() });
   return { items, error: null };

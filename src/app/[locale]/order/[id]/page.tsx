@@ -304,6 +304,7 @@ export default function OrderPage({
   const activeStep = getTimelineIndex(order.status);
   const isCancelled = order.status === "TRADE_CANCELLED";
   const isPaid = order.status === "PAID";
+  const isTimerExpired = order.status === "TRADE_SENT" && countdown === 0;
   const isPaymentPending =
     order.status === "PAYMENT_PENDING" ||
     order.status === "TRADE_COMPLETED";
@@ -776,6 +777,50 @@ export default function OrderPage({
                       <span>#{tradeOfferId}</span>
                     </div>
                   )}
+                </div>
+              </div>
+            ) : isTimerExpired ? (
+              <div className="odr-trade-expired">
+                <div className="odr-trade-expired__decor">
+                  <div className="odr-trade-expired__decor-grid" />
+                  <div className="odr-trade-expired__decor-circle odr-trade-expired__decor-circle--1" />
+                  <div className="odr-trade-expired__decor-circle odr-trade-expired__decor-circle--2" />
+                </div>
+
+                <div className="odr-trade-expired__icon">
+                  <svg viewBox="0 0 52 52">
+                    <circle className="odr-trade-expired__circle" cx="26" cy="26" r="24" fill="none" />
+                    <g className="odr-trade-expired__clock">
+                      <circle cx="26" cy="26" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
+                      <polyline points="26 20 26 26 30 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </g>
+                  </svg>
+                </div>
+
+                <h4 className="odr-trade-expired__title">{t("tradeExpiredTitle")}</h4>
+                <p className="odr-trade-expired__desc">{t("tradeExpiredDesc")}</p>
+
+                <div className="odr-trade-expired__info">
+                  <div className="odr-trade-expired__info-row">
+                    <div className="odr-trade-expired__info-icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <span>{t("tradeExpiredHint")}</span>
+                  </div>
+                </div>
+
+                <div className="odr-trade-expired__actions">
+                  <button
+                    className="odr-trade-expired__btn odr-trade-expired__btn--primary"
+                    onClick={() => window.location.reload()}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    <span>{t("tradeExpiredRetry")}</span>
+                  </button>
+                  <Link href="/sell" className="odr-trade-expired__btn odr-trade-expired__btn--outline">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span>{t("tradeExpiredNewDeal")}</span>
+                  </Link>
                 </div>
               </div>
             ) : (

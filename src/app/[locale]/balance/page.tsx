@@ -25,6 +25,26 @@ type BalanceData = {
 
 type FilterType = "all" | "credit" | "withdraw";
 
+type PaymentMethodDB = {
+  id: string;
+  name: string;
+  type: string;
+  commission: string;
+  minAmount: string;
+  currencies: string[];
+};
+
+const CASHOUT_ICONS: Record<string, string> = {
+  card: "/icons/pay-card.png",
+  crypto: "/icons/tether.png",
+  bank: "/icons/pay-bank.png",
+  balance: "/icons/pay-balance.png",
+  sbp: "/icons/pay-bank.png",
+  qiwi: "/icons/pay-balance.png",
+  yoomoney: "/icons/pay-balance.png",
+  other: "/icons/pay-balance.png",
+};
+
 export default function BalancePage() {
   const t = useTranslations("balance");
   const locale = useLocale();
@@ -37,6 +57,7 @@ export default function BalancePage() {
   const [submitting, setSubmitting] = useState(false);
   const [cashoutError, setCashoutError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>("all");
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDB[]>([]);
 
   const fetchBalance = useCallback(async () => {
     try {
@@ -59,6 +80,15 @@ export default function BalancePage() {
       setLoading(false);
     }
   }, [sessionLoading, user, fetchBalance]);
+
+  useEffect(() => {
+    fetch("/api/payment-methods")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success) setPaymentMethods(json.data);
+      })
+      .catch(() => {});
+  }, []);
 
   const balance = data ? parseFloat(data.balance) : 0;
 
@@ -84,7 +114,8 @@ export default function BalancePage() {
     : 0;
 
   const cashoutAmountNum = parseFloat(cashoutAmount) || 0;
-  const commissionRate = 0.02;
+  const selectedPM = paymentMethods.find((m) => m.type === cashoutMethod || m.id === cashoutMethod);
+  const commissionRate = selectedPM ? parseFloat(selectedPM.commission) / 100 : 0;
   const commissionAmount = cashoutAmountNum * commissionRate;
   const youReceive = cashoutAmountNum - commissionAmount;
 
@@ -112,6 +143,13 @@ export default function BalancePage() {
     if (!cashoutMethod) {
       setCashoutError(t("errorSelectMethod"));
       return;
+    }
+    if (selectedPM) {
+      const minAmt = parseFloat(selectedPM.minAmount);
+      if (minAmt > 0 && amount < minAmt) {
+        setCashoutError(`${t("methodMin")}: ${minAmt}$`);
+        return;
+      }
     }
 
     setSubmitting(true);
@@ -336,51 +374,54 @@ export default function BalancePage() {
                 <div className="form-group">
                   <label>{t("selectMethod")}</label>
                   <div className="bal-methods">
-                    <button
-                      className={`bal-method${cashoutMethod === "card" ? " active" : ""}`}
-                      onClick={() => setCashoutMethod("card")}
-                    >
-                      <div className="bal-method__icon">
-                        <img src="/icons/pay-card.png" alt="Card" width="36" height="36" style={{ objectFit: "contain" }} />
-                      </div>
-                      <span className="bal-method__name">{t("debitCard")}</span>
-                      <span className="bal-method__desc">{t("visaMc")}</span>
-                      <div className="bal-method__conditions">
-                        <span>{t("methodMin")}: <strong>1$</strong></span>
-                        <span>{t("methodFee")}: <strong>0%</strong></span>
-                        <span>{t("methodSpeed")}: <strong>{t("methodInstant")}</strong></span>
-                      </div>
-                    </button>
-                    <button
-                      className={`bal-method${cashoutMethod === "crypto" ? " active" : ""}`}
-                      onClick={() => setCashoutMethod("crypto")}
-                    >
-                      <div className="bal-method__icon">
-                        <img src="/icons/tether.png" alt="Crypto" width="36" height="36" style={{ objectFit: "contain" }} />
-                      </div>
-                      <span className="bal-method__name">{t("cryptocurrency")}</span>
-                      <span className="bal-method__desc">{t("cryptoDesc")}</span>
-                      <div className="bal-method__conditions">
-                        <span>{t("methodMin")}: <strong>5$</strong></span>
-                        <span>{t("methodFee")}: <strong>0%</strong></span>
-                        <span>{t("methodSpeed")}: <strong>{t("methodInstant")}</strong></span>
-                      </div>
-                    </button>
-                    <button
-                      className={`bal-method${cashoutMethod === "bank" ? " active" : ""}`}
-                      onClick={() => setCashoutMethod("bank")}
-                    >
-                      <div className="bal-method__icon">
-                        <img src="/icons/pay-bank.png" alt="Bank" width="36" height="36" style={{ objectFit: "contain" }} />
-                      </div>
-                      <span className="bal-method__name">{t("bankTransfer")}</span>
-                      <span className="bal-method__desc">{t("ibanSwift")}</span>
-                      <div className="bal-method__conditions">
-                        <span>{t("methodMin")}: <strong>50$</strong></span>
-                        <span>{t("methodFee")}: <strong>0%</strong></span>
-                        <span>{t("methodSpeed")}: <strong>1-2 {t("methodDays")}</strong></span>
-                      </div>
-                    </button>
+                    {paymentMethods.length > 0 ? paymentMethods.map((pm) => {
+                      const icon = CASHOUT_ICONS[pm.type] ?? CASHOUT_ICONS.other;
+                      const commPct = parseFloat(pm.commission);
+                      const minAmt = parseFloat(pm.minAmount);
+                      return (
+                        <button
+                          key={pm.id}
+                          className={`bal-method${cashoutMethod === pm.type ? " active" : ""}`}
+                          onClick={() => setCashoutMethod(pm.type)}
+                        >
+                          <div className="bal-method__icon">
+                            <img src={icon} alt={pm.name} width="36" height="36" style={{ objectFit: "contain" }} />
+                          </div>
+                          <span className="bal-method__name">{pm.name}</span>
+                          <div className="bal-method__conditions">
+                            <span>{t("methodMin")}: <strong>{minAmt > 0 ? `${minAmt}$` : "0$"}</strong></span>
+                            <span>{t("methodFee")}: <strong>{commPct > 0 ? `${commPct}%` : "0%"}</strong></span>
+                          </div>
+                        </button>
+                      );
+                    }) : (
+                      <>
+                        <button className={`bal-method${cashoutMethod === "card" ? " active" : ""}`} onClick={() => setCashoutMethod("card")}>
+                          <div className="bal-method__icon"><img src="/icons/pay-card.png" alt="Card" width="36" height="36" style={{ objectFit: "contain" }} /></div>
+                          <span className="bal-method__name">{t("debitCard")}</span>
+                          <div className="bal-method__conditions">
+                            <span>{t("methodMin")}: <strong>1$</strong></span>
+                            <span>{t("methodFee")}: <strong>0%</strong></span>
+                          </div>
+                        </button>
+                        <button className={`bal-method${cashoutMethod === "crypto" ? " active" : ""}`} onClick={() => setCashoutMethod("crypto")}>
+                          <div className="bal-method__icon"><img src="/icons/tether.png" alt="Crypto" width="36" height="36" style={{ objectFit: "contain" }} /></div>
+                          <span className="bal-method__name">{t("cryptocurrency")}</span>
+                          <div className="bal-method__conditions">
+                            <span>{t("methodMin")}: <strong>5$</strong></span>
+                            <span>{t("methodFee")}: <strong>0%</strong></span>
+                          </div>
+                        </button>
+                        <button className={`bal-method${cashoutMethod === "bank" ? " active" : ""}`} onClick={() => setCashoutMethod("bank")}>
+                          <div className="bal-method__icon"><img src="/icons/pay-bank.png" alt="Bank" width="36" height="36" style={{ objectFit: "contain" }} /></div>
+                          <span className="bal-method__name">{t("bankTransfer")}</span>
+                          <div className="bal-method__conditions">
+                            <span>{t("methodMin")}: <strong>50$</strong></span>
+                            <span>{t("methodFee")}: <strong>0%</strong></span>
+                          </div>
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 

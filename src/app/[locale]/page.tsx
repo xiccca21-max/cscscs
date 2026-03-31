@@ -74,10 +74,73 @@ function randomPayoutAmountUsd(): number {
   return 1000 + Math.random() * 280;
 }
 
+type PaymentMethodDB = {
+  id: string;
+  name: string;
+  type: string;
+  commission: string;
+  minAmount: string;
+  currencies: string[];
+};
+
+const PAYOUT_CARD_COLORS: Record<string, string> = {
+  card: "#1A1F71",
+  crypto: "#F7931A",
+  bank: "#6366f1",
+  balance: "#f59e0b",
+  sbp: "#1d4ed8",
+  qiwi: "#9333ea",
+  yoomoney: "#8b22c7",
+  other: "#6366f1",
+};
+
+function PayoutCardIcon({ type }: { type: string }) {
+  switch (type) {
+    case "card":
+      return (
+        <>
+          <svg width="40" height="28" viewBox="0 0 48 32"><rect width="48" height="32" rx="4" fill="#1A1F71" /><path d="M20.2 10.5l-3.8 11h-2.8l-1.9-8.8c-.1-.5-.3-.6-.7-.8-.7-.3-1.8-.7-2.8-.9l.1-.5h4.5c.6 0 1.1.4 1.2 1l1.1 5.9 2.8-6.9h2.3zm9.2 7.4c0-2.9-4-3.1-4-4.4 0-.4.4-.8 1.2-.9.6-.1 1.8-.1 2.5.3l.5-2.1c-.6-.2-1.4-.4-2.4-.4-2.5 0-4.3 1.3-4.3 3.2 0 1.4 1.3 2.2 2.2 2.6 1 .5 1.3.8 1.3 1.2 0 .7-.8 1-1.5 1-.9 0-1.7-.2-2.4-.5l-.5 2.2c.7.3 1.7.4 2.7.4 2.7 0 4.5-1.3 4.5-3.3l.2-.3zm6.7 3.6h2.5l-2.2-11h-2.3c-.5 0-.9.3-1.1.7l-3.8 10.3h2.7l.5-1.5h3.3l.4 1.5zm-2.8-3.5l1.4-3.7.8 3.7h-2.2z" fill="#fff" /></svg>
+          <svg width="40" height="28" viewBox="0 0 48 32"><rect width="48" height="32" rx="4" fill="#EB001B" opacity="0" /><circle cx="18" cy="16" r="10" fill="#EB001B" /><circle cx="30" cy="16" r="10" fill="#F79E1B" /><path d="M24 8.6a10 10 0 0 1 3.7 7.4A10 10 0 0 1 24 23.4 10 10 0 0 1 20.3 16 10 10 0 0 1 24 8.6z" fill="#FF5F00" /></svg>
+        </>
+      );
+    case "crypto":
+      return (
+        <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A" /><path d="M22.5 14c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.6 2.6c-.4-.1-.9-.2-1.3-.3l.7-2.6-1.7-.4-.7 2.7c-.4-.1-.7-.2-1-.2v-.1l-2.3-.6-.4 1.8s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c0 .1.1.1.1.1h-.1l-1.2 4.7c-.1.2-.3.6-.8.4 0 0-1.2-.3-1.2-.3l-.8 1.9 2.2.5c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.7.4.7-2.8c2.8.5 5 .3 5.9-2.2.7-2-.1-3.2-1.5-3.9 1.1-.3 1.9-1 2.1-2.6zm-3.7 5.2c-.5 2.1-4.1 1-5.3.7l1-3.8c1.1.3 4.9.8 4.3 3.1zm.5-5.3c-.5 1.9-3.5.9-4.4.7l.8-3.4c1 .2 4.1.7 3.6 2.7z" fill="#fff" /></svg>
+      );
+    case "bank":
+      return (
+        <svg width="44" height="44" viewBox="0 0 32 32"><rect width="32" height="32" rx="16" fill="#6366f1" /><path d="M8 12h16M8 16h12M8 20h8" stroke="#fff" strokeWidth="2" strokeLinecap="round" /><rect x="20" y="18" width="5" height="4" rx="1" fill="#fff" opacity="0.7" /></svg>
+      );
+    case "balance":
+      return (
+        <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#f59e0b"/><path d="M21 12a5 5 0 01-5 5h-3v5h-2V7h5a5 5 0 015 5z" fill="#fff"/><path d="M13 17h4a4 4 0 010 8h-4v-8z" fill="#fff" opacity=".7"/></svg>
+      );
+    case "sbp":
+      return (
+        <svg width="44" height="44" viewBox="0 0 32 32"><rect width="32" height="32" rx="16" fill="#1d4ed8" /><path d="M10 8l6 8-6 8M16 16h6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      );
+    default:
+      return (
+        <svg width="44" height="44" viewBox="0 0 32 32"><rect width="32" height="32" rx="16" fill="#6366f1" /><circle cx="16" cy="16" r="6" fill="none" stroke="#fff" strokeWidth="2" /><path d="M16 13v6M13 16h6" stroke="#fff" strokeWidth="2" strokeLinecap="round" /></svg>
+      );
+  }
+}
+
 export default function HomePage() {
   const t = useTranslations("landing");
   const locale = useLocale();
   const { format, symbol } = useCurrency();
+
+  const [homePaymentMethods, setHomePaymentMethods] = useState<PaymentMethodDB[]>([]);
+
+  useEffect(() => {
+    fetch("/api/payment-methods")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success) setHomePaymentMethods(json.data);
+      })
+      .catch(() => {});
+  }, []);
 
   /* ── A) Payout rotation ── */
   const payoutIdxRef = useRef(0);
@@ -485,153 +548,81 @@ export default function HomePage() {
           <h2 className="payouts-section__title">{t("payoutTitle")} <span>{t("payoutTitleAccent")}</span></h2>
           <p className="payouts-section__sub">{t("payoutSub")}</p>
           <div className="payouts-grid">
-            <div className="payout-card" style={{"--pc":"#1A1F71"} as React.CSSProperties}>
-              <div className="payout-card__inner payout-card__front">
-                <div className="payout-card__logo-wrap">
-                  <svg width="40" height="28" viewBox="0 0 48 32"><rect width="48" height="32" rx="4" fill="#1A1F71" /><path d="M20.2 10.5l-3.8 11h-2.8l-1.9-8.8c-.1-.5-.3-.6-.7-.8-.7-.3-1.8-.7-2.8-.9l.1-.5h4.5c.6 0 1.1.4 1.2 1l1.1 5.9 2.8-6.9h2.3zm9.2 7.4c0-2.9-4-3.1-4-4.4 0-.4.4-.8 1.2-.9.6-.1 1.8-.1 2.5.3l.5-2.1c-.6-.2-1.4-.4-2.4-.4-2.5 0-4.3 1.3-4.3 3.2 0 1.4 1.3 2.2 2.2 2.6 1 .5 1.3.8 1.3 1.2 0 .7-.8 1-1.5 1-.9 0-1.7-.2-2.4-.5l-.5 2.2c.7.3 1.7.4 2.7.4 2.7 0 4.5-1.3 4.5-3.3l.2-.3zm6.7 3.6h2.5l-2.2-11h-2.3c-.5 0-.9.3-1.1.7l-3.8 10.3h2.7l.5-1.5h3.3l.4 1.5zm-2.8-3.5l1.4-3.7.8 3.7h-2.2z" fill="#fff" /></svg>
-                  <svg width="40" height="28" viewBox="0 0 48 32"><rect width="48" height="32" rx="4" fill="#EB001B" opacity="0" /><circle cx="18" cy="16" r="10" fill="#EB001B" /><circle cx="30" cy="16" r="10" fill="#F79E1B" /><path d="M24 8.6a10 10 0 0 1 3.7 7.4A10 10 0 0 1 24 23.4 10 10 0 0 1 20.3 16 10 10 0 0 1 24 8.6z" fill="#FF5F00" /></svg>
+            {homePaymentMethods.length > 0 ? homePaymentMethods.map((pm) => {
+              const color = PAYOUT_CARD_COLORS[pm.type] ?? PAYOUT_CARD_COLORS.other;
+              const fee = parseFloat(pm.commission);
+              const minAmt = parseFloat(pm.minAmount);
+              return (
+                <div key={pm.id} className="payout-card" style={{"--pc": color} as React.CSSProperties}>
+                  <div className="payout-card__inner payout-card__front">
+                    <div className="payout-card__logo-wrap">
+                      <PayoutCardIcon type={pm.type} />
+                    </div>
+                    <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
+                    <h3>{pm.name}</h3>
+                    <p>{fee > 0 ? `${t("payoutFee")}: ${fee}%` : t("payoutVisaDesc")}</p>
+                  </div>
+                  <div className="payout-card__inner payout-card__back">
+                    <h4>{t("payoutDetails")}</h4>
+                    <ul>
+                      <li>{t("payoutMinWd")}: {minAmt > 0 ? `${minAmt}$` : "0$"}</li>
+                      <li>{t("payoutFee")}: {fee > 0 ? `${fee}%` : "0%"}</li>
+                    </ul>
+                  </div>
                 </div>
-                <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
-                <h3>{t("payoutVisa")}</h3>
-                <p>{t("payoutVisaDesc")}</p>
-              </div>
-              <div className="payout-card__inner payout-card__back">
-                <h4>{t("payoutDetails")}</h4>
-                <ul>
-                  <li>{t("payoutMinWd")}: 1$</li>
-                  <li>{t("payoutProcessing")}: {t("payoutBadgeInstant")}</li>
-                  <li>{t("payoutFee")}: 0%</li>
-                </ul>
-              </div>
-            </div>
-            <div className="payout-card" style={{"--pc":"#F7931A"} as React.CSSProperties}>
-              <div className="payout-card__inner payout-card__front">
-                <div className="payout-card__logo-wrap">
-                  <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A" /><path d="M22.5 14c.3-2-1.2-3.1-3.3-3.8l.7-2.7-1.6-.4-.6 2.6c-.4-.1-.9-.2-1.3-.3l.7-2.6-1.7-.4-.7 2.7c-.4-.1-.7-.2-1-.2v-.1l-2.3-.6-.4 1.8s1.2.3 1.2.3c.7.2.8.6.8 1l-.8 3.2c0 .1.1.1.1.1h-.1l-1.2 4.7c-.1.2-.3.6-.8.4 0 0-1.2-.3-1.2-.3l-.8 1.9 2.2.5c.4.1.8.2 1.2.3l-.7 2.8 1.6.4.7-2.7c.4.1.9.2 1.3.3l-.7 2.7 1.7.4.7-2.8c2.8.5 5 .3 5.9-2.2.7-2-.1-3.2-1.5-3.9 1.1-.3 1.9-1 2.1-2.6zm-3.7 5.2c-.5 2.1-4.1 1-5.3.7l1-3.8c1.1.3 4.9.8 4.3 3.1zm.5-5.3c-.5 1.9-3.5.9-4.4.7l.8-3.4c1 .2 4.1.7 3.6 2.7z" fill="#fff" /></svg>
+              );
+            }) : (
+              <>
+                <div className="payout-card" style={{"--pc":"#1A1F71"} as React.CSSProperties}>
+                  <div className="payout-card__inner payout-card__front">
+                    <div className="payout-card__logo-wrap"><PayoutCardIcon type="card" /></div>
+                    <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
+                    <h3>{t("payoutVisa")}</h3>
+                    <p>{t("payoutVisaDesc")}</p>
+                  </div>
+                  <div className="payout-card__inner payout-card__back">
+                    <h4>{t("payoutDetails")}</h4>
+                    <ul><li>{t("payoutMinWd")}: 1$</li><li>{t("payoutFee")}: 0%</li></ul>
+                  </div>
                 </div>
-                <span className="payout-card__badge">{t("payoutBadge10m")}</span>
-                <h3>{t("payoutBtc")}</h3>
-                <p>{t("payoutBtcDesc")}</p>
-              </div>
-              <div className="payout-card__inner payout-card__back">
-                <h4>{t("payoutDetails")}</h4>
-                <ul>
-                  <li>{t("payoutMinWd")}: 10$</li>
-                  <li>{t("payoutProcessing")}: {t("payoutBadge10m")}</li>
-                  <li>{t("payoutNetwork")}: BTC</li>
-                </ul>
-              </div>
-            </div>
-            <div className="payout-card" style={{"--pc":"#26A17B"} as React.CSSProperties}>
-              <div className="payout-card__inner payout-card__front">
-                <div className="payout-card__logo-wrap">
-                  <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B" /><path d="M17.9 17.2v0c-.1 0-.7.1-2 .1-1 0-1.7 0-1.9-.1v0c-3.8-.2-6.6-.8-6.6-1.6s2.8-1.5 6.6-1.6v2.6c.3 0 1 .1 2 .1 1.2 0 1.8-.1 1.9-.1v-2.6c3.8.2 6.6.8 6.6 1.6s-2.8 1.4-6.6 1.6zm0-3.5V11h5.3V8H8.9v3h5.3v2.7c-4.3.2-7.5 1.1-7.5 2.1s3.2 1.9 7.5 2.1v7.6h3.7v-7.6c4.3-.2 7.5-1.1 7.5-2.1s-3.2-1.9-7.5-2.1z" fill="#fff" /></svg>
+                <div className="payout-card" style={{"--pc":"#F7931A"} as React.CSSProperties}>
+                  <div className="payout-card__inner payout-card__front">
+                    <div className="payout-card__logo-wrap"><PayoutCardIcon type="crypto" /></div>
+                    <span className="payout-card__badge">{t("payoutBadge10m")}</span>
+                    <h3>{t("payoutBtc")}</h3>
+                    <p>{t("payoutBtcDesc")}</p>
+                  </div>
+                  <div className="payout-card__inner payout-card__back">
+                    <h4>{t("payoutDetails")}</h4>
+                    <ul><li>{t("payoutMinWd")}: 10$</li><li>{t("payoutFee")}: 0%</li></ul>
+                  </div>
                 </div>
-                <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
-                <h3>{t("payoutUsdt")}</h3>
-                <p>{t("payoutUsdtDesc")}</p>
-              </div>
-              <div className="payout-card__inner payout-card__back">
-                <h4>{t("payoutDetails")}</h4>
-                <ul>
-                  <li>{t("payoutMinWd")}: 5$</li>
-                  <li>{t("payoutProcessing")}: {t("payoutBadgeInstant")}</li>
-                  <li>{t("payoutNetwork")}: TRC-20</li>
-                </ul>
-              </div>
-            </div>
-            <div className="payout-card" style={{"--pc":"#6366f1"} as React.CSSProperties}>
-              <div className="payout-card__inner payout-card__front">
-                <div className="payout-card__logo-wrap">
-                  <svg width="44" height="44" viewBox="0 0 32 32"><rect width="32" height="32" rx="16" fill="#6366f1" /><path d="M8 12h16M8 16h12M8 20h8" stroke="#fff" strokeWidth="2" strokeLinecap="round" /><rect x="20" y="18" width="5" height="4" rx="1" fill="#fff" opacity="0.7" /></svg>
+                <div className="payout-card" style={{"--pc":"#6366f1"} as React.CSSProperties}>
+                  <div className="payout-card__inner payout-card__front">
+                    <div className="payout-card__logo-wrap"><PayoutCardIcon type="bank" /></div>
+                    <span className="payout-card__badge">{t("payoutBadge12d")}</span>
+                    <h3>{t("payoutBank")}</h3>
+                    <p>{t("payoutBankDesc")}</p>
+                  </div>
+                  <div className="payout-card__inner payout-card__back">
+                    <h4>{t("payoutDetails")}</h4>
+                    <ul><li>{t("payoutMinWd")}: 50$</li><li>{t("payoutFee")}: 0%</li></ul>
+                  </div>
                 </div>
-                <span className="payout-card__badge">{t("payoutBadge12d")}</span>
-                <h3>{t("payoutBank")}</h3>
-                <p>{t("payoutBankDesc")}</p>
-              </div>
-              <div className="payout-card__inner payout-card__back">
-                <h4>{t("payoutDetails")}</h4>
-                <ul>
-                  <li>{t("payoutMinWd")}: 50$</li>
-                  <li>{t("payoutProcessing")}: {t("payoutBadge12d")}</li>
-                  <li>{t("payoutFee")}: 0%</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div className="payouts-grid payouts-grid--row2">
-            <div className="payout-card" style={{"--pc":"#627eea"} as React.CSSProperties}>
-              <div className="payout-card__inner payout-card__front">
-                <div className="payout-card__logo-wrap">
-                  <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#627eea"/><path d="M16.5 4v8.87l7.5 3.35L16.5 4z" fill="#fff" opacity=".6"/><path d="M16.5 4L9 16.22l7.5-3.35V4z" fill="#fff"/><path d="M16.5 21.97v6.03L24 17.62l-7.5 4.35z" fill="#fff" opacity=".6"/><path d="M16.5 28V21.97L9 17.62 16.5 28z" fill="#fff"/><path d="M16.5 20.57l7.5-4.35-7.5-3.35v7.7z" fill="#fff" opacity=".2"/><path d="M9 16.22l7.5 4.35v-7.7L9 16.22z" fill="#fff" opacity=".6"/></svg>
+                <div className="payout-card" style={{"--pc":"#f59e0b"} as React.CSSProperties}>
+                  <div className="payout-card__inner payout-card__front">
+                    <div className="payout-card__logo-wrap"><PayoutCardIcon type="balance" /></div>
+                    <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
+                    <h3>Balance</h3>
+                    <p>Instant credit to your account</p>
+                  </div>
+                  <div className="payout-card__inner payout-card__back">
+                    <h4>{t("payoutDetails")}</h4>
+                    <ul><li>{t("payoutMinWd")}: 0$</li><li>{t("payoutFee")}: 0%</li></ul>
+                  </div>
                 </div>
-                <span className="payout-card__badge">~5 min</span>
-                <h3>Ethereum (ERC-20)</h3>
-                <p>Fast on-chain ETH transfer</p>
-              </div>
-              <div className="payout-card__inner payout-card__back">
-                <h4>{t("payoutDetails")}</h4>
-                <ul>
-                  <li>{t("payoutMinWd")}: 10$</li>
-                  <li>{t("payoutProcessing")}: ~5 min</li>
-                  <li>{t("payoutFee")}: 1%</li>
-                </ul>
-              </div>
-            </div>
-            <div className="payout-card" style={{"--pc":"#26A17B"} as React.CSSProperties}>
-              <div className="payout-card__inner payout-card__front">
-                <div className="payout-card__logo-wrap">
-                  <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path d="M17.9 17.2v0c-.1 0-.7.1-2 .1-1 0-1.7 0-1.9-.1v0c-3.8-.2-6.6-.8-6.6-1.6s2.8-1.5 6.6-1.6v2.6c.3 0 1 .1 2 .1 1.2 0 1.8-.1 1.9-.1v-2.6c3.8.2 6.6.8 6.6 1.6s-2.8 1.4-6.6 1.6zm0-3.5V11h5.3V8H8.9v3h5.3v2.7c-4.3.2-7.5 1.1-7.5 2.1s3.2 1.9 7.5 2.1v7.6h3.7v-7.6c4.3-.2 7.5-1.1 7.5-2.1s-3.2-1.9-7.5-2.1z" fill="#fff"/></svg>
-                </div>
-                <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
-                <h3>USDT (ERC-20)</h3>
-                <p>Stablecoin via Ethereum network</p>
-              </div>
-              <div className="payout-card__inner payout-card__back">
-                <h4>{t("payoutDetails")}</h4>
-                <ul>
-                  <li>{t("payoutMinWd")}: 10$</li>
-                  <li>{t("payoutProcessing")}: ~5 min</li>
-                  <li>{t("payoutFee")}: 1%</li>
-                </ul>
-              </div>
-            </div>
-            <div className="payout-card" style={{"--pc":"#bfbbbb"} as React.CSSProperties}>
-              <div className="payout-card__inner payout-card__front">
-                <div className="payout-card__logo-wrap">
-                  <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#bfbbbb"/><path d="M16 5l-1 .4v14.2l1 .6 7-4.1L16 5z" fill="#fff" opacity=".5"/><path d="M16 5L9 16.1l7 4.1V5z" fill="#fff"/><path d="M16 21.5l-.1.1v5.4l.1.3 7-9.8-7 4z" fill="#fff" opacity=".5"/><path d="M16 27.3v-5.8L9 17.5l7 9.8z" fill="#fff"/></svg>
-                </div>
-                <span className="payout-card__badge">~10 min</span>
-                <h3>Litecoin (LTC)</h3>
-                <p>Low-fee crypto payments</p>
-              </div>
-              <div className="payout-card__inner payout-card__back">
-                <h4>{t("payoutDetails")}</h4>
-                <ul>
-                  <li>{t("payoutMinWd")}: 5$</li>
-                  <li>{t("payoutProcessing")}: ~10 min</li>
-                  <li>{t("payoutFee")}: 1%</li>
-                </ul>
-              </div>
-            </div>
-            <div className="payout-card" style={{"--pc":"#f59e0b"} as React.CSSProperties}>
-              <div className="payout-card__inner payout-card__front">
-                <div className="payout-card__logo-wrap">
-                  <svg width="44" height="44" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#f59e0b"/><path d="M21 12a5 5 0 01-5 5h-3v5h-2V7h5a5 5 0 015 5z" fill="#fff"/><path d="M13 17h4a4 4 0 010 8h-4v-8z" fill="#fff" opacity=".7"/></svg>
-                </div>
-                <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
-                <h3>Balance</h3>
-                <p>Instant credit to your account</p>
-              </div>
-              <div className="payout-card__inner payout-card__back">
-                <h4>{t("payoutDetails")}</h4>
-                <ul>
-                  <li>{t("payoutMinWd")}: 0$</li>
-                  <li>{t("payoutProcessing")}: {t("payoutBadgeInstant")}</li>
-                  <li>{t("payoutFee")}: 0%</li>
-                </ul>
-              </div>
-            </div>
+              </>
+            )}
           </div>
 
           <div className="payouts-notice">

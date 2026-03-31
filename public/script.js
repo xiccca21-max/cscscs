@@ -457,9 +457,9 @@
 
     function randAmount() {
       const r = Math.random();
-      if (r < 0.4) return (Math.random() * 200 + 10).toFixed(2);
-      if (r < 0.75) return (Math.random() * 800 + 200).toFixed(2);
-      return (Math.random() * 4000 + 800).toFixed(2);
+      if (r < 0.72) return (15 + Math.random() * 485).toFixed(2);
+      if (r < 0.92) return (500 + Math.random() * 500).toFixed(2);
+      return (1000 + Math.random() * 280).toFixed(2);
     }
 
     function randName() {

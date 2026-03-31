@@ -16,6 +16,14 @@ const PAYOUT_NAMES = [
 
 const SLIDE_COUNT = 7;
 
+/** Mostly under $500; rarely above $1000 (trust display). */
+function randomPayoutAmountUsd(): number {
+  const r = Math.random();
+  if (r < 0.72) return 15 + Math.random() * 485;
+  if (r < 0.92) return 500 + Math.random() * 500;
+  return 1000 + Math.random() * 280;
+}
+
 export default function HomePage() {
   const t = useTranslations("landing");
   const { format, symbol } = useCurrency();
@@ -36,7 +44,7 @@ export default function HomePage() {
         row.style.transform = "translateY(-8px)";
         setTimeout(() => {
           const name = PAYOUT_NAMES[Math.floor(Math.random() * PAYOUT_NAMES.length)];
-          const amountUsd = Math.random() * 4000 + 50;
+          const amountUsd = randomPayoutAmountUsd();
           const userEl = row.querySelector(".hero__payout-user");
           const amountEl = row.querySelector(".hero__payout-amount");
           if (userEl) userEl.innerHTML = `<span>${name[0]}</span> ${name}`;
@@ -271,7 +279,7 @@ export default function HomePage() {
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[0] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
                 <div className="hero__payout-user"><span>N</span> Nugaev</div>
-                <span className="hero__payout-amount">{format(1790)}</span>
+                <span className="hero__payout-amount">{format(412)}</span>
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[1] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
                 <div className="hero__payout-user"><span>M</span> max1moff_</div>
@@ -279,7 +287,7 @@ export default function HomePage() {
               </div>
               <div className="hero__payout-row" ref={(el) => { payoutRowRefs.current[2] = el; }} style={{ transition: "opacity 0.3s ease, transform 0.3s ease" }}>
                 <div className="hero__payout-user"><span>R</span> Razrez</div>
-                <span className="hero__payout-amount">{format(3100)}</span>
+                <span className="hero__payout-amount">{format(267)}</span>
               </div>
             </div>
           </div>

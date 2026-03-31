@@ -17,11 +17,12 @@ const PAYOUT_NAMES = [
   "Sergey L.",
 ];
 
+/** Mostly under $500; rarely above $1000. */
 function randAmount() {
   const r = Math.random();
-  if (r < 0.4) return (Math.random() * 200 + 10).toFixed(2);
-  if (r < 0.75) return (Math.random() * 800 + 200).toFixed(2);
-  return (Math.random() * 4000 + 800).toFixed(2);
+  if (r < 0.72) return (15 + Math.random() * 485).toFixed(2);
+  if (r < 0.92) return (500 + Math.random() * 500).toFixed(2);
+  return (1000 + Math.random() * 280).toFixed(2);
 }
 
 export function LandingPageView() {
@@ -29,9 +30,9 @@ export function LandingPageView() {
   const [faqOpen, setFaqOpen] = useState<string | null>(null);
   const payoutTick = useRef(0);
   const [rows, setRows] = useState([
-    { name: "Alex C.", amount: "1,790.00" },
+    { name: "Alex C.", amount: "412.00" },
     { name: "Maria S.", amount: "89.50" },
-    { name: "Denis P.", amount: "3,100.00" },
+    { name: "Denis P.", amount: "267.00" },
   ]);
 
   const reviewSlides: ReviewSlide[] = [

@@ -556,6 +556,62 @@ export default function OrderPage({
                   </span>
                 </div>
               </div>
+            ) : order.status === "PAID" ? (
+              <div className="odr-trade-paid">
+                <div className="odr-trade-paid__decor">
+                  <div className="odr-trade-paid__decor-grid" />
+                  <div className="odr-trade-paid__decor-circle odr-trade-paid__decor-circle--1" />
+                  <div className="odr-trade-paid__decor-circle odr-trade-paid__decor-circle--2" />
+                </div>
+
+                <div className="odr-trade-paid__check">
+                  <svg className="odr-trade-paid__check-svg" viewBox="0 0 52 52">
+                    <circle className="odr-trade-paid__check-circle" cx="26" cy="26" r="24" fill="none" />
+                    <path className="odr-trade-paid__check-path" fill="none" d="M14 27l7 7 16-16" />
+                  </svg>
+                </div>
+
+                <h4 className="odr-trade-paid__title">{t("tradePaidTitle")}</h4>
+
+                <div className="odr-trade-paid__amount">
+                  {totalAmount}<small>$</small>
+                </div>
+
+                <p className="odr-trade-paid__desc">{t("tradePaidDesc")}</p>
+
+                <div className="odr-trade-paid__info">
+                  <div className="odr-trade-paid__info-row">
+                    <div className="odr-trade-paid__info-icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <span>{t("tradePaidSent")}</span>
+                  </div>
+                  <div className="odr-trade-paid__info-row">
+                    <div className="odr-trade-paid__info-icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                    </div>
+                    <span>{t("tradePaidMethod")} <strong>{order.paymentMethod?.name ?? "—"}</strong></span>
+                  </div>
+                </div>
+
+                <div className="odr-trade-paid__actions">
+                  <Link href="/sell" className="odr-trade-paid__btn odr-trade-paid__btn--primary">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>{t("tradePaidHome")}</span>
+                  </Link>
+                  <Link href="/orders" className="odr-trade-paid__btn odr-trade-paid__btn--outline">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span>{t("tradePaidOrders")}</span>
+                  </Link>
+                </div>
+
+                {tradeOfferId && (
+                  <div className="odr-trade-paid__deal">
+                    <span>{t("dealNumber")}</span>
+                    <span>#{tradeOfferId}</span>
+                  </div>
+                )}
+              </div>
             ) : (order.status === "TRADE_COMPLETED" || order.status === "PAYMENT_PENDING") ? (
               <div className="odr-trade-done">
                 <div className="odr-trade-done__decor">
@@ -885,27 +941,6 @@ export default function OrderPage({
           </div>
         )}
 
-        {/* ── Paid ── */}
-        {isPaid && (
-          <div
-            className="odr-state odr-state--paid odr-fade"
-            style={{ "--delay": 4 } as React.CSSProperties}
-          >
-            <div className="odr-state__icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            </div>
-            <h3>{t("state.paidTitle")}</h3>
-            <p>
-              {totalAmount}$ {t("state.paidDescSuffix")}
-            </p>
-            <Link href="/sell" className="odr-btn">
-              {t("state.sellMore")}
-            </Link>
-          </div>
-        )}
 
         {payerModalOpen && (
           <div className="odr-modal-overlay active" onClick={() => setPayerModalOpen(false)}>

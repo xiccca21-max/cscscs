@@ -1287,7 +1287,7 @@
     grid-template-columns: 1fr;
   }
 
-  /* Timeline — single compact row */
+  /* Timeline - single compact row */
   .odr-tl {
     padding: 16px 12px !important;
     margin-bottom: 16px;
@@ -1802,7 +1802,7 @@
 .odr-details-btn { display: none !important; }
 
 /* ══════════════════════════════════════════════
-   CANCELLED TIMELINE — dimmed/faded
+   CANCELLED TIMELINE - dimmed/faded
    ══════════════════════════════════════════════ */
 .odr-tl--cancelled {
   opacity: 0.35 !important;
@@ -1829,7 +1829,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   TRADE CANCELLED BLOCK — inside Trade Info card
+   TRADE CANCELLED BLOCK - inside Trade Info card
    ══════════════════════════════════════════════ */
 .odr-trade-cancelled {
   position: relative;
@@ -2014,7 +2014,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   TRADE EXPIRED BLOCK — timer ran out
+   TRADE EXPIRED BLOCK - timer ran out
    ══════════════════════════════════════════════ */
 .odr-trade-expired {
   position: relative;
@@ -2187,7 +2187,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   PAYER MODAL — dark theme redesign
+   PAYER MODAL - dark theme redesign
    ══════════════════════════════════════════════ */
 .odr-modal--dark {
   background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #172554 100%) !important;
@@ -2417,7 +2417,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   TRADE WAIT V3 — dark themed
+   TRADE WAIT V3 - dark themed
    ══════════════════════════════════════════════ */
 .tw3 {
   position: relative;
@@ -2569,7 +2569,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   TRADE DONE — items received, awaiting payout
+   TRADE DONE - items received, awaiting payout
    ══════════════════════════════════════════════ */
 .odr-trade-done {
   display: flex;
@@ -2886,7 +2886,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   TRADE PAID — final success state
+   TRADE PAID - final success state
    ══════════════════════════════════════════════ */
 .odr-trade-paid {
   display: flex;
@@ -3203,7 +3203,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   TRADE READY — dark themed (matches tw3 / step 1)
+   TRADE READY - dark themed (matches tw3 / step 1)
    ══════════════════════════════════════════════ */
 .odr-trade-ready {
   display: flex !important;

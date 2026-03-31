@@ -687,7 +687,7 @@ export default function OrderPage({
                   </div>
                   <div className="odr-trade-paid__receipt-row">
                     <span>{t("tradePaidMethod")}</span>
-                    <strong>{order.paymentMethod?.name ?? "—"}</strong>
+                    <strong>{order.paymentMethod?.name ?? "-"}</strong>
                   </div>
                   <div className="odr-trade-paid__receipt-row">
                     <span>{t("tradePaidReceiptItems")}</span>

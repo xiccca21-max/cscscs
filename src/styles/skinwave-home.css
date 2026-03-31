@@ -1284,7 +1284,7 @@ section + section::before {
 .carousel__arrow--prev { left: max(16px, calc(50% - 580px)); }
 .carousel__arrow--next { right: max(16px, calc(50% - 580px)); }
 
-/* Dots — hidden, navigation via arrows only */
+/* Dots - hidden, navigation via arrows only */
 .carousel__dots {
   display: none;
 }

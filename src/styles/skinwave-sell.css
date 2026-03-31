@@ -3752,7 +3752,7 @@
     cursor: pointer;
   }
 
-  /* Continue to payment — sticky bottom bar */
+  /* Continue to payment - sticky bottom bar */
   .sell-mobile-continue {
     display: flex;
     align-items: center;
@@ -4642,7 +4642,7 @@
 }
 
 /* ═══════════════════════════════════════════════
-   CHECKOUT MODAL — Dark Premium
+   CHECKOUT MODAL - Dark Premium
    ═══════════════════════════════════════════════ */
 .checkout-overlay {
   position: fixed;

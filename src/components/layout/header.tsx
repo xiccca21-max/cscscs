@@ -219,7 +219,7 @@ export function Header() {
         </div>
       </header>
       <div className={`header__mob-backdrop${mobileOpen ? " active" : ""}`} onClick={() => setMobileOpen(false)} />
-      {/* Mobile menu — outside header to avoid stacking context */}
+      {/* Mobile menu - outside header to avoid stacking context */}
       <div className={`mob${mobileOpen ? " mob--open" : ""}`}>
         {!loading && user && (
           <div className="mob__profile">

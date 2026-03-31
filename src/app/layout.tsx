@@ -26,6 +26,11 @@ export default function RootLayout({
         className={`${inter.variable} font-sans antialiased min-h-screen`}
       >
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `document.addEventListener('contextmenu',function(e){if(e.target.tagName==='IMG'){e.preventDefault()}});document.addEventListener('dragstart',function(e){if(e.target.tagName==='IMG'){e.preventDefault()}});`,
+          }}
+        />
       </body>
     </html>
   );

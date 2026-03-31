@@ -606,7 +606,7 @@ export default function OrdersPage() {
             </Link>
           </div>
 
-          {/* Stats — clickable + sparklines */}
+          {/* Stats - clickable + sparklines */}
           <div className="ord-stats">
             <button type="button" className={`ord-stat ord-stat--clickable${activeFilter === "all" ? " ord-stat--active" : ""}`} onClick={() => handleStatClick("all")}>
               <div className="ord-stat__icon">
@@ -930,13 +930,13 @@ export default function OrdersPage() {
                   </div>
                   <div className="ord-modal__summary-item">
                     <span className="ord-modal__summary-label">{t("colItems")}</span>
-                    <span className="ord-modal__summary-val">{detail.itemCount || (modalDetail?.items ?? []).length || "—"}</span>
+                    <span className="ord-modal__summary-val">{detail.itemCount || (modalDetail?.items ?? []).length || "-"}</span>
                   </div>
                   <div className="ord-modal__summary-item">
                     <span className="ord-modal__summary-label">{t("colMethod")}</span>
                     <span className="ord-modal__summary-val">
                       {paymentIcon(detail.paymentMethod?.type)}
-                      {detail.paymentMethod?.name ?? "—"}
+                      {detail.paymentMethod?.name ?? "-"}
                     </span>
                   </div>
                 </div>

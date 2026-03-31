@@ -1375,7 +1375,7 @@ body.avatar-blur > .footer {
   .header__left { flex: 1; }
   .header__inner { padding: 0 16px; }
 
-  /* ═══ MOBILE — hide desktop nav, show mob ═══ */
+  /* ═══ MOBILE - hide desktop nav, show mob ═══ */
   .header__nav { display: none !important; }
   .header__nav-slider { display: none !important; }
 

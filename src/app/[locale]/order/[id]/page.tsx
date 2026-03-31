@@ -564,6 +564,13 @@ export default function OrderPage({
                   <div className="odr-trade-paid__decor-circle odr-trade-paid__decor-circle--2" />
                 </div>
 
+                {/* Confetti */}
+                <div className="odr-confetti" aria-hidden="true">
+                  {Array.from({ length: 20 }).map((_, i) => (
+                    <span key={i} className="odr-confetti__piece" style={{ "--ci": i } as React.CSSProperties} />
+                  ))}
+                </div>
+
                 <div className="odr-trade-paid__check">
                   <svg className="odr-trade-paid__check-svg" viewBox="0 0 52 52">
                     <circle className="odr-trade-paid__check-circle" cx="26" cy="26" r="24" fill="none" />
@@ -579,38 +586,56 @@ export default function OrderPage({
 
                 <p className="odr-trade-paid__desc">{t("tradePaidDesc")}</p>
 
-                <div className="odr-trade-paid__info">
-                  <div className="odr-trade-paid__info-row">
-                    <div className="odr-trade-paid__info-icon">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
-                    </div>
-                    <span>{t("tradePaidSent")}</span>
+                {/* Receipt card */}
+                <div className="odr-trade-paid__receipt">
+                  <div className="odr-trade-paid__receipt-row">
+                    <span>{t("tradePaidReceiptStatus")}</span>
+                    <span className="odr-trade-paid__receipt-badge">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      {t("tradePaidReceiptPaid")}
+                    </span>
                   </div>
-                  <div className="odr-trade-paid__info-row">
-                    <div className="odr-trade-paid__info-icon">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                  <div className="odr-trade-paid__receipt-row">
+                    <span>{t("tradePaidMethod")}</span>
+                    <strong>{order.paymentMethod?.name ?? "—"}</strong>
+                  </div>
+                  <div className="odr-trade-paid__receipt-row">
+                    <span>{t("tradePaidReceiptItems")}</span>
+                    <strong>{order.items.length}</strong>
+                  </div>
+                  <div className="odr-trade-paid__receipt-row">
+                    <span>{t("tradePaidReceiptDate")}</span>
+                    <strong>{new Date().toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US", { day: "numeric", month: "short", year: "numeric" })}</strong>
+                  </div>
+                  {tradeOfferId && (
+                    <div className="odr-trade-paid__receipt-row">
+                      <span>{t("dealNumber")}</span>
+                      <strong>#{tradeOfferId}</strong>
                     </div>
-                    <span>{t("tradePaidMethod")} <strong>{order.paymentMethod?.name ?? "—"}</strong></span>
+                  )}
+                  <div className="odr-trade-paid__receipt-total">
+                    <span>{t("total")}</span>
+                    <span>{totalAmount}<small>$</small></span>
                   </div>
                 </div>
 
+                {/* Actions */}
                 <div className="odr-trade-paid__actions">
-                  <Link href="/sell" className="odr-trade-paid__btn odr-trade-paid__btn--primary">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    <span>{t("tradePaidHome")}</span>
+                  <Link href="/sell" className="odr-trade-paid__btn odr-trade-paid__btn--sell">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span>{t("tradePaidSellMore")}</span>
                   </Link>
-                  <Link href="/orders" className="odr-trade-paid__btn odr-trade-paid__btn--outline">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                    <span>{t("tradePaidOrders")}</span>
-                  </Link>
-                </div>
-
-                {tradeOfferId && (
-                  <div className="odr-trade-paid__deal">
-                    <span>{t("dealNumber")}</span>
-                    <span>#{tradeOfferId}</span>
+                  <div className="odr-trade-paid__actions-row">
+                    <Link href="/" className="odr-trade-paid__btn odr-trade-paid__btn--outline">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                      <span>{t("tradePaidHome")}</span>
+                    </Link>
+                    <Link href="/orders" className="odr-trade-paid__btn odr-trade-paid__btn--outline">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                      <span>{t("tradePaidOrders")}</span>
+                    </Link>
                   </div>
-                )}
+                </div>
               </div>
             ) : (order.status === "TRADE_COMPLETED" || order.status === "PAYMENT_PENDING") ? (
               <div className="odr-trade-done">
@@ -796,9 +821,8 @@ export default function OrderPage({
                     href={tradeOfferId ? `steam://url/ShowTradeOffer/${tradeOfferId}` : `steam://openurl/${botSteamUrl ?? ""}`}
                     className="odr-trade-actions__btn odr-trade-actions__btn--client"
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M22 2 11 13" />
-                      <path d="m22 2-7 20-4-9-9-4 20-7z" />
+                    <svg width="16" height="16" viewBox="0 0 256 259" fill="currentColor">
+                      <path d="M127.779 0C57.895 0 .69 55.324.046 124.599L86.729 160.3a35.896 35.896 0 0 1 20.365-6.3l30.472-44.12v-.655c0-26.638 21.674-48.311 48.32-48.311 26.643 0 48.317 21.673 48.317 48.324 0 26.642-21.674 48.316-48.317 48.316h-1.124l-43.412 30.993c0 .349.018.697.018 1.037 0 19.98-16.241 36.227-36.233 36.227-17.616 0-32.323-12.627-35.56-29.349L4.05 168.46C20.455 220.12 69.244 258.218 127.779 258.218c70.556 0 127.774-57.214 127.774-127.776S198.335 0 127.779 0" />
                     </svg>
                     <span>{t("confirmClient")}</span>
                   </a>

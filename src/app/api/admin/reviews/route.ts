@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     await requireAdmin();
     const body = await request.json();
     const { user, steam, avatar, textEn, textRu, game, stars } = body;
-    if (!user || !steam || !textEn || !textRu)
+    if (!user || !steam || (!textEn && !textRu))
       return NextResponse.json({ success: false, error: "Missing fields" }, { status: 400 });
 
     const maxSort = await db.review.aggregate({ _max: { sortOrder: true } });
@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
         user,
         steam,
         avatar: avatar || "",
-        textEn,
-        textRu,
+        textEn: textEn || "",
+        textRu: textRu || "",
         game: game || "CS2",
         stars: Math.min(5, Math.max(1, Number(stars) || 5)),
         sortOrder: (maxSort._max.sortOrder ?? 0) + 1,

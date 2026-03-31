@@ -1035,7 +1035,7 @@
   background: linear-gradient(160deg, #1e1b4b 0%, #252370 30%, #312e81 60%, #3730a3 100%);
   border-radius: 14px;
   border: 1px solid rgba(99,102,241,0.25);
-  margin: 6px 24px 6px 24px;
+  margin: 6px 24px;
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 16px rgba(30,27,75,0.15);
@@ -1862,11 +1862,12 @@
   overflow-y: auto;
   background: linear-gradient(180deg, #f4f3fa 0%, #eceaf6 50%, #e6e4f2 100%);
   border-left: none;
-  padding: 0 14px 14px;
+  padding: 0 14px 14px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   color: var(--text);
+  margin: 0;
 }
 .sell-sidebar::-webkit-scrollbar { width: 4px; }
 .sell-sidebar::-webkit-scrollbar-track { background: transparent; }

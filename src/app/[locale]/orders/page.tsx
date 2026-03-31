@@ -894,7 +894,7 @@ export default function OrdersPage() {
                   </div>
                   <div className="ord-modal__summary-item">
                     <span className="ord-modal__summary-label">{t("colItems")}</span>
-                    <span className="ord-modal__summary-val">{detail.itemCount}</span>
+                    <span className="ord-modal__summary-val">{detail.itemCount || (modalDetail?.items ?? []).length || "—"}</span>
                   </div>
                   <div className="ord-modal__summary-item">
                     <span className="ord-modal__summary-label">{t("colMethod")}</span>

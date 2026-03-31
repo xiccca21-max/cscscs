@@ -1519,6 +1519,9 @@
   display: flex !important;
   flex-direction: column !important;
 }
+.odr-grid > .odr-card:first-child {
+  align-self: start !important;
+}
 .odr-card:hover {
   border-color: #c7d2fe !important;
   box-shadow: 0 8px 24px rgba(99,102,241,0.08), 0 2px 8px rgba(0,0,0,0.04) !important;

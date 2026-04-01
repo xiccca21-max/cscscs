@@ -81,6 +81,7 @@ export default function AdminPage() {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [pricingRules, setPricingRules] = useState<any[]>([]);
   const [cashouts, setCashouts] = useState<any[]>([]);
+  const [cashoutDetail, setCashoutDetail] = useState<any | null>(null);
   const [bots, setBots] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -949,44 +950,123 @@ export default function AdminPage() {
 
         {/* ── CASHOUTS ── */}
         {section === "cashouts" && (
-          <div className="adm-section">
-            <div className="adm-section__top">
-              <h1>Запросы на вывод</h1>
-              <div className="adm-section__actions">
-                <select className="adm-input adm-select" value={cashoutsStatus} onChange={(e) => setCashoutsStatus(e.target.value)}>
-                  <option value="">Все</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="APPROVED">Approved</option>
-                  <option value="REJECTED">Rejected</option>
-                  <option value="PAID">Paid</option>
-                </select>
-                <button className="adm-btn adm-btn--ghost" onClick={fetchCashouts}>Обновить</button>
+          <div className="adm-section" style={{ display: "flex", gap: 16 }}>
+            {/* Left: list */}
+            <div style={{ flex: cashoutDetail ? "0 0 45%" : "1 1 100%", minWidth: 0, transition: "flex 0.2s" }}>
+              <div className="adm-section__top">
+                <h1>Запросы на вывод</h1>
+                <div className="adm-section__actions">
+                  <select className="adm-input adm-select" value={cashoutsStatus} onChange={(e) => setCashoutsStatus(e.target.value)}>
+                    <option value="">Все</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="APPROVED">Approved</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="PAID">Paid</option>
+                  </select>
+                  <button className="adm-btn adm-btn--ghost" onClick={fetchCashouts}>Обновить</button>
+                </div>
+              </div>
+              <div className="adm-card">
+                <table className="adm-table">
+                  <thead><tr><th>ID</th><th>Юзер</th><th>Сумма</th><th>Метод</th><th>Статус</th><th>Дата</th></tr></thead>
+                  <tbody>
+                    {cashouts.length > 0 ? cashouts.map((c: any) => (
+                      <tr key={c.id} onClick={() => setCashoutDetail(c)} style={{ cursor: "pointer", background: cashoutDetail?.id === c.id ? "rgba(99,102,241,0.08)" : undefined }}>
+                        <td className="adm-mono">#{c.id?.slice(0, 8)}</td>
+                        <td>{c.user?.steamLogin ?? "-"}</td>
+                        <td className="adm-bold">{parseFloat(c.amount ?? 0).toFixed(2)}$</td>
+                        <td>{c.paymentMethod ?? "-"}</td>
+                        <td><span className={`adm-badge adm-badge--${(c.status ?? "").toLowerCase()}`}>{c.status}</span></td>
+                        <td>{c.createdAt ? new Date(c.createdAt).toLocaleDateString("ru-RU") : "-"}</td>
+                      </tr>
+                    )) : <tr><td colSpan={6} className="adm-empty">Нет запросов</td></tr>}
+                  </tbody>
+                </table>
               </div>
             </div>
-            <div className="adm-card">
-              <table className="adm-table">
-                <thead><tr><th>ID</th><th>Юзер</th><th>Сумма</th><th>Метод</th><th>Статус</th><th>Дата</th><th></th></tr></thead>
-                <tbody>
-                  {cashouts.length > 0 ? cashouts.map((c: any) => (
-                    <tr key={c.id}>
-                      <td className="adm-mono">#{c.id?.slice(0, 8)}</td>
-                      <td>{c.user?.steamLogin ?? "-"}</td>
-                      <td className="adm-bold">{parseFloat(c.amount ?? 0).toFixed(2)}$</td>
-                      <td>{c.paymentMethod ?? "-"}</td>
-                      <td><span className={`adm-badge adm-badge--${(c.status ?? "").toLowerCase()}`}>{c.status}</span></td>
-                      <td>{c.createdAt ? new Date(c.createdAt).toLocaleDateString("ru-RU") : "-"}</td>
-                      <td className="adm-actions-cell">
-                        {c.status === "PENDING" && <>
-                          <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/cashouts/${c.id}`, { status: "APPROVED" }, "Одобрено", fetchCashouts)}>ОК</button>
-                          <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/cashouts/${c.id}`, { status: "REJECTED" }, "Отклонено", () => { fetchCashouts(); fetchUsers(); })}>Отклонить</button>
-                        </>}
-                        {c.status === "APPROVED" && <button className="adm-btn adm-btn--primary adm-btn--sm" onClick={() => handleAction("PATCH", `/api/admin/cashouts/${c.id}`, { status: "PAID" }, "Оплачено", fetchCashouts)}>Paid</button>}
-                      </td>
-                    </tr>
-                  )) : <tr><td colSpan={7} className="adm-empty">Нет запросов</td></tr>}
-                </tbody>
-              </table>
-            </div>
+
+            {/* Right: detail panel */}
+            {cashoutDetail && (
+              <div className="adm-card" style={{ flex: "0 0 54%", padding: 20, alignSelf: "flex-start", position: "sticky", top: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                  <h2 style={{ margin: 0, fontSize: 16 }}>Вывод #{cashoutDetail.id?.slice(0, 8)}</h2>
+                  <button className="adm-btn adm-btn--ghost adm-btn--sm" onClick={() => setCashoutDetail(null)}>✕</button>
+                </div>
+
+                {/* User info */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14, padding: "10px 12px", background: "rgba(99,102,241,0.06)", borderRadius: 10 }}>
+                  {cashoutDetail.user?.steamAvatar && <img src={cashoutDetail.user.steamAvatar} alt="" style={{ width: 36, height: 36, borderRadius: "50%" }} />}
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{cashoutDetail.user?.steamLogin ?? "—"}</div>
+                    <div style={{ fontSize: 12, opacity: 0.6 }}>Steam ID: {cashoutDetail.user?.steamId ?? "—"}</div>
+                  </div>
+                </div>
+
+                {/* Summary */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 14, fontSize: 13 }}>
+                  <div style={{ padding: "8px 12px", background: "#f8f7fd", borderRadius: 8 }}>
+                    <div style={{ opacity: 0.6, fontSize: 11 }}>Сумма</div>
+                    <div style={{ fontWeight: 700 }}>{parseFloat(cashoutDetail.amount ?? 0).toFixed(2)}$</div>
+                  </div>
+                  <div style={{ padding: "8px 12px", background: "#f8f7fd", borderRadius: 8 }}>
+                    <div style={{ opacity: 0.6, fontSize: 11 }}>Комиссия</div>
+                    <div style={{ fontWeight: 700 }}>{parseFloat(cashoutDetail.commission ?? 0).toFixed(2)}$</div>
+                  </div>
+                  <div style={{ padding: "8px 12px", background: "#f8f7fd", borderRadius: 8 }}>
+                    <div style={{ opacity: 0.6, fontSize: 11 }}>К выплате</div>
+                    <div style={{ fontWeight: 700, color: "#22c55e" }}>{parseFloat(cashoutDetail.totalAmount ?? 0).toFixed(2)}$</div>
+                  </div>
+                  <div style={{ padding: "8px 12px", background: "#f8f7fd", borderRadius: 8 }}>
+                    <div style={{ opacity: 0.6, fontSize: 11 }}>Метод</div>
+                    <div style={{ fontWeight: 600 }}>{cashoutDetail.paymentMethod ?? "—"}</div>
+                  </div>
+                </div>
+
+                {/* Payment details / requisites */}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 6 }}>Реквизиты</div>
+                  {cashoutDetail.paymentDetails && typeof cashoutDetail.paymentDetails === "object" && Object.keys(cashoutDetail.paymentDetails).length > 0 ? (
+                    <div style={{ background: "#f0eefa", borderRadius: 10, padding: "10px 14px", fontSize: 13 }}>
+                      {Object.entries(cashoutDetail.paymentDetails as Record<string, string>).map(([key, val]) => (
+                        <div key={key} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid rgba(99,102,241,0.08)" }}>
+                          <span style={{ opacity: 0.6, textTransform: "capitalize" }}>{key.replace(/([A-Z])/g, " $1").trim()}</span>
+                          <span style={{ fontWeight: 600, wordBreak: "break-all", textAlign: "right", maxWidth: "60%" }}>{val || "—"}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ opacity: 0.5, fontSize: 13 }}>Реквизиты не указаны</div>
+                  )}
+                </div>
+
+                {/* Status + date */}
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, fontSize: 13 }}>
+                  <span className={`adm-badge adm-badge--${(cashoutDetail.status ?? "").toLowerCase()}`}>{cashoutDetail.status}</span>
+                  <span style={{ opacity: 0.5 }}>{cashoutDetail.createdAt ? new Date(cashoutDetail.createdAt).toLocaleString("ru-RU") : ""}</span>
+                </div>
+
+                {/* Action buttons */}
+                <div style={{ display: "flex", gap: 8 }}>
+                  {cashoutDetail.status === "PENDING" && (
+                    <>
+                      <button className="adm-btn adm-btn--primary" style={{ flex: 1 }} onClick={() => handleAction("PATCH", `/api/admin/cashouts/${cashoutDetail.id}`, { status: "APPROVED" }, "Одобрено", () => { fetchCashouts(); setCashoutDetail((p: any) => p ? { ...p, status: "APPROVED" } : null); })}>Одобрить</button>
+                      <button className="adm-btn adm-btn--danger" style={{ flex: 1 }} onClick={() => handleAction("PATCH", `/api/admin/cashouts/${cashoutDetail.id}`, { status: "REJECTED" }, "Отклонено", () => { fetchCashouts(); fetchUsers(); setCashoutDetail(null); })}>Отклонить</button>
+                    </>
+                  )}
+                  {cashoutDetail.status === "APPROVED" && (
+                    <>
+                      <button className="adm-btn adm-btn--primary" style={{ flex: 1 }} onClick={() => handleAction("PATCH", `/api/admin/cashouts/${cashoutDetail.id}`, { status: "PAID" }, "Выплачено", () => { fetchCashouts(); setCashoutDetail((p: any) => p ? { ...p, status: "PAID" } : null); })}>Выплачено</button>
+                      <button className="adm-btn adm-btn--danger" style={{ flex: 1 }} onClick={() => handleAction("PATCH", `/api/admin/cashouts/${cashoutDetail.id}`, { status: "REJECTED" }, "Отменено", () => { fetchCashouts(); fetchUsers(); setCashoutDetail(null); })}>Отменить</button>
+                    </>
+                  )}
+                  {(cashoutDetail.status === "PAID" || cashoutDetail.status === "REJECTED") && (
+                    <div style={{ opacity: 0.5, fontSize: 13, textAlign: "center", width: "100%" }}>
+                      {cashoutDetail.status === "PAID" ? "Выплата завершена" : "Вывод отклонён"}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -1,3 +1,5 @@
+import { detectCs2PhaseFromIconUrl } from "./csPhase";
+
 const STEAM_OPENID_URL = "https://steamcommunity.com/openid/login";
 const STEAM_API_URL = "https://api.steampowered.com";
 
@@ -182,7 +184,10 @@ async function fetchViaSteamDirect(
 
 type SteamTag = { category: string; localized_tag_name: string };
 
-function parseInventoryItems(data: Record<string, unknown>) {
+function parseInventoryItems(
+  data: Record<string, unknown>,
+  game: keyof typeof STEAM_GAME_APP_IDS,
+) {
   if (!data.descriptions || !data.assets) {
     return [];
   }
@@ -197,6 +202,10 @@ function parseInventoryItems(data: Record<string, unknown>) {
       const desc = descriptionsMap.get(
         `${asset.classid}_${asset.instanceid}`,
       ) as Record<string, unknown> | undefined;
+      const iconPath = desc?.icon_url as string | undefined;
+      const fullIconUrl = iconPath
+        ? `https://steamcommunity-a.akamaihd.net/economy/image/${iconPath}`
+        : null;
       return {
         assetId: asset.assetid,
         classId: asset.classid,
@@ -205,9 +214,9 @@ function parseInventoryItems(data: Record<string, unknown>) {
           (desc?.market_hash_name as string) ||
           (desc?.name as string) ||
           "Unknown",
-        iconUrl: desc?.icon_url
-          ? `https://steamcommunity-a.akamaihd.net/economy/image/${desc.icon_url}`
-          : null,
+        iconUrl: fullIconUrl,
+        phase:
+          game === "CS2" ? detectCs2PhaseFromIconUrl(fullIconUrl) : null,
         tradable: (desc?.tradable as number) === 1,
         condition: extractCondition(desc?.market_hash_name as string),
         quality: (desc?.tags as SteamTag[] | undefined)?.find(
@@ -248,7 +257,7 @@ export async function getSteamInventory(
     return { items: [], error: "fetch_failed" as const };
   }
 
-  const items = parseInventoryItems(result.data);
+  const items = parseInventoryItems(result.data, game);
 
   inventoryCache.set(cacheKey, { items, error: null, timestamp: Date.now() });
   return { items, error: null };

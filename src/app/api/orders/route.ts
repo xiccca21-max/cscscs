@@ -9,6 +9,7 @@ type OrderItemInput = {
   game: Game;
   name: string;
   externalId: string;
+  phase?: string | null;
   classId?: string;
   instanceId?: string;
   condition?: string;
@@ -118,12 +119,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const priceInputs = items.map((i) => ({ name: i.name, game: i.game }));
+    const priceInputs = items.map((i) => ({
+      id: i.externalId,
+      name: i.name,
+      game: i.game,
+      phase: i.phase ?? null,
+    }));
     const serverPrices = await getBulkPrices(priceInputs);
 
     const verifiedItems: OrderItemInput[] = [];
     for (const item of items) {
-      const serverPrice = serverPrices.get(item.name);
+      const serverPrice = serverPrices.get(item.externalId);
       if (!serverPrice || !serverPrice.available) {
         return NextResponse.json(
           { success: false, error: `Item "${item.name}" is not available for sale` },

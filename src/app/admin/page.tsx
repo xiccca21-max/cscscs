@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { PRICING_PHASE_OPTIONS, skinMarketNameHasPhases } from "@/lib/pricingPhases";
 
 type Section = "orders" | "users" | "payments" | "prices" | "balances" | "cashouts" | "bots" | "referrals" | "logs" | "social" | "reviews";
 
@@ -134,7 +135,20 @@ export default function AdminPage() {
   const [pmEditForm, setPmEditForm] = useState({ name: "", commission: "", minAmount: "" });
 
   const [priceModal, setPriceModal] = useState<any | null>(null);
-  const [priceForm, setPriceForm] = useState({ game: "", itemExternalId: "", adjustmentType: "percentage", adjustmentValue: "", isExcluded: false });
+  const [priceForm, setPriceForm] = useState({
+    game: "",
+    itemExternalId: "",
+    phase: "",
+    adjustmentType: "percentage",
+    adjustmentValue: "",
+    isExcluded: false,
+  });
+  const [tmItemQuery, setTmItemQuery] = useState("");
+  const [tmItemResults, setTmItemResults] = useState<string[]>([]);
+  const [tmItemLoading, setTmItemLoading] = useState(false);
+  const [tmItemOpen, setTmItemOpen] = useState(false);
+  const [tmSearchDebounced, setTmSearchDebounced] = useState("");
+  const tmComboRef = useRef<HTMLDivElement>(null);
 
   const addToast = useCallback((msg: string, type?: ToastItem["type"]) => {
     const id = ++toastIdCounter;
@@ -154,6 +168,58 @@ export default function AdminPage() {
       return d;
     } catch { return null; }
   }, []);
+
+  useEffect(() => {
+    const id = setTimeout(() => setTmSearchDebounced(tmItemQuery), 280);
+    return () => clearTimeout(id);
+  }, [tmItemQuery]);
+
+  useEffect(() => {
+    if (!priceModal || !priceForm.game) {
+      setTmItemResults([]);
+      return;
+    }
+    const q = tmSearchDebounced.trim();
+    if (q.length < 2) {
+      setTmItemResults([]);
+      return;
+    }
+    let cancelled = false;
+    setTmItemLoading(true);
+    fetch(
+      `/api/admin/tm-items?game=${encodeURIComponent(priceForm.game)}&q=${encodeURIComponent(q)}`,
+    )
+      .then((r) => r.json())
+      .then((j) => {
+        if (!cancelled && j?.success && Array.isArray(j.data)) setTmItemResults(j.data);
+      })
+      .catch(() => {
+        if (!cancelled) setTmItemResults([]);
+      })
+      .finally(() => {
+        if (!cancelled) setTmItemLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [priceModal, priceForm.game, tmSearchDebounced]);
+
+  useEffect(() => {
+    if (!priceModal || !tmItemOpen) return;
+    const fn = (e: MouseEvent) => {
+      if (tmComboRef.current && !tmComboRef.current.contains(e.target as Node)) setTmItemOpen(false);
+    };
+    document.addEventListener("mousedown", fn);
+    return () => document.removeEventListener("mousedown", fn);
+  }, [priceModal, tmItemOpen]);
+
+  useEffect(() => {
+    if (!priceModal) {
+      setTmItemQuery("");
+      setTmItemResults([]);
+      setTmItemOpen(false);
+    }
+  }, [priceModal]);
 
   const fetchOrders = useCallback(async () => {
     const params = new URLSearchParams();
@@ -398,17 +464,29 @@ export default function AdminPage() {
   };
 
   const openPriceModal = (rule?: any) => {
+    setTmItemQuery("");
+    setTmItemResults([]);
+    setTmItemOpen(false);
+    setTmSearchDebounced("");
     if (rule) {
       setPriceForm({
         game: rule.game ?? "",
         itemExternalId: rule.itemExternalId ?? "",
+        phase: rule.phase ?? "",
         adjustmentType: rule.adjustmentType ?? "percentage",
         adjustmentValue: String(rule.adjustmentValue ?? ""),
         isExcluded: !!rule.isExcluded,
       });
       setPriceModal(rule);
     } else {
-      setPriceForm({ game: "", itemExternalId: "", adjustmentType: "percentage", adjustmentValue: "", isExcluded: false });
+      setPriceForm({
+        game: "",
+        itemExternalId: "",
+        phase: "",
+        adjustmentType: "percentage",
+        adjustmentValue: "",
+        isExcluded: false,
+      });
       setPriceModal("new");
     }
   };
@@ -421,6 +499,7 @@ export default function AdminPage() {
       adjustmentValue: val,
       game: priceForm.game || null,
       itemExternalId: priceForm.itemExternalId || null,
+      phase: priceForm.phase || null,
       isExcluded: priceForm.isExcluded,
     };
     if (priceModal !== "new") body.id = priceModal.id;
@@ -863,13 +942,14 @@ export default function AdminPage() {
                 <strong>Фиксированная</strong> - прибавляет/вычитает сумму в $: +5 = цена + 5$, -3 = цена - 3$<br/>
                 <strong>Игра</strong> - правило для конкретной игры или всех сразу<br/>
                 <strong>Предмет</strong> - правило для конкретного предмета (ID) или глобально<br/>
-                <strong>Исключить</strong> - предмет не будет показан на сайте
+                <strong>Исключить</strong> - предмет не будет показан на сайте<br/>
+                <strong>Фаза</strong> — только для Doppler / Gamma Doppler; пусто = все фазы. С правилом без фазы эффекты суммируются.
               </div>
             </div>
 
             <div className="adm-card">
               <table className="adm-table">
-                <thead><tr><th>Игра</th><th>Предмет</th><th>Тип</th><th>Значение</th><th>Исключён</th><th>Обновлён</th><th></th></tr></thead>
+                <thead><tr><th>Игра</th><th>Предмет</th><th>Фаза</th><th>Тип</th><th>Значение</th><th>Исключён</th><th>Обновлён</th><th></th></tr></thead>
                 <tbody>
                   {pricingRules.length > 0 ? pricingRules.map((r: any) => {
                     const val = parseFloat(r.adjustmentValue);
@@ -880,6 +960,7 @@ export default function AdminPage() {
                       <tr key={r.id}>
                         <td><span className="adm-badge adm-badge--created">{r.game ?? "Все"}</span></td>
                         <td>{r.itemExternalId ? <span className="adm-mono">{r.itemExternalId.length > 20 ? r.itemExternalId.slice(0, 20) + "…" : r.itemExternalId}</span> : "Глобально"}</td>
+                        <td>{r.phase ? <span className="adm-mono">{r.phase}</span> : "—"}</td>
                         <td>{isPercent ? "Процент" : "Фиксированная"}</td>
                         <td style={{ fontWeight: 700, color }}>{display}</td>
                         <td>{r.isExcluded ? <span className="adm-badge adm-badge--danger">Да</span> : <span className="adm-badge adm-badge--success">Нет</span>}</td>
@@ -890,7 +971,7 @@ export default function AdminPage() {
                         </td>
                       </tr>
                     );
-                  }) : <tr><td colSpan={7} className="adm-empty">Нет правил</td></tr>}
+                  }) : <tr><td colSpan={8} className="adm-empty">Нет правил</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -901,7 +982,18 @@ export default function AdminPage() {
                   <h2>{priceModal === "new" ? "Новое правило" : "Редактировать правило"}</h2>
                   <div className="adm-form">
                     <label>Игра
-                      <select className="adm-input adm-select" value={priceForm.game} onChange={(e) => setPriceForm({ ...priceForm, game: e.target.value })}>
+                      <select
+                        className="adm-input adm-select"
+                        value={priceForm.game}
+                        onChange={(e) =>
+                          setPriceForm({
+                            ...priceForm,
+                            game: e.target.value,
+                            itemExternalId: "",
+                            phase: "",
+                          })
+                        }
+                      >
                         <option value="">Все игры</option>
                         <option value="CS2">CS2</option>
                         <option value="DOTA2">Dota 2</option>
@@ -909,9 +1001,101 @@ export default function AdminPage() {
                         <option value="RUST">Rust</option>
                       </select>
                     </label>
-                    <label>ID предмета (пусто = глобально)
-                      <input className="adm-input" placeholder="Оставьте пустым для всех предметов" value={priceForm.itemExternalId} onChange={(e) => setPriceForm({ ...priceForm, itemExternalId: e.target.value })} />
+                    <label>Предмет (пусто = глобально)
+                      {!priceForm.game ? (
+                        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Сначала выберите игру для поиска по TM</span>
+                      ) : (
+                        <div ref={tmComboRef} style={{ position: "relative" }}>
+                          {priceForm.itemExternalId ? (
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+                              <span className="adm-mono" style={{ fontSize: 12, wordBreak: "break-all" }}>{priceForm.itemExternalId}</span>
+                              <button
+                                type="button"
+                                className="adm-btn adm-btn--sm adm-btn--ghost"
+                                onClick={() => setPriceForm({ ...priceForm, itemExternalId: "", phase: "" })}
+                              >
+                                Сбросить
+                              </button>
+                            </div>
+                          ) : null}
+                          <input
+                            className="adm-input"
+                            placeholder="Поиск на TM (от 2 символов)…"
+                            value={tmItemQuery}
+                            onChange={(e) => {
+                              setTmItemQuery(e.target.value);
+                              setTmItemOpen(true);
+                            }}
+                            onFocus={() => setTmItemOpen(true)}
+                          />
+                          {tmItemOpen && tmItemResults.length > 0 && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                zIndex: 20,
+                                left: 0,
+                                right: 0,
+                                top: "100%",
+                                marginTop: 4,
+                                maxHeight: 220,
+                                overflowY: "auto",
+                                background: "var(--surface)",
+                                border: "1px solid var(--border)",
+                                borderRadius: 8,
+                                boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                              }}
+                            >
+                              {tmItemResults.map((name) => (
+                                <button
+                                  key={name}
+                                  type="button"
+                                  onClick={() => {
+                                    setPriceForm({ ...priceForm, itemExternalId: name, phase: "" });
+                                    setTmItemQuery("");
+                                    setTmItemOpen(false);
+                                  }}
+                                  style={{
+                                    display: "block",
+                                    width: "100%",
+                                    textAlign: "left",
+                                    padding: "8px 12px",
+                                    fontSize: 12,
+                                    border: "none",
+                                    background: "transparent",
+                                    color: "var(--text)",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  {name}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          {tmItemLoading && <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Загрузка…</span>}
+                        </div>
+                      )}
+                      <input
+                        className="adm-input"
+                        style={{ marginTop: 8 }}
+                        placeholder="Или вставьте market_hash_name вручную"
+                        value={priceForm.itemExternalId}
+                        onChange={(e) => setPriceForm({ ...priceForm, itemExternalId: e.target.value })}
+                      />
                     </label>
+                    {(skinMarketNameHasPhases(priceForm.itemExternalId) || !!priceForm.phase) && (
+                      <label>Фаза (Doppler / Gamma)
+                        <select
+                          className="adm-input adm-select"
+                          value={priceForm.phase}
+                          onChange={(e) => setPriceForm({ ...priceForm, phase: e.target.value })}
+                        >
+                          <option value="">Любая фаза</option>
+                          {PRICING_PHASE_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
                     <label>Тип корректировки
                       <select className="adm-input adm-select" value={priceForm.adjustmentType} onChange={(e) => setPriceForm({ ...priceForm, adjustmentType: e.target.value })}>
                         <option value="percentage">Процент (наценка/скидка %)</option>

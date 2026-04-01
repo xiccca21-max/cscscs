@@ -28,6 +28,7 @@ type PriceRuleBody = {
   id?: string;
   game?: Game | null;
   itemExternalId?: string | null;
+  phase?: string | null;
   adjustmentType: string;
   adjustmentValue: number;
   isExcluded?: boolean;
@@ -54,12 +55,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const phaseNorm =
+      body.phase != null && String(body.phase).trim() !== ""
+        ? String(body.phase).trim().toLowerCase()
+        : null;
+    if (phaseNorm && !(body.itemExternalId && String(body.itemExternalId).trim())) {
+      return NextResponse.json(
+        { success: false, error: "itemExternalId is required when phase is set" },
+        { status: 400 },
+      );
+    }
+
     const rule = body.id
       ? await db.pricingRule.update({
           where: { id: body.id },
           data: {
             ...(body.game !== undefined ? { game: body.game } : {}),
             ...(body.itemExternalId !== undefined ? { itemExternalId: body.itemExternalId } : {}),
+            ...(body.phase !== undefined ? { phase: phaseNorm } : {}),
             adjustmentType: body.adjustmentType,
             adjustmentValue: new Prisma.Decimal(Number(body.adjustmentValue).toFixed(4)),
             ...(body.isExcluded !== undefined ? { isExcluded: body.isExcluded } : {}),
@@ -69,6 +82,7 @@ export async function POST(request: NextRequest) {
           data: {
             game: body.game ?? null,
             itemExternalId: body.itemExternalId ?? null,
+            phase: phaseNorm,
             adjustmentType: body.adjustmentType,
             adjustmentValue: new Prisma.Decimal(Number(body.adjustmentValue).toFixed(4)),
             isExcluded: body.isExcluded ?? false,

@@ -1,5 +1,6 @@
 import { db } from "./db";
 import type { Game } from "@prisma/client";
+import { normalizePricingPhase } from "./pricingPhases";
 
 const TM_PRICES_URLS: Record<Game, string> = {
   CS2: "https://market.csgo.com/api/v2/prices/USD.json",
@@ -17,6 +18,13 @@ export interface ItemPrice {
   currency: string;
   available: boolean;
 }
+
+export type BulkPriceInput = {
+  id: string;
+  name: string;
+  game: Game;
+  phase?: string | null;
+};
 
 const tmPriceCaches = new Map<Game, { map: Map<string, number>; ts: number }>();
 
@@ -47,9 +55,25 @@ async function loadTmPrices(game: Game): Promise<Map<string, number>> {
   }
 }
 
+export async function searchTmMarketHashNames(
+  game: Game,
+  query: string,
+  limit = 150,
+): Promise<string[]> {
+  const map = await loadTmPrices(game);
+  const keys = [...map.keys()];
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? keys.filter((k) => k.toLowerCase().includes(q))
+    : keys;
+  filtered.sort((a, b) => a.localeCompare(b));
+  return filtered.slice(0, limit);
+}
+
 interface PricingRuleRow {
   game: Game | null;
   itemExternalId: string | null;
+  phase: string | null;
   adjustmentType: string;
   adjustmentValue: unknown;
   isExcluded: boolean;
@@ -72,6 +96,7 @@ async function loadAllPricingRules(
       orderBy: [
         { game: { sort: "asc", nulls: "first" } },
         { itemExternalId: { sort: "asc", nulls: "first" } },
+        { phase: { sort: "asc", nulls: "first" } },
       ],
     });
   } catch {
@@ -79,19 +104,32 @@ async function loadAllPricingRules(
   }
 }
 
+function ruleMatchesItem(
+  rule: PricingRuleRow,
+  itemName: string,
+  itemPhaseNorm: string | null,
+): boolean {
+  if (rule.itemExternalId !== itemName) return false;
+  const rulePhaseNorm = normalizePricingPhase(rule.phase);
+  if (rulePhaseNorm === null) return true;
+  return itemPhaseNorm !== null && itemPhaseNorm === rulePhaseNorm;
+}
+
 function applyRulesInMemory(
   basePrice: number,
   itemName: string,
   game: Game,
+  itemPhase: string | null,
   allRules: PricingRuleRow[],
 ): { price: number; excluded: boolean } {
   let price = basePrice;
   let excluded = false;
+  const itemPhaseNorm = normalizePricingPhase(itemPhase);
 
   for (const rule of allRules) {
     const matchesGlobal = rule.game === null && rule.itemExternalId === null;
     const matchesGame = rule.game === game && rule.itemExternalId === null;
-    const matchesItem = rule.itemExternalId === itemName;
+    const matchesItem = ruleMatchesItem(rule, itemName, itemPhaseNorm);
 
     if (!matchesGlobal && !matchesGame && !matchesItem) continue;
 
@@ -111,21 +149,22 @@ function applyRulesInMemory(
 }
 
 export async function getBulkPrices(
-  items: { name: string; game: Game }[],
+  items: BulkPriceInput[],
 ): Promise<Map<string, ItemPrice>> {
   const priceMap = new Map<string, ItemPrice>();
   if (items.length === 0) return priceMap;
 
   const game = items[0].game;
-  const t0 = Date.now();
 
   let tmPrices: Map<string, number>;
   let allRules: PricingRuleRow[] = [];
 
+  const uniqueNames = [...new Set(items.map((i) => i.name))];
+
   try {
     const results = await Promise.allSettled([
       loadTmPrices(game),
-      loadAllPricingRules(game, items.map((i) => i.name)),
+      loadAllPricingRules(game, uniqueNames),
     ]);
 
     tmPrices = results[0].status === "fulfilled" ? results[0].value : new Map();
@@ -138,7 +177,6 @@ export async function getBulkPrices(
     tmPrices = new Map();
   }
 
-
   const DEFAULT_BUYOUT_RATE = 0.92;
 
   for (const item of items) {
@@ -147,12 +185,18 @@ export async function getBulkPrices(
       if (tmPrice && tmPrice > 0) {
         let buyout = tmPrice * DEFAULT_BUYOUT_RATE;
         if (allRules.length > 0) {
-          const adjusted = applyRulesInMemory(tmPrice, item.name, item.game, allRules);
+          const adjusted = applyRulesInMemory(
+            tmPrice,
+            item.name,
+            item.game,
+            item.phase ?? null,
+            allRules,
+          );
           buyout = adjusted.price;
           if (adjusted.excluded) continue;
         }
-        priceMap.set(item.name, {
-          externalId: item.name,
+        priceMap.set(item.id, {
+          externalId: item.id,
           name: item.name,
           basePrice: tmPrice,
           buyoutPrice: Math.round(buyout * 100) / 100,

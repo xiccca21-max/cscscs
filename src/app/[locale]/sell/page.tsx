@@ -15,6 +15,7 @@ interface InventoryItem {
   id: string;
   game: string;
   name: string;
+  phase?: string | null;
   weapon?: string;
   skinName?: string;
   price: number;
@@ -256,6 +257,7 @@ export default function SellPage() {
         id: (item.assetId as string) || String(Math.random()),
         game,
         name,
+        phase: (item.phase as string | null | undefined) ?? null,
         weapon: parts.length > 1 ? parts[0] : undefined,
         skinName: parts.length > 1 ? parts[1]?.replace(/\s*\(.*\)$/, "") : undefined,
         price: (item.price as number) ?? 0,
@@ -499,6 +501,7 @@ export default function SellPage() {
             game: gameApiMap[item.game] || "CS2",
             name: item.name,
             externalId: item.id,
+            phase: item.phase ?? null,
             imageUrl: item.image || undefined,
             basePrice: item.price,
             buyoutPrice: +(item.price * (1 - commissionRate)).toFixed(2),

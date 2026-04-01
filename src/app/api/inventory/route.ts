@@ -57,16 +57,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    type InvItem = { name: string };
+    type InvItem = {
+      name: string;
+      assetId: string;
+      phase?: string | null;
+    };
     const invItems = items as InvItem[];
 
     let priceMap = new Map<string, { buyoutPrice: number }>();
     if (invItems.length > 0) {
       try {
-        const t2 = Date.now();
         const priceInputs = invItems.map((item) => ({
+          id: item.assetId,
           name: item.name,
           game,
+          phase: item.phase ?? null,
         }));
         const rawMap = await getBulkPrices(priceInputs);
         priceMap = rawMap as Map<string, { buyoutPrice: number }>;
@@ -77,7 +82,7 @@ export async function GET(request: NextRequest) {
 
     const itemsWithPrices = invItems.map((item) => ({
       ...item,
-      price: priceMap.get(item.name)?.buyoutPrice ?? null,
+      price: priceMap.get(item.assetId)?.buyoutPrice ?? null,
     }));
 
     return NextResponse.json({ success: true, data: { items: itemsWithPrices } });

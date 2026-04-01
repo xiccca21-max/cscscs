@@ -1001,9 +1001,10 @@ export default function AdminPage() {
                         <option value="RUST">Rust</option>
                       </select>
                     </label>
-                    <label>Предмет (пусто = глобально)
+                    <div style={{ display: "grid", gap: 4, fontSize: 13, fontWeight: 600, color: "var(--text)", position: "relative", zIndex: tmItemOpen ? 50 : 1 }}>
+                      <span>Предмет (пусто = глобально)</span>
                       {!priceForm.game ? (
-                        <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Сначала выберите игру для поиска по TM</span>
+                        <span style={{ fontSize: 12, color: "var(--text-muted)", fontWeight: 400 }}>Сначала выберите игру для поиска по TM</span>
                       ) : (
                         <div ref={tmComboRef} style={{ position: "relative" }}>
                           {priceForm.itemExternalId ? (
@@ -1032,24 +1033,26 @@ export default function AdminPage() {
                             <div
                               style={{
                                 position: "absolute",
-                                zIndex: 20,
+                                zIndex: 9999,
                                 left: 0,
                                 right: 0,
                                 top: "100%",
                                 marginTop: 4,
                                 maxHeight: 220,
                                 overflowY: "auto",
-                                background: "var(--surface)",
+                                background: "var(--bg-card)",
                                 border: "1px solid var(--border)",
                                 borderRadius: 8,
-                                boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+                                boxShadow: "0 12px 32px rgba(0,0,0,0.45)",
                               }}
                             >
                               {tmItemResults.map((name) => (
                                 <button
                                   key={name}
                                   type="button"
-                                  onClick={() => {
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
                                     setPriceForm({ ...priceForm, itemExternalId: name, phase: "" });
                                     setTmItemQuery("");
                                     setTmItemOpen(false);
@@ -1058,13 +1061,16 @@ export default function AdminPage() {
                                     display: "block",
                                     width: "100%",
                                     textAlign: "left",
-                                    padding: "8px 12px",
-                                    fontSize: 12,
+                                    padding: "10px 14px",
+                                    fontSize: 13,
                                     border: "none",
-                                    background: "transparent",
+                                    borderBottom: "1px solid var(--border)",
+                                    background: "var(--bg-card)",
                                     color: "var(--text)",
                                     cursor: "pointer",
                                   }}
+                                  onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "var(--accent)"; (e.target as HTMLElement).style.color = "#fff"; }}
+                                  onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "var(--bg-card)"; (e.target as HTMLElement).style.color = "var(--text)"; }}
                                 >
                                   {name}
                                 </button>
@@ -1081,7 +1087,7 @@ export default function AdminPage() {
                         value={priceForm.itemExternalId}
                         onChange={(e) => setPriceForm({ ...priceForm, itemExternalId: e.target.value })}
                       />
-                    </label>
+                    </div>
                     {(skinMarketNameHasPhases(priceForm.itemExternalId) || !!priceForm.phase) && (
                       <label>Фаза (Doppler / Gamma)
                         <select

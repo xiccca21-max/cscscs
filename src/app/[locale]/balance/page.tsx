@@ -579,11 +579,12 @@ export default function BalancePage() {
                                 )}
                               </span>
                               <span className="bal-row__desc">
-                                {tx.type === "CREDIT"
-                                  ? <>{t("skinSale")} - <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
-                                  : <>{t("withdrawal")} - <strong>{cashoutMethod ?? t("payout")}</strong></>
+                                {tx.order
+                                  ? <>{t("skinSale")} - <strong>#{tx.order.orderNumber}</strong></>
+                                  : tx.type === "CREDIT"
+                                    ? <>{t("skinSale")} - <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
+                                    : <>{t("withdrawal")} - <strong>{cashoutMethod ?? t("payout")}</strong></>
                                 }
-                                {tx.comment && <> - {tx.comment}</>}
                               </span>
                             </span>
                           </td>

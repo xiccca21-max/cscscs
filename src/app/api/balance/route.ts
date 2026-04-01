@@ -15,8 +15,8 @@ export async function GET() {
     }
 
     const raw = await db.balanceTransaction.findMany({
-      where: { userId: session.userId },
-      include: { order: { select: { status: true, orderNumber: true } } },
+      where: { userId: session.userId, orderId: null },
+      include: { cashoutRequest: { select: { status: true } } },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
@@ -27,10 +27,8 @@ export async function GET() {
       amount: tx.amount.toString(),
       balanceAfter: tx.balanceAfter.toString(),
       comment: tx.comment,
-      orderId: tx.orderId,
-      orderStatus: tx.order?.status ?? null,
-      orderNumber: tx.order?.orderNumber ?? null,
       cashoutRequestId: tx.cashoutRequestId,
+      cashoutStatus: tx.cashoutRequest?.status ?? null,
       createdAt: tx.createdAt.toISOString(),
     }));
 

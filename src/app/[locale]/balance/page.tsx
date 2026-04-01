@@ -15,10 +15,8 @@ type Transaction = {
   amount: string;
   balanceAfter: string;
   comment: string | null;
-  orderId: string | null;
-  orderStatus: string | null;
-  orderNumber: string | null;
   cashoutRequestId: string | null;
+  cashoutStatus: string | null;
   createdAt: string;
 };
 
@@ -251,8 +249,7 @@ export default function BalancePage() {
 
   const filteredTransactions = data
     ? data.transactions.filter((tx) => {
-        if (filter === "credit") return tx.type === "CREDIT";
-        if (filter === "withdraw") return tx.type === "DEBIT";
+        if (filter === "withdraw") return tx.type === "FREEZE" || tx.type === "DEBIT";
         return true;
       })
     : [];
@@ -533,12 +530,6 @@ export default function BalancePage() {
                     {t("filterAll")}
                   </button>
                   <button
-                    className={`bal-fil${filter === "credit" ? " active" : ""}`}
-                    onClick={() => setFilter("credit")}
-                  >
-                    {t("filterSales")}
-                  </button>
-                  <button
                     className={`bal-fil${filter === "withdraw" ? " active" : ""}`}
                     onClick={() => setFilter("withdraw")}
                   >
@@ -582,39 +573,34 @@ export default function BalancePage() {
                                 )}
                               </span>
                               <span className="bal-row__desc">
-                                {tx.orderNumber
-                                  ? <>{t("skinSale")} - <strong>#{tx.orderNumber}</strong></>
-                                  : tx.cashoutRequestId
-                                    ? <>{t("withdrawal")} - <strong>#{tx.cashoutRequestId.slice(0, 8).toUpperCase()}</strong></>
-                                    : tx.type === "CREDIT"
-                                      ? <>{t("skinSale")} - <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
-                                      : <>{t("withdrawal")} - <strong>{t("payout")}</strong></>
+                                {tx.cashoutRequestId
+                                  ? <>{t("withdrawal")} - <strong>#{tx.cashoutRequestId.slice(0, 8).toUpperCase()}</strong></>
+                                  : tx.type === "CREDIT"
+                                    ? <>{t("credit")} - <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
+                                    : <>{t("withdrawal")} - <strong>{t("payout")}</strong></>
                                 }
                               </span>
                             </span>
                           </td>
                           <td>
-                            <span className={`bal-row__amt ${tx.type === "CREDIT" ? "bal-row__amt--plus" : "bal-row__amt--minus"}`}>
-                              {tx.type === "CREDIT" ? "+" : "-"}{Math.abs(parseFloat(tx.amount)).toFixed(2)}$
+                            <span className={`bal-row__amt ${tx.type === "CREDIT" || tx.type === "UNFREEZE" ? "bal-row__amt--plus" : "bal-row__amt--minus"}`}>
+                              {tx.type === "CREDIT" || tx.type === "UNFREEZE" ? "+" : "-"}{Math.abs(parseFloat(tx.amount)).toFixed(2)}$
                             </span>
                           </td>
                           <td>
-                            {tx.orderStatus ? (
-                              <span className={`bal-badge bal-badge--${tx.orderStatus === "PAID" ? "paid" : tx.orderStatus === "TRADE_CANCELLED" ? "cancelled" : "credit"}`}>
-                                {tx.orderStatus === "CREATED" ? t("statusCreated") :
-                                 tx.orderStatus === "TRADE_SENT" ? t("statusTradeSent") :
-                                 tx.orderStatus === "TRADE_COMPLETED" ? t("statusReceived") :
-                                 tx.orderStatus === "PAID" ? t("paid") :
-                                 tx.orderStatus === "TRADE_CANCELLED" ? t("statusCancelled") :
-                                 tx.orderStatus}
-                              </span>
-                            ) : tx.cashoutRequestId ? (
-                              <span className="bal-badge bal-badge--credit">
-                                {tx.type === "FREEZE" ? t("statusCreated") : t("paid")}
+                            {tx.cashoutStatus ? (
+                              <span className={`bal-badge bal-badge--${tx.cashoutStatus === "PAID" ? "paid" : tx.cashoutStatus === "REJECTED" ? "cancelled" : "credit"}`}>
+                                {tx.cashoutStatus === "CREATED" ? t("statusCreated") :
+                                 tx.cashoutStatus === "PAID" ? t("paid") :
+                                 tx.cashoutStatus === "REJECTED" ? t("statusCancelled") :
+                                 tx.cashoutStatus}
                               </span>
                             ) : (
-                              <span className={`bal-badge ${tx.type === "CREDIT" ? "bal-badge--credit" : "bal-badge--paid"}`}>
-                                {tx.type === "CREDIT" ? t("credit") : tx.type === "FREEZE" ? t("statusCreated") : t("paid")}
+                              <span className={`bal-badge ${tx.type === "CREDIT" || tx.type === "UNFREEZE" ? "bal-badge--credit" : "bal-badge--paid"}`}>
+                                {tx.type === "CREDIT" ? t("credit") :
+                                 tx.type === "UNFREEZE" ? t("statusCancelled") :
+                                 tx.type === "FREEZE" ? t("statusCreated") :
+                                 t("paid")}
                               </span>
                             )}
                           </td>

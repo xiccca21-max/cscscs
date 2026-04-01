@@ -1,7 +1,12 @@
 import { db } from "./db";
 import type { Game } from "@prisma/client";
 
-const TM_PRICES_URL = "https://market.csgo.com/api/v2/prices/USD.json";
+const TM_PRICES_URLS: Record<Game, string> = {
+  CS2: "https://market.csgo.com/api/v2/prices/USD.json",
+  DOTA2: "https://market.dota2.net/api/v2/prices/USD.json",
+  TF2: "https://tf2.tm/api/v2/prices/USD.json",
+  RUST: "https://rust.tm/api/v2/prices/USD.json",
+};
 const CACHE_TTL = 10 * 60 * 1000;
 
 export interface ItemPrice {
@@ -13,17 +18,18 @@ export interface ItemPrice {
   available: boolean;
 }
 
-let tmPriceCache: Map<string, number> | null = null;
-let tmCacheTimestamp = 0;
+const tmPriceCaches = new Map<Game, { map: Map<string, number>; ts: number }>();
 
-async function loadTmPrices(): Promise<Map<string, number>> {
-  if (tmPriceCache && Date.now() - tmCacheTimestamp < CACHE_TTL) {
-    return tmPriceCache;
+async function loadTmPrices(game: Game): Promise<Map<string, number>> {
+  const cached = tmPriceCaches.get(game);
+  if (cached && Date.now() - cached.ts < CACHE_TTL) {
+    return cached.map;
   }
 
+  const url = TM_PRICES_URLS[game];
   try {
-    const res = await fetch(TM_PRICES_URL, { cache: "no-store" });
-    if (!res.ok) throw new Error(`TM API ${res.status}`);
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`TM API ${res.status} for ${game}`);
     const data = await res.json();
     const map = new Map<string, number>();
     if (Array.isArray(data?.items)) {
@@ -34,11 +40,10 @@ async function loadTmPrices(): Promise<Map<string, number>> {
         }
       }
     }
-    tmPriceCache = map;
-    tmCacheTimestamp = Date.now();
+    tmPriceCaches.set(game, { map, ts: Date.now() });
     return map;
   } catch {
-    return tmPriceCache ?? new Map();
+    return cached?.map ?? new Map();
   }
 }
 
@@ -119,7 +124,7 @@ export async function getBulkPrices(
 
   try {
     const results = await Promise.allSettled([
-      loadTmPrices(),
+      loadTmPrices(game),
       loadAllPricingRules(game, items.map((i) => i.name)),
     ]);
 

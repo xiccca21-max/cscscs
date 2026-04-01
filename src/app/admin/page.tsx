@@ -5,17 +5,76 @@ import Link from "next/link";
 
 type Section = "orders" | "users" | "payments" | "prices" | "balances" | "cashouts" | "bots" | "referrals" | "logs" | "social" | "reviews";
 
-function Toast({ message, onDone }: { message: string; onDone: () => void }) {
+type ToastItem = { message: string; type?: "order" | "cashout" | "message" | "default" };
+
+function playNotifSound(type: "order" | "cashout" | "message" | "default") {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.value = 0.15;
+    if (type === "order") {
+      osc.frequency.value = 880;
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.4);
+      setTimeout(() => {
+        const osc2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        osc2.connect(g2); g2.connect(ctx.destination);
+        osc2.frequency.value = 1100;
+        osc2.type = "sine";
+        g2.gain.value = 0.15;
+        g2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5 + 0.3);
+        osc2.start(ctx.currentTime + 0.5);
+        osc2.stop(ctx.currentTime + 0.5 + 0.3);
+      }, 0);
+    } else if (type === "cashout") {
+      osc.frequency.value = 660;
+      osc.type = "triangle";
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.5);
+    } else {
+      osc.frequency.value = 520;
+      osc.type = "sine";
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.25);
+    }
+  } catch {}
+}
+
+const TOAST_COLORS: Record<string, string> = {
+  order: "#22c55e",
+  cashout: "#f59e0b",
+  message: "#3b82f6",
+  default: "#6366f1",
+};
+
+function Toast({ item, onDone }: { item: ToastItem; onDone: () => void }) {
   useEffect(() => {
-    const t = setTimeout(onDone, 3000);
+    const t = setTimeout(onDone, 10000);
     return () => clearTimeout(t);
   }, [onDone]);
-  return <div className="adm-toast">{message}</div>;
+  const color = TOAST_COLORS[item.type ?? "default"];
+  return (
+    <div className="adm-toast" style={{ borderLeft: `4px solid ${color}` }}>
+      {item.message}
+    </div>
+  );
 }
 
 export default function AdminPage() {
   const [section, setSection] = useState<Section>("orders");
-  const [toasts, setToasts] = useState<string[]>([]);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const prevOrderIdsRef = useRef<Set<string>>(new Set());
+  const prevCashoutIdsRef = useRef<Set<string>>(new Set());
+  const prevChatCountRef = useRef<number>(0);
 
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -46,6 +105,7 @@ export default function AdminPage() {
   const [chatInput, setChatInput] = useState("");
   const [chatSending, setChatSending] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [adminReady, setAdminReady] = useState(false);
 
@@ -71,7 +131,10 @@ export default function AdminPage() {
   const [priceModal, setPriceModal] = useState<any | null>(null);
   const [priceForm, setPriceForm] = useState({ game: "", itemExternalId: "", adjustmentType: "percentage", adjustmentValue: "", isExcluded: false });
 
-  const addToast = useCallback((msg: string) => setToasts((p) => [...p, msg]), []);
+  const addToast = useCallback((msg: string, type?: ToastItem["type"]) => {
+    setToasts((p) => [...p, { message: msg, type: type ?? "default" }]);
+    if (type && type !== "default") playNotifSound(type);
+  }, []);
   const removeToast = useCallback((i: number) => setToasts((p) => p.filter((_, idx) => idx !== i)), []);
 
   const safeFetch = useCallback(async (url: string): Promise<any> => {
@@ -109,7 +172,16 @@ export default function AdminPage() {
       if (!u) { setAuthError("Войдите через Steam"); setAdminReady(true); return; }
       if (!u.isAdmin) { setAuthError(`Нет прав. Steam ID: ${u.steamId}. Добавьте в ADMIN_STEAM_IDS.`); setAdminReady(true); return; }
       setAdminReady(true);
-      fetchOrders(); fetchUsers(); fetchPayments();
+      {
+        const params = new URLSearchParams(); params.set("limit", "50");
+        const d = await safeFetch(`/api/admin/orders?${params.toString()}`);
+        if (d) {
+          const initOrders = d.data?.orders ?? [];
+          setOrders(initOrders);
+          prevOrderIdsRef.current = new Set(initOrders.map((o: any) => o.id));
+        }
+      }
+      fetchUsers(); fetchPayments();
       fetchPrices();
       fetchCashouts();
       safeFetch("/api/admin/bots").then((d) => { if (d) setBots(d.data ?? []); });
@@ -129,12 +201,28 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (!adminReady || authError) return;
-    const id = setInterval(() => {
-      if (section === "orders") fetchOrders();
+    const id = setInterval(async () => {
+      if (section === "orders") {
+        const params = new URLSearchParams();
+        params.set("limit", "50");
+        if (ordersStatus) params.set("status", ordersStatus);
+        if (ordersSearch.trim()) params.set("search", ordersSearch.trim());
+        const d = await safeFetch(`/api/admin/orders?${params.toString()}`);
+        if (d) {
+          const newOrders = d.data?.orders ?? [];
+          const newIds = new Set<string>(newOrders.map((o: any) => o.id as string));
+          if (prevOrderIdsRef.current.size > 0) {
+            const fresh = newOrders.filter((o: any) => !prevOrderIdsRef.current.has(o.id));
+            fresh.forEach((o: any) => addToast(`Новый заказ #${o.orderNumber} — $${parseFloat(o.totalAmount).toFixed(2)}`, "order"));
+          }
+          prevOrderIdsRef.current = newIds;
+          setOrders(newOrders);
+        }
+      }
       if (section === "cashouts") fetchCashouts();
     }, 3000);
     return () => clearInterval(id);
-  }, [adminReady, authError, section, fetchOrders, fetchCashouts]);
+  }, [adminReady, authError, section, fetchOrders, fetchCashouts, ordersSearch, ordersStatus, safeFetch, addToast]);
 
   useEffect(() => {
     if (!adminReady || authError || section !== "orders") return;
@@ -154,19 +242,30 @@ export default function AdminPage() {
   }, [orderDetail?.id, section, safeFetch]);
 
   useEffect(() => {
-    if (!orderDetail?.id) { setChatMessages([]); return; }
+    if (!orderDetail?.id) { setChatMessages([]); prevChatCountRef.current = 0; return; }
     let cancelled = false;
     const fetchMsgs = async () => {
       const d = await safeFetch(`/api/admin/orders/${orderDetail.id}/messages`);
-      if (!cancelled && d?.data) setChatMessages(d.data);
+      if (!cancelled && d?.data) {
+        const msgs = d.data;
+        const userMsgs = msgs.filter((m: any) => m.authorRole === "user");
+        if (prevChatCountRef.current > 0 && userMsgs.length > prevChatCountRef.current) {
+          addToast(`Новое сообщение от клиента (заказ #${orderDetail.orderNumber ?? ""})`, "message");
+        }
+        prevChatCountRef.current = userMsgs.length;
+        setChatMessages(msgs);
+      }
     };
     fetchMsgs();
     const iv = setInterval(fetchMsgs, 4000);
     return () => { cancelled = true; clearInterval(iv); };
-  }, [orderDetail?.id, safeFetch]);
+  }, [orderDetail?.id, safeFetch, addToast]);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const c = chatContainerRef.current;
+    if (!c) { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); return; }
+    const isNearBottom = c.scrollHeight - c.scrollTop - c.clientHeight < 80;
+    if (isNearBottom) chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
   const sendChatMsg = async () => {
@@ -479,7 +578,7 @@ export default function AdminPage() {
                         {chatMessages.length > 0 ? `${chatMessages.length} сообщ.` : "Пусто"}
                       </div>
                     </div>
-                    <div className="adm-chat__messages">
+                    <div className="adm-chat__messages" ref={chatContainerRef}>
                       {chatMessages.length === 0 && (
                         <div className="adm-chat__empty">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -1087,7 +1186,7 @@ export default function AdminPage() {
 
       {/* Toasts */}
       <div className="adm-toasts">
-        {toasts.map((msg, i) => <Toast key={`${msg}-${i}`} message={msg} onDone={() => removeToast(i)} />)}
+        {toasts.map((item, i) => <Toast key={`${item.message}-${i}`} item={item} onDone={() => removeToast(i)} />)}
       </div>
     </div>
   );

@@ -473,9 +473,14 @@ export default function SellPage() {
       req("swift", "SWIFT / BIC");
       req("recipientName", "Recipient name");
     }
+    const pm = dbPaymentMethods.find((m) => m.type === effectivePayType);
+    const minAmt = pm ? parseFloat(pm.minAmount) : 0;
+    if (minAmt > 0 && youReceive < minAmt) {
+      errs._minAmount = `Minimum amount: $${minAmt.toFixed(2)}`;
+    }
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [paymentMethod, payDetails]);
+  }, [paymentMethod, payDetails, effectivePayType, dbPaymentMethods, youReceive]);
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit) return;
@@ -1505,6 +1510,9 @@ export default function SellPage() {
                 <p style={{ color: "#ef4444", fontSize: 13, fontWeight: 600, textAlign: "center", marginBottom: 8 }}>
                   {submitError}
                 </p>
+              )}
+              {fieldErrors._minAmount && (
+                <p className="checkout-modal__field-error" style={{ textAlign: "center", marginBottom: 4 }}>{fieldErrors._minAmount}</p>
               )}
               <button
                 className="checkout-modal__submit"

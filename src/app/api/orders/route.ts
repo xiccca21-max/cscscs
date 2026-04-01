@@ -146,6 +146,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const minAmount = Number(paymentMethod.minAmount) || 0;
+    if (minAmount > 0 && totalAmount < minAmount) {
+      return NextResponse.json(
+        { success: false, error: `Order total $${totalAmount.toFixed(2)} is below minimum $${minAmount.toFixed(2)} for this payment method` },
+        { status: 400 },
+      );
+    }
+
     const orderNumber = generateOrderNumber();
     const steamId = session.steamId;
     const steamProfileUrl = getSteamProfileUrl(steamId);

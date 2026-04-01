@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -35,7 +35,6 @@ type PaymentMethodDB = {
 };
 
 const CASHOUT_ICONS: Record<string, string> = {
-  balance:      "/icons/pay-balance.png",
   card:         "/icons/pay-card.png",
   crypto:       "/icons/pay-crypto.png",
   btc:          "/icons/crypto-btc.svg",
@@ -45,10 +44,18 @@ const CASHOUT_ICONS: Record<string, string> = {
   ltc:          "/icons/crypto-ltc.svg",
   bank:         "/icons/pay-bank.png",
   sbp:          "/icons/pay-bank.png",
-  qiwi:         "/icons/pay-balance.png",
-  yoomoney:     "/icons/pay-balance.png",
   other:        "/icons/pay-balance.png",
 };
+
+const CRYPTO_TYPES = new Set(["crypto", "btc", "usdt-trc20", "usdt-erc20", "eth", "ltc"]);
+
+const CRYPTO_NETWORKS = [
+  { val: "BTC", label: "Bitcoin", tag: "BTC", color: "#f7931a" },
+  { val: "ETH", label: "Ethereum", tag: "ERC-20", color: "#627eea" },
+  { val: "USDT-TRC20", label: "USDT", tag: "TRC-20", color: "#26a17b" },
+  { val: "USDT-ERC20", label: "USDT", tag: "ERC-20", color: "#26a17b" },
+  { val: "LTC", label: "Litecoin", tag: "LTC", color: "#bfbbbb" },
+];
 
 export default function BalancePage() {
   const t = useTranslations("balance");
@@ -63,6 +70,11 @@ export default function BalancePage() {
   const [cashoutError, setCashoutError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>("all");
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethodDB[]>([]);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [payDetails, setPayDetails] = useState<Record<string, string>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [cryptoDropOpen, setCryptoDropOpen] = useState(false);
+  const cryptoDropRef = useRef<HTMLDivElement>(null);
 
   const fetchBalance = useCallback(async () => {
     try {
@@ -94,6 +106,20 @@ export default function BalancePage() {
       })
       .catch(() => {});
   }, []);
+
+  const cashoutMethods = paymentMethods.filter((m) => m.type !== "balance");
+  const mainCashoutMethods = cashoutMethods.filter((m) => !CRYPTO_TYPES.has(m.type));
+  const cryptoMethods = cashoutMethods.filter((m) => CRYPTO_TYPES.has(m.type));
+  const hasCrypto = cryptoMethods.length > 0;
+
+  useEffect(() => {
+    if (!cryptoDropOpen) return;
+    const handler = (e: Event) => {
+      if (cryptoDropRef.current && !cryptoDropRef.current.contains(e.target as Node)) setCryptoDropOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [cryptoDropOpen]);
 
   const balance = data ? parseFloat(data.balance) : 0;
 
@@ -135,7 +161,27 @@ export default function BalancePage() {
     }
   };
 
-  const handleCashout = async () => {
+  const validateDetails = useCallback((): boolean => {
+    const errs: Record<string, string> = {};
+    const req = (key: string, label: string) => {
+      if (!payDetails[key]?.trim()) errs[key] = `${label} required`;
+    };
+    if (cashoutMethod === "card") {
+      req("cardNumber", "Card number");
+      req("cardName", "Cardholder name");
+    } else if (cashoutMethod === "crypto") {
+      if (!payDetails.network) errs.network = "Select a network";
+      req("walletAddress", "Wallet address");
+    } else if (cashoutMethod === "bank") {
+      req("iban", "IBAN");
+      req("swift", "SWIFT / BIC");
+      req("recipientName", "Recipient name");
+    }
+    setFieldErrors(errs);
+    return Object.keys(errs).length === 0;
+  }, [cashoutMethod, payDetails]);
+
+  const openDetailsModal = () => {
     const amount = parseFloat(cashoutAmount);
     if (!Number.isFinite(amount) || amount <= 0) {
       setCashoutError(t("errorInvalidAmount"));
@@ -156,10 +202,19 @@ export default function BalancePage() {
         return;
       }
     }
+    setCashoutError(null);
+    setPayDetails({});
+    setFieldErrors({});
+    setDetailsModalOpen(true);
+  };
+
+  const handleCashout = async () => {
+    if (!validateDetails()) return;
 
     setSubmitting(true);
     setCashoutError(null);
 
+    const amount = parseFloat(cashoutAmount);
     try {
       const res = await fetch("/api/cashout", {
         method: "POST",
@@ -168,14 +223,16 @@ export default function BalancePage() {
           amount,
           paymentMethod: cashoutMethod,
           currency: "USD",
-          paymentDetails: {},
+          paymentDetails: payDetails,
         }),
       });
       const json = await res.json();
       if (json.success) {
+        setDetailsModalOpen(false);
         setCashoutOpen(false);
         setCashoutAmount("");
         setCashoutMethod(null);
+        setPayDetails({});
         fetchBalance();
         refreshSession();
       } else {
@@ -379,11 +436,7 @@ export default function BalancePage() {
                 <div className="form-group">
                   <label>{t("selectMethod")}</label>
                   <div className="bal-pay-grid">
-                    {(paymentMethods.length > 0 ? paymentMethods : [
-                      { id: "f-card", name: t("debitCard"), type: "card", commission: "2.5", minAmount: "1", currencies: [] },
-                      { id: "f-crypto", name: t("cryptocurrency"), type: "crypto", commission: "0", minAmount: "5", currencies: [] },
-                      { id: "f-bank", name: t("bankTransfer"), type: "bank", commission: "3", minAmount: "50", currencies: [] },
-                    ] as PaymentMethodDB[]).map((pm) => {
+                    {mainCashoutMethods.map((pm) => {
                       const icon = CASHOUT_ICONS[pm.type] ?? CASHOUT_ICONS.other;
                       return (
                         <button
@@ -398,6 +451,33 @@ export default function BalancePage() {
                         </button>
                       );
                     })}
+                    {hasCrypto && (
+                      <button
+                        className={`bal-pay-btn${cashoutMethod === "crypto" ? " active" : ""}`}
+                        onClick={() => setCashoutMethod("crypto")}
+                      >
+                        <span className="bal-pay-btn__icon">
+                          <img src="/icons/pay-crypto.png" alt="Crypto" width="24" height="24" />
+                        </span>
+                        <span className="bal-pay-btn__name">Crypto</span>
+                      </button>
+                    )}
+                    {mainCashoutMethods.length === 0 && !hasCrypto && (
+                      <>
+                        <button className={`bal-pay-btn${cashoutMethod === "card" ? " active" : ""}`} onClick={() => setCashoutMethod("card")}>
+                          <span className="bal-pay-btn__icon"><img src="/icons/pay-card.png" alt="Card" width="24" height="24" /></span>
+                          <span className="bal-pay-btn__name">{t("debitCard")}</span>
+                        </button>
+                        <button className={`bal-pay-btn${cashoutMethod === "crypto" ? " active" : ""}`} onClick={() => setCashoutMethod("crypto")}>
+                          <span className="bal-pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" width="24" height="24" /></span>
+                          <span className="bal-pay-btn__name">{t("cryptocurrency")}</span>
+                        </button>
+                        <button className={`bal-pay-btn${cashoutMethod === "bank" ? " active" : ""}`} onClick={() => setCashoutMethod("bank")}>
+                          <span className="bal-pay-btn__icon"><img src="/icons/pay-bank.png" alt="Bank" width="24" height="24" /></span>
+                          <span className="bal-pay-btn__name">{t("bankTransfer")}</span>
+                        </button>
+                      </>
+                    )}
                   </div>
                   {selectedPM && (
                     <div className="bal-pay-info">
@@ -429,9 +509,9 @@ export default function BalancePage() {
                 <button
                   className="bal-continue"
                   disabled={submitting || !cashoutMethod || cashoutAmountNum <= 0}
-                  onClick={handleCashout}
+                  onClick={openDetailsModal}
                 >
-                  <span>{submitting ? "…" : t("submit")}</span>
+                  <span>{t("submit")}</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 </button>
               </div>
@@ -534,6 +614,99 @@ export default function BalancePage() {
         )}
 
       </div>
+
+      {/* Payment Details Modal */}
+      {detailsModalOpen && (
+        <div className="bal-modal-overlay" onClick={() => setDetailsModalOpen(false)}>
+          <div className="bal-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="bal-modal__close" onClick={() => setDetailsModalOpen(false)}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <h3 className="bal-modal__title">{t("paymentDetails")}</h3>
+            <p className="bal-modal__subtitle">{cashoutMethod === "card" ? t("debitCard") : cashoutMethod === "crypto" ? "Crypto" : t("bankTransfer")} · {cashoutAmountNum.toFixed(2)}$</p>
+
+            <div className="bal-modal__fields">
+              {cashoutMethod === "card" && (
+                <>
+                  <label className={`bal-modal__field${fieldErrors.cardNumber ? " has-error" : ""}`}>
+                    <span>{t("cardNumber")}</span>
+                    <input type="text" placeholder="0000 0000 0000 0000" value={payDetails.cardNumber ?? ""} onChange={(e) => setPayDetails((p) => ({ ...p, cardNumber: e.target.value }))} />
+                    {fieldErrors.cardNumber && <span className="bal-modal__err">{fieldErrors.cardNumber}</span>}
+                  </label>
+                  <label className={`bal-modal__field${fieldErrors.cardName ? " has-error" : ""}`}>
+                    <span>{t("cardholderName")}</span>
+                    <input type="text" placeholder="John Doe" value={payDetails.cardName ?? ""} onChange={(e) => setPayDetails((p) => ({ ...p, cardName: e.target.value }))} />
+                    {fieldErrors.cardName && <span className="bal-modal__err">{fieldErrors.cardName}</span>}
+                  </label>
+                </>
+              )}
+
+              {cashoutMethod === "crypto" && (
+                <>
+                  <label className={`bal-modal__field${fieldErrors.network ? " has-error" : ""}`}>
+                    <span>{t("selectNetwork")}</span>
+                    <div className="bal-crypto-drop" ref={cryptoDropRef}>
+                      <button type="button" className="bal-crypto-drop__btn" onClick={() => setCryptoDropOpen(!cryptoDropOpen)}>
+                        {payDetails.network ? (
+                          <span>{CRYPTO_NETWORKS.find((n) => n.val === payDetails.network)?.label} ({CRYPTO_NETWORKS.find((n) => n.val === payDetails.network)?.tag})</span>
+                        ) : (
+                          <span style={{ opacity: 0.5 }}>Select network...</span>
+                        )}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: cryptoDropOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><polyline points="6 9 12 15 18 9"/></svg>
+                      </button>
+                      {cryptoDropOpen && (
+                        <div className="bal-crypto-drop__list">
+                          {CRYPTO_NETWORKS.map((n) => (
+                            <button key={n.val} type="button" className={`bal-crypto-drop__opt${payDetails.network === n.val ? " active" : ""}`} onClick={() => { setPayDetails((p) => ({ ...p, network: n.val })); setCryptoDropOpen(false); setFieldErrors((e) => { const ne = { ...e }; delete ne.network; return ne; }); }}>
+                              <span className="bal-crypto-drop__dot" style={{ background: n.color }} />
+                              <span>{n.label}</span>
+                              <span className="bal-crypto-drop__tag">{n.tag}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {fieldErrors.network && <span className="bal-modal__err">{fieldErrors.network}</span>}
+                  </label>
+                  <label className={`bal-modal__field${fieldErrors.walletAddress ? " has-error" : ""}`}>
+                    <span>{t("walletAddress")}</span>
+                    <input type="text" placeholder="Wallet address" value={payDetails.walletAddress ?? ""} onChange={(e) => setPayDetails((p) => ({ ...p, walletAddress: e.target.value }))} />
+                    {fieldErrors.walletAddress && <span className="bal-modal__err">{fieldErrors.walletAddress}</span>}
+                  </label>
+                </>
+              )}
+
+              {cashoutMethod === "bank" && (
+                <>
+                  <label className={`bal-modal__field${fieldErrors.iban ? " has-error" : ""}`}>
+                    <span>IBAN</span>
+                    <input type="text" placeholder="IBAN" value={payDetails.iban ?? ""} onChange={(e) => setPayDetails((p) => ({ ...p, iban: e.target.value }))} />
+                    {fieldErrors.iban && <span className="bal-modal__err">{fieldErrors.iban}</span>}
+                  </label>
+                  <label className={`bal-modal__field${fieldErrors.swift ? " has-error" : ""}`}>
+                    <span>SWIFT / BIC</span>
+                    <input type="text" placeholder="SWIFT / BIC" value={payDetails.swift ?? ""} onChange={(e) => setPayDetails((p) => ({ ...p, swift: e.target.value }))} />
+                    {fieldErrors.swift && <span className="bal-modal__err">{fieldErrors.swift}</span>}
+                  </label>
+                  <label className={`bal-modal__field${fieldErrors.recipientName ? " has-error" : ""}`}>
+                    <span>{t("recipientName")}</span>
+                    <input type="text" placeholder="Recipient name" value={payDetails.recipientName ?? ""} onChange={(e) => setPayDetails((p) => ({ ...p, recipientName: e.target.value }))} />
+                    {fieldErrors.recipientName && <span className="bal-modal__err">{fieldErrors.recipientName}</span>}
+                  </label>
+                </>
+              )}
+            </div>
+
+            {cashoutError && (
+              <p style={{ color: "#ef4444", fontSize: 13, fontWeight: 600, marginTop: 8 }}>{cashoutError}</p>
+            )}
+
+            <button className="bal-modal__submit" disabled={submitting} onClick={handleCashout}>
+              {submitting ? "Processing..." : t("confirmWithdraw")}
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

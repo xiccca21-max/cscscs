@@ -820,6 +820,11 @@ export default function OrderPage({
                     </div>
                   )}
                 </div>
+
+                <Link href="/sell" className="odr-trade-done__sell-btn">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+                  <span>{t("continueSelling")}</span>
+                </Link>
               </div>
             ) : isTimerExpired ? (
               <div className="odr-trade-expired">
@@ -860,31 +865,35 @@ export default function OrderPage({
               </div>
             ) : (
               <div className="odr-trade-ready">
-                {/* Bot info */}
-                <div className="odr-trade-bot">
-                  <div className="odr-trade-bot__avatar">
-                    {botProfile?.avatarUrl ? (
-                      <img src={botProfile.avatarUrl} alt="" />
-                    ) : (
-                      <span>{(order.botAccount?.name ?? "B").charAt(0).toUpperCase()}</span>
-                    )}
+                {/* Bot info — only shown when bot data is available */}
+                {(botProfile || order.botAccount) && (
+                  <div className="odr-trade-bot">
+                    <div className="odr-trade-bot__avatar">
+                      {botProfile?.avatarUrl ? (
+                        <img src={botProfile.avatarUrl} alt="" />
+                      ) : order.botAccount?.name ? (
+                        <span>{order.botAccount.name.charAt(0).toUpperCase()}</span>
+                      ) : (
+                        <span>?</span>
+                      )}
+                    </div>
+                    <div className="odr-trade-bot__info">
+                      <a
+                        href={botProfile?.profileUrl ?? botSteamUrl ?? "#"}
+                        className="odr-trade-bot__name odr-trade-bot__name--link"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {botProfile?.name ?? order.botAccount?.name ?? t("botPending")}
+                      </a>
+                      {botProfile?.level != null && (
+                        <span className="odr-trade-bot__level">
+                          {t("botLevel")} {botProfile.level}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="odr-trade-bot__info">
-                    <a
-                      href={botSteamUrl ?? "#"}
-                      className="odr-trade-bot__name odr-trade-bot__name--link"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {botProfile?.name ?? order.botAccount?.name ?? "SKINSELL Bot"}
-                    </a>
-                    {botProfile?.level != null && (
-                      <span className="odr-trade-bot__level">
-                        {t("botLevel")} {botProfile.level}
-                      </span>
-                    )}
-                  </div>
-                </div>
+                )}
 
                 {/* Timer */}
                 {countdown !== null && order.status === "TRADE_SENT" && (
@@ -1036,14 +1045,22 @@ export default function OrderPage({
 
         {/* ── Floating Chat ── */}
         <div className={`odr-fchat${chatOpen ? " odr-fchat--open" : ""}`}>
-          <button className="odr-fchat__fab" onClick={() => setChatOpen((o) => !o)} aria-label="Chat">
+          <button className="odr-fchat__fab" onClick={() => {
+            setChatOpen((o) => {
+              const willOpen = !o;
+              if (willOpen && order?.id) {
+                fetch(`/api/orders/${order.id}/messages`, { method: "PATCH" }).catch(() => {});
+              }
+              return willOpen;
+            });
+          }} aria-label="Chat">
             {chatOpen ? (
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             ) : (
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             )}
-            {!chatOpen && chatMessages.length > 0 && (
-              <span className="odr-fchat__fab-count">{chatMessages.length}</span>
+            {!chatOpen && chatMessages.filter((m: any) => m.authorRole === "admin" && !m.readAt).length > 0 && (
+              <span className="odr-fchat__fab-count">{chatMessages.filter((m: any) => m.authorRole === "admin" && !m.readAt).length}</span>
             )}
           </button>
 

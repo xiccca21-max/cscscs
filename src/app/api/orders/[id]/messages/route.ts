@@ -77,3 +77,39 @@ export async function POST(
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }
+
+export async function PATCH(
+  _request: NextRequest,
+  context: { params: Promise<{ id: string }> },
+) {
+  try {
+    const session = await requireAuth();
+    const { id } = await context.params;
+
+    const order = await db.order.findFirst({
+      where: { id, userId: session.userId },
+      select: { id: true },
+    });
+    if (!order)
+      return NextResponse.json(
+        { success: false, error: "Order not found" },
+        { status: 404 },
+      );
+
+    await db.orderMessage.updateMany({
+      where: {
+        orderId: id,
+        authorId: { not: session.userId },
+        readAt: null,
+      },
+      data: { readAt: new Date() },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Unknown error";
+    if (msg === "Unauthorized")
+      return NextResponse.json({ success: false, error: msg }, { status: 401 });
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+  }
+}

@@ -49,6 +49,13 @@ export async function POST(request: NextRequest) {
         where: { type: body.paymentMethod, isActive: true },
       }));
 
+    if (paymentMethodRecord?.type === "balance") {
+      return NextResponse.json(
+        { success: false, error: "Cannot withdraw to balance" },
+        { status: 400 },
+      );
+    }
+
     const commissionPercent = paymentMethodRecord
       ? Number(paymentMethodRecord.commission)
       : 0;

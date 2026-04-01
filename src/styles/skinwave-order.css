@@ -2886,6 +2886,26 @@
   }
 }
 
+.odr-trade-done__sell-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 24px;
+  border-radius: 10px;
+  background: rgba(99,102,241,0.12);
+  color: #6366f1;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  border: 1px solid rgba(99,102,241,0.2);
+}
+.odr-trade-done__sell-btn:hover {
+  background: #6366f1;
+  color: #fff;
+}
+
 /* ══════════════════════════════════════════════
    TRADE PAID - final success state
    ══════════════════════════════════════════════ */

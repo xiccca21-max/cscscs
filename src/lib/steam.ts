@@ -83,11 +83,19 @@ export async function getSteamProfile(steamId: string) {
   };
 }
 
+const STEAMAPIS_KEYS_BY_APPID: Record<number, string> = {
+  730: "STEAMAPIS_KEY",
+  570: "STEAMAPIS_KEY_DOTA2",
+  440: "STEAMAPIS_KEY_TF2",
+  252490: "STEAMAPIS_KEY_RUST",
+};
+
 async function fetchViaSteamApis(
   steamId: string,
   appId: number,
 ): Promise<{ data: Record<string, unknown> | null; error: string | null }> {
-  const apiKey = process.env.STEAMAPIS_KEY;
+  const envKey = STEAMAPIS_KEYS_BY_APPID[appId] ?? "STEAMAPIS_KEY";
+  const apiKey = process.env[envKey] || process.env.STEAMAPIS_KEY;
   if (!apiKey) return { data: null, error: "no_key" };
 
   const url = `https://api.steamapis.com/steam/inventory/${steamId}/${appId}/2?api_key=${apiKey}`;

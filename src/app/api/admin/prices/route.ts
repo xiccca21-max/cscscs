@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { normalizePricingPhase } from "@/lib/pricingPhases";
 import type { Game } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
@@ -55,10 +56,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const phaseNorm =
-      body.phase != null && String(body.phase).trim() !== ""
-        ? String(body.phase).trim().toLowerCase()
-        : null;
+    const phaseNorm = normalizePricingPhase(body.phase);
     if (phaseNorm && !(body.itemExternalId && String(body.itemExternalId).trim())) {
       return NextResponse.json(
         { success: false, error: "itemExternalId is required when phase is set" },

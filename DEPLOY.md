@@ -18,7 +18,7 @@
 | Ключ | Где получить | Что делать |
 |------|-------------|------------|
 | **Steam Web API Key** | [steamcommunity.com/dev/apikey](https://steamcommunity.com/dev/apikey) | Авторизоваться в Steam → вписать любой домен → скопировать ключ |
-| **SteamApis Key** | [steamapis.com](https://steamapis.com) | Зарегаться → Dashboard → API Key (бесплатно, 500 запросов/сутки) |
+| **SteamApis Key** | [steamapis.com](https://steamapis.com) | Зарегаться → Dashboard → API Key  |
 | **Session Secret** | Генерируешь сам | Любая случайная строка 32+ символов. Команда: `openssl rand -hex 32` |
 
 ### Steam ID администратора
@@ -72,6 +72,8 @@ git push -u origin main
 
 ### 2.4. Создать таблицы в БД
 
+Миграций в репозитории нет — используется **`prisma db push`** (см. `prisma.config.ts` и `DIRECT_URL` в `.env`). После **любого изменения** `schema.prisma` снова выполните `npx prisma db push` локально с теми же переменными, что на Vercel.
+
 После первого деплоя — **один раз** локально:
 
 ```bash
@@ -104,12 +106,6 @@ npx tsx prisma/seed-payments.ts  # заливает 8 способов опла�
 3. Если ваш Steam ID указан в `ADMIN_STEAM_IDS` → доступ к `/admin`
 4. В админке (Оплата) — все 8 методов уже будут. Настраивайте комиссии/минималки
 
-### 2.6. Свой домен (опционально)
-
-1. В Vercel → Settings → Domains → Add Domain
-2. Добавить CNAME запись у регистратора: `cname.vercel-dns.com`
-3. Обновить `NEXT_PUBLIC_APP_URL` в Vercel на новый домен
-4. Redeploy
 
 ---
 
@@ -122,7 +118,6 @@ npx tsx prisma/seed-payments.ts  # заливает 8 способов опла�
 - **Диск:** 10 GB+
 - Docker + Docker Compose установлены
 
-Хостинги: [Hetzner](https://hetzner.com) (CX22 ~€4/мес), [Timeweb](https://timeweb.cloud), [DigitalOcean](https://digitalocean.com) Droplet $6/мес.
 
 ### 3.1. На сервере
 
@@ -198,7 +193,7 @@ certbot --nginx -d ваш-домен.com
 | `SESSION_SECRET` | ✅ | 32+ символов случайных |
 | `NEXT_PUBLIC_APP_URL` | ✅ | Полный URL сайта (`https://...`) без `/` в конце |
 | `ADMIN_STEAM_IDS` | ✅ | Steam64 ID админа(ов), через запятую |
-| `STEAMAPIS_KEY` | ⚠️ | SteamApis.com ключ. Без него инвентарь загружается медленнее |
+| `STEAMAPIS_KEY` | ✅ | SteamApis.com ключ |
 
 ---
 
@@ -237,5 +232,4 @@ docker compose exec app npx prisma db push
 | `P1017: Server has closed the connection` | Neon БД заснула. Зайти в Neon Dashboard → проект → активировать. Или подождать и повторить |
 | Логин не работает | Проверить `NEXT_PUBLIC_APP_URL` — должен точно совпадать с доменом, включая `https://` |
 | Админка не открывается | Проверить `ADMIN_STEAM_IDS` — должен быть Steam64 ID (17 цифр), не ссылка |
-| Инвентарь не грузится | Проверить `STEAMAPIS_KEY`. Если пустой — работает через Steam напрямую (медленнее) |
-| 404 на мобилке | Middleware перенаправляет на `/en`. Если не срабатывает — очистить кеш браузера |
+| Инвентарь не грузится | Проверить `STEAMAPIS_KEY`. |

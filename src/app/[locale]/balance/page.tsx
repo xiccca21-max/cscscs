@@ -15,8 +15,11 @@ type Transaction = {
   amount: string;
   balanceAfter: string;
   comment: string | null;
+  orderId: string | null;
+  orderStatus: string | null;
+  orderNumber: string | null;
+  cashoutRequestId: string | null;
   createdAt: string;
-  order?: { status: string; orderNumber: string } | null;
 };
 
 type BalanceData = {
@@ -579,11 +582,13 @@ export default function BalancePage() {
                                 )}
                               </span>
                               <span className="bal-row__desc">
-                                {tx.order
-                                  ? <>{t("skinSale")} - <strong>#{tx.order.orderNumber}</strong></>
-                                  : tx.type === "CREDIT"
-                                    ? <>{t("skinSale")} - <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
-                                    : <>{t("withdrawal")} - <strong>{cashoutMethod ?? t("payout")}</strong></>
+                                {tx.orderNumber
+                                  ? <>{t("skinSale")} - <strong>#{tx.orderNumber}</strong></>
+                                  : tx.cashoutRequestId
+                                    ? <>{t("withdrawal")} - <strong>#{tx.cashoutRequestId.slice(0, 8).toUpperCase()}</strong></>
+                                    : tx.type === "CREDIT"
+                                      ? <>{t("skinSale")} - <strong>#{tx.id.slice(0, 8).toUpperCase()}</strong></>
+                                      : <>{t("withdrawal")} - <strong>{t("payout")}</strong></>
                                 }
                               </span>
                             </span>
@@ -594,18 +599,22 @@ export default function BalancePage() {
                             </span>
                           </td>
                           <td>
-                            {tx.order ? (
-                              <span className={`bal-badge bal-badge--${tx.order.status === "PAID" ? "paid" : tx.order.status === "TRADE_CANCELLED" ? "cancelled" : "credit"}`}>
-                                {tx.order.status === "CREATED" ? t("statusCreated") :
-                                 tx.order.status === "TRADE_SENT" ? t("statusTradeSent") :
-                                 tx.order.status === "TRADE_COMPLETED" ? t("statusReceived") :
-                                 tx.order.status === "PAID" ? t("paid") :
-                                 tx.order.status === "TRADE_CANCELLED" ? t("statusCancelled") :
-                                 tx.order.status}
+                            {tx.orderStatus ? (
+                              <span className={`bal-badge bal-badge--${tx.orderStatus === "PAID" ? "paid" : tx.orderStatus === "TRADE_CANCELLED" ? "cancelled" : "credit"}`}>
+                                {tx.orderStatus === "CREATED" ? t("statusCreated") :
+                                 tx.orderStatus === "TRADE_SENT" ? t("statusTradeSent") :
+                                 tx.orderStatus === "TRADE_COMPLETED" ? t("statusReceived") :
+                                 tx.orderStatus === "PAID" ? t("paid") :
+                                 tx.orderStatus === "TRADE_CANCELLED" ? t("statusCancelled") :
+                                 tx.orderStatus}
+                              </span>
+                            ) : tx.cashoutRequestId ? (
+                              <span className="bal-badge bal-badge--credit">
+                                {tx.type === "FREEZE" ? t("statusCreated") : t("paid")}
                               </span>
                             ) : (
                               <span className={`bal-badge ${tx.type === "CREDIT" ? "bal-badge--credit" : "bal-badge--paid"}`}>
-                                {tx.type === "CREDIT" ? t("credit") : t("paid")}
+                                {tx.type === "CREDIT" ? t("credit") : tx.type === "FREEZE" ? t("statusCreated") : t("paid")}
                               </span>
                             )}
                           </td>

@@ -14,12 +14,25 @@ export async function GET() {
       return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
     }
 
-    const transactions = await db.balanceTransaction.findMany({
+    const raw = await db.balanceTransaction.findMany({
       where: { userId: session.userId },
       include: { order: { select: { status: true, orderNumber: true } } },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
+
+    const transactions = raw.map((tx) => ({
+      id: tx.id,
+      type: tx.type,
+      amount: tx.amount.toString(),
+      balanceAfter: tx.balanceAfter.toString(),
+      comment: tx.comment,
+      orderId: tx.orderId,
+      orderStatus: tx.order?.status ?? null,
+      orderNumber: tx.order?.orderNumber ?? null,
+      cashoutRequestId: tx.cashoutRequestId,
+      createdAt: tx.createdAt.toISOString(),
+    }));
 
     return NextResponse.json({
       success: true,

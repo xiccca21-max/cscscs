@@ -122,6 +122,22 @@
   background: var(--accent-h);
   color: #fff;
 }
+.adm-tab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  background: #ef4444;
+  border-radius: 9px;
+  vertical-align: middle;
+}
 
 /* ── Main ── */
 .adm-main {

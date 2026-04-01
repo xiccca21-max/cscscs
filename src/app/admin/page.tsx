@@ -76,6 +76,9 @@ export default function AdminPage() {
   const prevOrderIdsRef = useRef<Set<string>>(new Set());
   const prevCashoutIdsRef = useRef<Set<string>>(new Set());
   const prevChatCountRef = useRef<number>(0);
+  const prevUnreadRef = useRef<number>(0);
+  const [newOrdersCount, setNewOrdersCount] = useState(0);
+  const [newCashoutsCount, setNewCashoutsCount] = useState(0);
 
   const [orders, setOrders] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -226,6 +229,7 @@ export default function AdminPage() {
           }
           prevOrderIdsRef.current = newIds;
           if (section === "orders") setOrders(newOrders);
+          setNewOrdersCount(newOrders.filter((o: any) => o.status === "CREATED").length);
         }
       }
       {
@@ -239,6 +243,17 @@ export default function AdminPage() {
           }
           prevCashoutIdsRef.current = newCIds;
           if (section === "cashouts") setCashouts(newCashouts);
+          setNewCashoutsCount(newCashouts.filter((c: any) => c.status === "CREATED").length);
+        }
+      }
+      {
+        const dm = await safeFetch("/api/admin/orders/unread-messages");
+        if (dm) {
+          const cnt = dm.data?.count ?? 0;
+          if (prevUnreadRef.current > 0 && cnt > prevUnreadRef.current) {
+            addToast(`Новое сообщение от клиента`, "message");
+          }
+          prevUnreadRef.current = cnt;
         }
       }
     }, 3000);
@@ -457,7 +472,11 @@ export default function AdminPage() {
         </Link>
         <nav className="adm-tabs">
           {tabs.map((t) => (
-            <button key={t.key} className={`adm-tab${section === t.key ? " adm-tab--active" : ""}`} onClick={() => setSection(t.key)}>{t.label}</button>
+            <button key={t.key} className={`adm-tab${section === t.key ? " adm-tab--active" : ""}`} onClick={() => setSection(t.key)}>
+              {t.label}
+              {t.key === "orders" && newOrdersCount > 0 && <span className="adm-tab__badge">{newOrdersCount}</span>}
+              {t.key === "cashouts" && newCashoutsCount > 0 && <span className="adm-tab__badge">{newCashoutsCount}</span>}
+            </button>
           ))}
         </nav>
       </header>

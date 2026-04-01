@@ -4,6 +4,12 @@ import { logAudit } from "@/lib/audit";
 import { Prisma, type OrderStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
+function extractSteamId(profileUrl: string): string | null {
+  const m64 = profileUrl.match(/\/profiles\/(\d{17})/);
+  if (m64) return m64[1];
+  return null;
+}
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const admin = await requireAdmin();
@@ -21,8 +27,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 const VALID_NEXT: Partial<Record<OrderStatus, OrderStatus[]>> = {
-  CREATED: ["TRADE_SENT", "PAYMENT_PENDING", "PAID", "TRADE_CANCELLED"],
-  TRADE_SENT: ["TRADE_COMPLETED", "TRADE_CANCELLED", "PAYMENT_PENDING", "PAID"],
+  CREATED: ["TRADE_SENT", "TRADE_CANCELLED"],
+  TRADE_SENT: ["TRADE_COMPLETED", "TRADE_CANCELLED"],
   TRADE_COMPLETED: ["PAID", "TRADE_CANCELLED"],
   TRADE_CANCELLED: [],
   PAYMENT_PENDING: ["PAID", "TRADE_CANCELLED"],
@@ -93,6 +99,23 @@ export async function PATCH(
       data.botAccount = body.botAccountId
         ? { connect: { id: body.botAccountId } }
         : { disconnect: true };
+    }
+
+    if (body.botSteamProfileUrl && !body.botAccountId) {
+      const steamId = extractSteamId(body.botSteamProfileUrl);
+      if (steamId) {
+        let bot = await db.botAccount.findUnique({ where: { steamId } });
+        if (!bot) {
+          bot = await db.botAccount.create({
+            data: {
+              steamId,
+              steamProfileUrl: body.botSteamProfileUrl,
+              name: body.botName || "Bot",
+            },
+          });
+        }
+        data.botAccount = { connect: { id: bot.id } };
+      }
     }
 
     if (body.tradeOfferUrl) data.adminComment = mergeAdminComment(existing.adminComment, body.tradeOfferUrl);

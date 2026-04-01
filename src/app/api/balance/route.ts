@@ -16,6 +16,7 @@ export async function GET() {
 
     const transactions = await db.balanceTransaction.findMany({
       where: { userId: session.userId },
+      include: { order: { select: { status: true, orderNumber: true } } },
       orderBy: { createdAt: "desc" },
       take: 50,
     });

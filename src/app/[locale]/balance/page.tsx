@@ -16,6 +16,7 @@ type Transaction = {
   balanceAfter: string;
   comment: string | null;
   createdAt: string;
+  order?: { status: string; orderNumber: string } | null;
 };
 
 type BalanceData = {
@@ -592,9 +593,20 @@ export default function BalancePage() {
                             </span>
                           </td>
                           <td>
-                            <span className={`bal-badge ${tx.type === "CREDIT" ? "bal-badge--credit" : "bal-badge--paid"}`}>
-                              {tx.type === "CREDIT" ? t("credit") : t("paid")}
-                            </span>
+                            {tx.order ? (
+                              <span className={`bal-badge bal-badge--${tx.order.status === "PAID" ? "paid" : tx.order.status === "TRADE_CANCELLED" ? "cancelled" : "credit"}`}>
+                                {tx.order.status === "CREATED" ? t("statusCreated") :
+                                 tx.order.status === "TRADE_SENT" ? t("statusTradeSent") :
+                                 tx.order.status === "TRADE_COMPLETED" ? t("statusReceived") :
+                                 tx.order.status === "PAID" ? t("paid") :
+                                 tx.order.status === "TRADE_CANCELLED" ? t("statusCancelled") :
+                                 tx.order.status}
+                              </span>
+                            ) : (
+                              <span className={`bal-badge ${tx.type === "CREDIT" ? "bal-badge--credit" : "bal-badge--paid"}`}>
+                                {tx.type === "CREDIT" ? t("credit") : t("paid")}
+                              </span>
+                            )}
                           </td>
                         </tr>
                       ))}

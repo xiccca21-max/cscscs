@@ -160,8 +160,9 @@ section + section::before {
   font-size: clamp(48px, 8vw, 110px);
   font-weight: 900;
   letter-spacing: -0.05em;
-  line-height: 0.9;
+  line-height: 0.95;
   margin-top: 8px;
+  padding-bottom: 4px;
 }
 
 /* stagger entrance animation */

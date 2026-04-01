@@ -5,12 +5,14 @@ import Link from "next/link";
 
 type Section = "orders" | "users" | "payments" | "prices" | "balances" | "cashouts" | "bots" | "referrals" | "logs" | "social" | "reviews";
 
-type ToastItem = { message: string; type?: "order" | "cashout" | "message" | "default" };
+type ToastItem = { id: number; message: string; type?: "order" | "cashout" | "message" | "default" };
 
-function playNotifSound(type: "order" | "cashout" | "message" | "default") {
+let toastIdCounter = 0;
+
+async function playNotifSound(type: "order" | "cashout" | "message" | "default") {
   try {
     const ctx = new AudioContext();
-    if (ctx.state === "suspended") ctx.resume();
+    if (ctx.state === "suspended") await ctx.resume();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -19,7 +21,7 @@ function playNotifSound(type: "order" | "cashout" | "message" | "default") {
     if (type === "order") {
       osc.frequency.value = 880;
       osc.type = "sine";
-      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
       osc.start();
       osc.stop(ctx.currentTime + 0.4);
@@ -29,11 +31,11 @@ function playNotifSound(type: "order" | "cashout" | "message" | "default") {
         osc2.connect(g2); g2.connect(ctx.destination);
         osc2.frequency.value = 1100;
         osc2.type = "sine";
-        g2.gain.value = 0.15;
+        g2.gain.value = 0.18;
         g2.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5 + 0.3);
         osc2.start(ctx.currentTime + 0.5);
         osc2.stop(ctx.currentTime + 0.5 + 0.3);
-      }, 0);
+      }, 200);
     } else if (type === "cashout") {
       osc.frequency.value = 660;
       osc.type = "triangle";
@@ -43,9 +45,9 @@ function playNotifSound(type: "order" | "cashout" | "message" | "default") {
     } else {
       osc.frequency.value = 520;
       osc.type = "sine";
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
       osc.start();
-      osc.stop(ctx.currentTime + 0.25);
+      osc.stop(ctx.currentTime + 0.3);
     }
   } catch {}
 }
@@ -57,11 +59,11 @@ const TOAST_COLORS: Record<string, string> = {
   default: "#6366f1",
 };
 
-function Toast({ item, onDone }: { item: ToastItem; onDone: () => void }) {
+function Toast({ item, onRemove }: { item: ToastItem; onRemove: (id: number) => void }) {
   useEffect(() => {
-    const t = setTimeout(onDone, 10000);
+    const t = setTimeout(() => onRemove(item.id), 8000);
     return () => clearTimeout(t);
-  }, [onDone]);
+  }, [item.id, onRemove]);
   const color = TOAST_COLORS[item.type ?? "default"];
   return (
     <div className="adm-toast" style={{ borderLeft: `4px solid ${color}` }}>
@@ -135,10 +137,11 @@ export default function AdminPage() {
   const [priceForm, setPriceForm] = useState({ game: "", itemExternalId: "", adjustmentType: "percentage", adjustmentValue: "", isExcluded: false });
 
   const addToast = useCallback((msg: string, type?: ToastItem["type"]) => {
-    setToasts((p) => [...p, { message: msg, type: type ?? "default" }]);
+    const id = ++toastIdCounter;
+    setToasts((p) => [...p, { id, message: msg, type: type ?? "default" }]);
     if (type && type !== "default") playNotifSound(type);
   }, []);
-  const removeToast = useCallback((i: number) => setToasts((p) => p.filter((_, idx) => idx !== i)), []);
+  const removeToast = useCallback((id: number) => setToasts((p) => p.filter((t) => t.id !== id)), []);
 
   const safeFetch = useCallback(async (url: string): Promise<any> => {
     try {
@@ -514,7 +517,10 @@ export default function AdminPage() {
                       <td>{o.paymentMethod?.name ?? "-"}</td>
                       <td><span className={`adm-badge adm-badge--${(o.status ?? "").toLowerCase().replace(/_/g, "-")}`}>{o.status}</span></td>
                       <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString("ru-RU") : "-"}</td>
-                      <td><button className="adm-btn adm-btn--sm" onClick={() => setOrderDetail(o)}>Детали</button></td>
+                      <td style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <button className="adm-btn adm-btn--sm" onClick={() => setOrderDetail(o)}>Детали</button>
+                        {(o._count?.messages ?? 0) > 0 && <span className="adm-tab__badge" title="Непрочитанных сообщений">{o._count.messages}</span>}
+                      </td>
                     </tr>
                   )) : <tr><td colSpan={8} className="adm-empty">Нет заказов</td></tr>}
                 </tbody>
@@ -1266,7 +1272,7 @@ export default function AdminPage() {
 
       {/* Toasts */}
       <div className="adm-toasts">
-        {toasts.map((item, i) => <Toast key={`${item.message}-${i}`} item={item} onDone={() => removeToast(i)} />)}
+        {toasts.map((item) => <Toast key={item.id} item={item} onRemove={removeToast} />)}
       </div>
     </div>
   );

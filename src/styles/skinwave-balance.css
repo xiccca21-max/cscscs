@@ -1070,6 +1070,7 @@
 .bal-badge--withdraw { background: #eff6ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.1); }
 .bal-badge--done { background: #f0fdf4; color: #16a34a; border: 1px solid rgba(22,163,106,0.1); }
 .bal-badge--paid { background: #fef2f2; color: #dc2626; border: 1px solid rgba(220,38,38,0.1); }
+.bal-badge--cancelled { background: #fef2f2; color: #9ca3af; border: 1px solid rgba(156,163,175,0.15); }
 
 /* ══════════════════════════════════════════════
    WITHDRAWAL MODAL

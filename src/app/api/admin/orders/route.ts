@@ -34,6 +34,9 @@ export async function GET(request: NextRequest) {
           items: true,
           paymentMethod: true,
           botAccount: true,
+          _count: {
+            select: { messages: { where: { authorRole: "user", readAt: null } } },
+          },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,

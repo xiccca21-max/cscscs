@@ -481,8 +481,8 @@
   margin-bottom: 20px;
 }
 .fq-contact__grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  justify-content: center;
   gap: 12px;
 }
 .fq-contact__card {

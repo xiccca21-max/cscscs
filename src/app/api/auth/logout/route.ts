@@ -1,4 +1,4 @@
-import { getSession } from "@/lib/auth";
+import { getSession, sessionOptions } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST() {
@@ -17,8 +17,11 @@ export async function POST() {
 }
 
 export async function GET(request: NextRequest) {
-  const session = await getSession();
-  session.destroy();
-  await session.save();
-  return NextResponse.redirect(new URL("/", request.url));
+  const response = NextResponse.redirect(new URL("/", request.url));
+  response.cookies.set(sessionOptions.cookieName, "", {
+    ...sessionOptions.cookieOptions,
+    path: "/",
+    maxAge: 0,
+  });
+  return response;
 }

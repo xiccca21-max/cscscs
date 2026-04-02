@@ -595,21 +595,21 @@ export default function HomePage() {
               const minAmt = parseFloat(pm.minAmount);
               return (
                 <div key={pm.id} className="payout-card" style={{"--pc": color} as React.CSSProperties}>
-                  <div className="payout-card__inner payout-card__front">
-                    <div className="payout-card__logo-wrap">
+              <div className="payout-card__inner payout-card__front">
+                <div className="payout-card__logo-wrap">
                       <PayoutCardIcon type={pm.type} />
-                    </div>
-                    <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
+                </div>
+                <span className="payout-card__badge">{t("payoutBadgeInstant")}</span>
                     <h3>{pm.name}</h3>
                     <p>{fee > 0 ? `${t("payoutFee")}: ${fee}%` : t("payoutVisaDesc")}</p>
-                  </div>
-                  <div className="payout-card__inner payout-card__back">
-                    <h4>{t("payoutDetails")}</h4>
-                    <ul>
+              </div>
+              <div className="payout-card__inner payout-card__back">
+                <h4>{t("payoutDetails")}</h4>
+                <ul>
                       <li>{t("payoutMinWd")}: {minAmt > 0 ? `${minAmt}$` : "0$"}</li>
                       <li>{t("payoutFee")}: {fee > 0 ? `${fee}%` : "0%"}</li>
-                    </ul>
-                  </div>
+                </ul>
+              </div>
                 </div>
               );
             })}
@@ -645,20 +645,20 @@ export default function HomePage() {
             {reviewData.map((r, i) => (
               <div key={`${r.steam}-${i}`} className={`carousel__slide ${getSlideClass(i)}`} data-index={i}>
                 <div className="review-card">
-                  <span className="review-card__quote">&ldquo;</span>
-                  <div className="review-card__header">
+                <span className="review-card__quote">&ldquo;</span>
+                <div className="review-card__header">
                     <div className="review-card__avatar"><img src={r.avatar} alt={r.user} loading="lazy" /></div>
-                    <div className="review-card__user">
+                  <div className="review-card__user">
                       <a href={r.steam} className="review-card__name" target="_blank" rel="noopener">{r.user}</a>
                       <div className="review-card__stars" aria-label={`${r.stars} out of 5 stars`}>
                         {Array.from({ length: 5 }, (_, s) => (
                           <svg key={s} width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity={s < r.stars ? 1 : 0.25}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
                         ))}
-                      </div>
-                    </div>
+              </div>
+            </div>
                   </div>
                   <p className="review-card__text">{locale === "ru" ? (r.ru || r.en) : (r.en || r.ru)}</p>
-                  <div className="review-card__footer">
+                <div className="review-card__footer">
                     <span className="review-card__game">{r.game}</span>
                     <a href={r.steam} className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
                   </div>

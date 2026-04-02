@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
-import { getSession } from "@/lib/auth";
+import { sessionOptions, type SessionData } from "@/lib/auth";
 import { getSteamProfile, verifySteamLogin } from "@/lib/steam";
+import { getIronSession } from "iron-session";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -57,7 +58,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const session = await getSession();
+    const savedLocale = user.locale || "en";
+    const validLocales = ["en", "ru"];
+    const locale = validLocales.includes(savedLocale) ? savedLocale : "en";
+    const response = NextResponse.redirect(new URL(`/${locale}`, request.url));
+
+    const session = await getIronSession<SessionData>(response.cookies, sessionOptions);
     session.userId = user.id;
     session.steamId = user.steamId;
     session.steamLogin = user.steamLogin;
@@ -69,10 +75,7 @@ export async function GET(request: NextRequest) {
     session.isAdmin = adminSteamIds.includes(user.steamId);
     await session.save();
 
-    const savedLocale = user.locale || "en";
-    const validLocales = ["en", "ru"];
-    const locale = validLocales.includes(savedLocale) ? savedLocale : "en";
-    return NextResponse.redirect(new URL(`/${locale}`, request.url));
+    return response;
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.redirect(

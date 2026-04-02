@@ -323,7 +323,7 @@ section + section::before {
   display: flex; align-items: flex-end; justify-content: space-between; margin-top: 6px;
 }
 .hero__card-price { font-size: 16px; font-weight: 700; color: #4ade80; }
-.hero__card-steam { font-size: 10px; color: rgba(192,192,200,0.15); text-decoration: line-through; }
+.hero__card-steam { display: none; }
 
 /* Recent payouts */
 .hero__payouts {

@@ -234,7 +234,6 @@ export function LandingPageView() {
                   <p className="hero__card-name">{n}</p>
                   <div className="hero__card-bottom">
                     <span className="hero__card-price">{p}$</span>
-                    <span className="hero__card-steam">{st}$</span>
                   </div>
                 </div>
               ))}

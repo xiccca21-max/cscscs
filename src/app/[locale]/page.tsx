@@ -403,7 +403,6 @@ export default function HomePage() {
                 <p className="hero__card-name">AK-47 | Case Hardened</p>
                 <div className="hero__card-bottom">
                   <span className="hero__card-price">{format(675)}</span>
-                  <span className="hero__card-steam">{format(712.5)}</span>
                 </div>
               </div>
               <div className="hero__card" style={{"--i":1,"--color":"#d32ce6"} as React.CSSProperties}>
@@ -418,7 +417,6 @@ export default function HomePage() {
                 <p className="hero__card-name">AWP | Gungnir</p>
                 <div className="hero__card-bottom">
                   <span className="hero__card-price">{format(1290)}</span>
-                  <span className="hero__card-steam">{format(1380)}</span>
                 </div>
               </div>
               <div className="hero__card" style={{"--i":2,"--color":"#eb4b4b"} as React.CSSProperties}>
@@ -433,7 +431,6 @@ export default function HomePage() {
                 <p className="hero__card-name">M4A4 | Howl</p>
                 <div className="hero__card-bottom">
                   <span className="hero__card-price">{format(1850)}</span>
-                  <span className="hero__card-steam">{format(1950)}</span>
                 </div>
               </div>
             </div>

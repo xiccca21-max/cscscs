@@ -1,34 +1,7 @@
 import { db } from "@/lib/db";
-import { sessionOptions, type SessionData } from "@/lib/auth";
-import { mapAuthCallbackError } from "@/lib/authCallbackErrors";
+import { getSession } from "@/lib/auth";
 import { getSteamProfile, verifySteamLogin } from "@/lib/steam";
-import { sealData } from "iron-session";
-import { serialize } from "cookie";
 import { NextRequest, NextResponse } from "next/server";
-
-const SESSION_TTL = 14 * 24 * 3600;
-
-function buildSessionCookie(sealed: string): string {
-  return serialize(sessionOptions.cookieName, sealed, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: SESSION_TTL,
-  });
-}
-
-function htmlRedirect(url: string, setCookie: string): NextResponse {
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=${url}"><title>Redirecting…</title></head><body><script>window.location.replace(${JSON.stringify(url)})</script></body></html>`;
-  return new NextResponse(html, {
-    status: 200,
-    headers: {
-      "Content-Type": "text/html; charset=utf-8",
-      "Set-Cookie": setCookie,
-      "Cache-Control": "no-store",
-    },
-  });
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -84,34 +57,29 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const session = await getSession();
+    session.userId = user.id;
+    session.steamId = user.steamId;
+    session.steamLogin = user.steamLogin;
+    session.steamAvatar = user.steamAvatar ?? undefined;
     const adminSteamIds = (process.env.ADMIN_STEAM_IDS ?? "")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-
-    const sessionPayload: SessionData = {
-      userId: user.id,
-      steamId: user.steamId,
-      steamLogin: user.steamLogin,
-      steamAvatar: user.steamAvatar ?? undefined,
-      isAdmin: adminSteamIds.includes(user.steamId),
-    };
-
-    const sealed = await sealData(sessionPayload, {
-      password: sessionOptions.password as string,
-      ttl: SESSION_TTL,
-    });
+    session.isAdmin = adminSteamIds.includes(user.steamId);
+    await session.save();
 
     const savedLocale = user.locale || "en";
     const validLocales = ["en", "ru"];
     const locale = validLocales.includes(savedLocale) ? savedLocale : "en";
-    const target = new URL(`/${locale}`, request.url).toString();
-
-    return htmlRedirect(target, buildSessionCookie(sealed));
+    return NextResponse.redirect(new URL(`/${locale}`, request.url));
   } catch (e) {
-    const code = mapAuthCallbackError(e);
+    const message = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.redirect(
-      new URL(`/?error=${encodeURIComponent(code)}`, request.url),
+      new URL(
+        `/?error=${encodeURIComponent(message)}`,
+        request.url,
+      ),
     );
   }
 }

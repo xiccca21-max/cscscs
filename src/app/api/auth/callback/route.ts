@@ -5,13 +5,27 @@ import { sealData } from "iron-session";
 import { serialize } from "cookie";
 import { NextRequest, NextResponse } from "next/server";
 
+const SESSION_TTL = 14 * 24 * 3600;
+
 function buildSessionCookie(sealed: string): string {
   return serialize(sessionOptions.cookieName, sealed, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 14 * 24 * 3600,
+    maxAge: SESSION_TTL,
+  });
+}
+
+function htmlRedirect(url: string, setCookie: string): NextResponse {
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=${url}"><title>Redirecting…</title></head><body><script>window.location.replace(${JSON.stringify(url)})</script></body></html>`;
+  return new NextResponse(html, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Set-Cookie": setCookie,
+      "Cache-Control": "no-store",
+    },
   });
 }
 
@@ -84,16 +98,15 @@ export async function GET(request: NextRequest) {
 
     const sealed = await sealData(sessionPayload, {
       password: sessionOptions.password as string,
-      ttl: 14 * 24 * 3600,
+      ttl: SESSION_TTL,
     });
 
     const savedLocale = user.locale || "en";
     const validLocales = ["en", "ru"];
     const locale = validLocales.includes(savedLocale) ? savedLocale : "en";
+    const target = new URL(`/${locale}`, request.url).toString();
 
-    const response = NextResponse.redirect(new URL(`/${locale}`, request.url));
-    response.headers.append("Set-Cookie", buildSessionCookie(sealed));
-    return response;
+    return htmlRedirect(target, buildSessionCookie(sealed));
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.redirect(

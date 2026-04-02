@@ -30,7 +30,15 @@ export async function POST() {
 }
 
 export async function GET(request: NextRequest) {
-  const response = NextResponse.redirect(new URL("/", request.url));
-  response.headers.append("Set-Cookie", buildDeleteCookie());
-  return response;
+  const target = new URL("/", request.url).toString();
+  const deleteCookie = buildDeleteCookie();
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=${target}"><title>Logging out…</title></head><body><script>window.location.replace(${JSON.stringify(target)})</script></body></html>`;
+  return new NextResponse(html, {
+    status: 200,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Set-Cookie": deleteCookie,
+      "Cache-Control": "no-store",
+    },
+  });
 }

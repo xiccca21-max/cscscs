@@ -1,8 +1,19 @@
 import { db } from "@/lib/db";
 import { sessionOptions, type SessionData } from "@/lib/auth";
 import { getSteamProfile, verifySteamLogin } from "@/lib/steam";
-import { getIronSession } from "iron-session";
+import { sealData } from "iron-session";
+import { serialize } from "cookie";
 import { NextRequest, NextResponse } from "next/server";
+
+function buildSessionCookie(sealed: string): string {
+  return serialize(sessionOptions.cookieName, sealed, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 14 * 24 * 3600,
+  });
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -58,23 +69,30 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const savedLocale = user.locale || "en";
-    const validLocales = ["en", "ru"];
-    const locale = validLocales.includes(savedLocale) ? savedLocale : "en";
-    const response = NextResponse.redirect(new URL(`/${locale}`, request.url));
-
-    const session = await getIronSession<SessionData>(response.cookies, sessionOptions);
-    session.userId = user.id;
-    session.steamId = user.steamId;
-    session.steamLogin = user.steamLogin;
-    session.steamAvatar = user.steamAvatar ?? undefined;
     const adminSteamIds = (process.env.ADMIN_STEAM_IDS ?? "")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    session.isAdmin = adminSteamIds.includes(user.steamId);
-    await session.save();
 
+    const sessionPayload: SessionData = {
+      userId: user.id,
+      steamId: user.steamId,
+      steamLogin: user.steamLogin,
+      steamAvatar: user.steamAvatar ?? undefined,
+      isAdmin: adminSteamIds.includes(user.steamId),
+    };
+
+    const sealed = await sealData(sessionPayload, {
+      password: sessionOptions.password as string,
+      ttl: 14 * 24 * 3600,
+    });
+
+    const savedLocale = user.locale || "en";
+    const validLocales = ["en", "ru"];
+    const locale = validLocales.includes(savedLocale) ? savedLocale : "en";
+
+    const response = NextResponse.redirect(new URL(`/${locale}`, request.url));
+    response.headers.append("Set-Cookie", buildSessionCookie(sealed));
     return response;
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";

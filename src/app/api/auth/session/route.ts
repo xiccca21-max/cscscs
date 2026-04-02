@@ -2,11 +2,22 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+  "Pragma": "no-cache",
+  "Expires": "0",
+} as const;
+
 export async function GET() {
   try {
     const session = await getSession();
     if (!session.userId) {
-      return NextResponse.json({ success: true, data: null });
+      return NextResponse.json(
+        { success: true, data: null },
+        { headers: NO_CACHE_HEADERS },
+      );
     }
 
     let balance = "0";
@@ -24,23 +35,26 @@ export async function GET() {
       // DB unavailable - use defaults
     }
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        userId: session.userId,
-        steamId: session.steamId,
-        steamLogin: session.steamLogin,
-        steamAvatar: session.steamAvatar,
-        isAdmin: session.isAdmin ?? false,
-        balance,
-        status,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          userId: session.userId,
+          steamId: session.steamId,
+          steamLogin: session.steamLogin,
+          steamAvatar: session.steamAvatar,
+          isAdmin: session.isAdmin ?? false,
+          balance,
+          status,
+        },
       },
-    });
+      { headers: NO_CACHE_HEADERS },
+    );
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.json(
       { success: false, error: message },
-      { status: 500 },
+      { status: 500, headers: NO_CACHE_HEADERS },
     );
   }
 }

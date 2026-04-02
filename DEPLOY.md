@@ -236,6 +236,8 @@ docker compose exec app npx prisma db push
 |----------|---------|
 | `P1017: Server has closed the connection` | Neon БД заснула. Зайти в Neon Dashboard → проект → активировать. Или подождать и повторить |
 | Логин не работает | Проверить `NEXT_PUBLIC_APP_URL` — должен точно совпадать с доменом, включая `https://` |
+| `?error=db_quota` после входа Steam | Лимит Neon (data transfer / compute). [Neon Dashboard](https://console.neon.tech) → проект → Usage / Upgrade план или дождаться сброса квоты |
+| `?error=db_unavailable` | БД недоступна (холодный старт, P1017). Повторить позже или проверить `DATABASE_URL` |
 | Админка не открывается | Проверить `ADMIN_STEAM_IDS` — должен быть Steam64 ID (17 цифр), не ссылка |
 | Инвентарь не грузится | Проверить `STEAMAPIS_KEY`. Если пустой — работает через Steam напрямую (медленнее) |
 | 404 на мобилке | Middleware перенаправляет на `/en`. Если не срабатывает — очистить кеш браузера |

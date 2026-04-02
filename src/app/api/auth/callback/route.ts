@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { sessionOptions, type SessionData } from "@/lib/auth";
+import { mapAuthCallbackError } from "@/lib/authCallbackErrors";
 import { getSteamProfile, verifySteamLogin } from "@/lib/steam";
 import { sealData } from "iron-session";
 import { serialize } from "cookie";
@@ -108,12 +109,9 @@ export async function GET(request: NextRequest) {
 
     return htmlRedirect(target, buildSessionCookie(sealed));
   } catch (e) {
-    const message = e instanceof Error ? e.message : "Unknown error";
+    const code = mapAuthCallbackError(e);
     return NextResponse.redirect(
-      new URL(
-        `/?error=${encodeURIComponent(message)}`,
-        request.url,
-      ),
+      new URL(`/?error=${encodeURIComponent(code)}`, request.url),
     );
   }
 }

@@ -688,27 +688,46 @@ export default function AdminPage() {
                     <div style={{ marginTop: 16, padding: 14, background: "rgba(99,102,241,0.06)", borderRadius: 10, border: "1px solid rgba(99,102,241,0.15)" }}>
                       <span className="adm-label" style={{ display: "block", marginBottom: 8 }}>Отправить трейд оффер</span>
                       {orderDetail.tradeUrl && (
-                        <button
-                          className="adm-btn adm-btn--primary adm-btn--sm"
-                          style={{ marginBottom: 10 }}
-                          onClick={() => {
-                            const GAME_APP_IDS: Record<string, string> = { CS2: "730", DOTA2: "570", TF2: "440", RUST: "252490" };
-                            const tradeUrl: string = orderDetail.tradeUrl;
-                            const url = new URL(tradeUrl);
-                            const partner = url.searchParams.get("partner") ?? "";
-                            const token = url.searchParams.get("token") ?? "";
-                            if (!partner || !token) { alert("Невалидный Trade URL пользователя"); return; }
-                            const params = new URLSearchParams({ partner, token });
-                            (orderDetail.items ?? []).forEach((it: any) => {
-                              const appId = GAME_APP_IDS[it.game] ?? "730";
-                              if (it.externalId) params.append("for_item", `${appId}_2_${it.externalId}`);
-                            });
-                            window.open(`https://steamcommunity.com/tradeoffer/new/?${params.toString()}`, "_blank");
-                          }}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                          {" "}Открыть трейд с предметами
-                        </button>
+                        <div style={{ marginBottom: 10, padding: 10, background: "rgba(34,197,94,0.06)", borderRadius: 8, border: "1px solid rgba(34,197,94,0.15)" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                            <button
+                              className="adm-btn adm-btn--primary adm-btn--sm"
+                              onClick={() => {
+                                const GAME_APP_IDS: Record<string, string> = { CS2: "730", DOTA2: "570", TF2: "440", RUST: "252490" };
+                                const tradeUrl: string = orderDetail.tradeUrl;
+                                const url = new URL(tradeUrl);
+                                const partner = url.searchParams.get("partner") ?? "";
+                                const token = url.searchParams.get("token") ?? "";
+                                if (!partner || !token) { alert("Невалидный Trade URL пользователя"); return; }
+                                const params = new URLSearchParams({ partner, token });
+                                (orderDetail.items ?? []).forEach((it: any) => {
+                                  const appId = GAME_APP_IDS[it.game] ?? "730";
+                                  if (it.externalId) params.append("for_item", `${appId}_2_${it.externalId}`);
+                                });
+                                window.open(`https://steamcommunity.com/tradeoffer/new/?${params.toString()}`, "_blank");
+                              }}
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                              {" "}Открыть трейд с предметами
+                            </button>
+                            <button
+                              className="adm-btn adm-btn--ghost adm-btn--sm"
+                              onClick={() => {
+                                const tradeUrl: string = orderDetail.tradeUrl;
+                                const url = new URL(tradeUrl);
+                                const partner = url.searchParams.get("partner") ?? "";
+                                const token = url.searchParams.get("token") ?? "";
+                                if (!partner || !token) { alert("Невалидный Trade URL пользователя"); return; }
+                                window.open(`https://steamcommunity.com/tradeoffer/new/?partner=${partner}&token=${token}`, "_blank");
+                              }}
+                            >Открыть трейд (без предвыбора)</button>
+                          </div>
+                          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.45)", marginTop: 6, display: "block", lineHeight: 1.5 }}>
+                            Предвыбор предметов работает только с расширением{" "}
+                            <a href="https://steamdb.info/extension/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>SteamDB</a>
+                            {" "}(Chrome / Firefox). Без него — откроется пустой трейд.
+                          </span>
+                        </div>
                       )}
                       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                         <input className="adm-input" placeholder="Ссылка на профиль бота Steam" value={botUrlInput} onChange={(e) => setBotUrlInput(e.target.value)} />

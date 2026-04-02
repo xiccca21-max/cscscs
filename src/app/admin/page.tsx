@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { PRICING_PHASE_OPTIONS, skinMarketNameHasPhases } from "@/lib/pricingPhases";
 
-type Section = "orders" | "users" | "payments" | "prices" | "balances" | "cashouts" | "bots" | "referrals" | "logs" | "social" | "reviews";
+type Section = "orders" | "users" | "payments" | "prices" | "balances" | "cashouts" | "bots" | "referrals" | "logs" | "social" | "reviews" | "promo";
 
 type ToastItem = { id: number; message: string; type?: "order" | "cashout" | "message" | "default" };
 
@@ -123,6 +123,11 @@ export default function AdminPage() {
   const [reviewForm, setReviewForm] = useState({ user: "", steam: "", avatar: "", textEn: "", textRu: "", game: "CS2", stars: "5" });
   const [reviewFetching, setReviewFetching] = useState(false);
 
+  const [promoList, setPromoList] = useState<any[]>([]);
+  const [promoModal, setPromoModal] = useState<any | null>(null);
+  const [promoForm, setPromoForm] = useState({ code: "", discount: "", usageLimit: "", expiresAt: "" });
+  const [promoSaving, setPromoSaving] = useState(false);
+
   const [exchangeRate, setExchangeRate] = useState("");
   const [eurRate, setEurRate] = useState("");
   const [exchangeRateSaving, setExchangeRateSaving] = useState(false);
@@ -235,6 +240,7 @@ export default function AdminPage() {
   const fetchPayments = useCallback(async () => { const d = await safeFetch("/api/admin/payments"); if (d) setPaymentMethods(d.data ?? []); }, [safeFetch]);
   const fetchPrices = useCallback(async () => { const d = await safeFetch("/api/admin/prices"); if (d) setPricingRules(Array.isArray(d.data) ? d.data : []); }, [safeFetch]);
   const fetchReviews = useCallback(async () => { const d = await safeFetch("/api/admin/reviews"); if (d?.data) setReviewsList(d.data); }, [safeFetch]);
+  const fetchPromos = useCallback(async () => { const d = await safeFetch("/api/admin/promo"); if (d?.data) setPromoList(d.data); }, [safeFetch]);
 
   useEffect(() => {
     const init = async () => {
@@ -267,6 +273,7 @@ export default function AdminPage() {
       safeFetch("/api/admin/referrals").then((d) => { if (d) setReferrals(d.data ?? []); });
       fetchAuditLogs();
       fetchReviews();
+      fetchPromos();
       safeFetch("/api/admin/settings").then((d) => {
         if (d?.data) {
           setSocialLinks(d.data);
@@ -276,7 +283,7 @@ export default function AdminPage() {
       });
     };
     init();
-  }, [fetchUsers, fetchAuditLogs, fetchPayments, fetchPrices, fetchReviews, safeFetch]);
+  }, [fetchUsers, fetchAuditLogs, fetchPayments, fetchPrices, fetchReviews, fetchPromos, safeFetch]);
 
   useEffect(() => {
     if (!adminReady || authError) return;
@@ -531,6 +538,7 @@ export default function AdminPage() {
     { key: "logs", label: "Логи" },
     { key: "social", label: "Ссылки" },
     { key: "reviews", label: "Отзывы" },
+    { key: "promo", label: "Промокоды" },
   ];
 
   if (!adminReady) return <div className="adm-loading">Загрузка...</div>;
@@ -1451,6 +1459,110 @@ export default function AdminPage() {
                       setReviewModal(null);
                     }}>{reviewModal === "new" ? "Добавить" : "Сохранить"}</button>
                     <button className="adm-btn adm-btn--ghost" onClick={() => setReviewModal(null)}>Отмена</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── PROMO CODES ── */}
+        {section === "promo" && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <h2 className="adm-section-title">Промокоды</h2>
+              <button className="adm-btn adm-btn--primary" onClick={() => {
+                setPromoForm({ code: "", discount: "", usageLimit: "", expiresAt: "" });
+                setPromoModal("new");
+              }}>+ Добавить</button>
+            </div>
+            <div className="adm-table-wrap">
+              <table className="adm-table">
+                <thead>
+                  <tr>
+                    <th>Код</th>
+                    <th>Скидка %</th>
+                    <th>Использований</th>
+                    <th>Лимит</th>
+                    <th>Истекает</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {promoList.map((p: any) => (
+                    <tr key={p.id}>
+                      <td><code style={{ background: "rgba(99,102,241,0.1)", padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>{p.code}</code></td>
+                      <td style={{ fontWeight: 700, color: "#22c55e" }}>+{Number(p.discount)}%</td>
+                      <td>{p.usageCount}</td>
+                      <td>{p.usageLimit ?? "∞"}</td>
+                      <td>{p.expiresAt ? new Date(p.expiresAt).toLocaleDateString("ru-RU") : "—"}</td>
+                      <td>
+                        <span style={{
+                          padding: "2px 10px", borderRadius: 12, fontSize: 11, fontWeight: 700,
+                          background: p.isActive ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.12)",
+                          color: p.isActive ? "#22c55e" : "#ef4444",
+                        }}>{p.isActive ? "Активен" : "Выключен"}</span>
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button className="adm-btn adm-btn--sm" onClick={() => {
+                            setPromoForm({
+                              code: p.code,
+                              discount: String(Number(p.discount)),
+                              usageLimit: p.usageLimit != null ? String(p.usageLimit) : "",
+                              expiresAt: p.expiresAt ? new Date(p.expiresAt).toISOString().slice(0, 10) : "",
+                            });
+                            setPromoModal(p);
+                          }}>Изменить</button>
+                          <button className="adm-btn adm-btn--sm" onClick={() => handleAction("POST", "/api/admin/promo", { id: p.id, code: p.code, discount: Number(p.discount), isActive: !p.isActive }, p.isActive ? "Выключен" : "Включён", fetchPromos)}>
+                            {p.isActive ? "Выкл" : "Вкл"}
+                          </button>
+                          <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={async () => {
+                            if (!confirm("Удалить промокод?")) return;
+                            await handleAction("DELETE", "/api/admin/promo", { id: p.id }, "Удалён", fetchPromos);
+                          }}>Удалить</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {promoList.length === 0 && (
+                    <tr><td colSpan={7} style={{ textAlign: "center", padding: 24, color: "var(--muted)" }}>Нет промокодов</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Promo modal */}
+            {promoModal && (
+              <div className="adm-overlay" onClick={() => setPromoModal(null)}>
+                <div className="adm-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
+                  <h3 className="adm-modal__title">{promoModal === "new" ? "Новый промокод" : "Редактировать промокод"}</h3>
+                  <div className="adm-form">
+                    <label className="adm-label">Код</label>
+                    <input className="adm-input" value={promoForm.code} onChange={(e) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase() })} placeholder="SUMMER10" />
+                    <label className="adm-label" style={{ marginTop: 12 }}>Скидка (%)</label>
+                    <input className="adm-input" type="number" min="0.01" max="100" step="0.01" value={promoForm.discount} onChange={(e) => setPromoForm({ ...promoForm, discount: e.target.value })} placeholder="10" />
+                    <label className="adm-label" style={{ marginTop: 12 }}>Лимит использований (пусто = безлимит)</label>
+                    <input className="adm-input" type="number" min="0" value={promoForm.usageLimit} onChange={(e) => setPromoForm({ ...promoForm, usageLimit: e.target.value })} placeholder="Без лимита" />
+                    <label className="adm-label" style={{ marginTop: 12 }}>Дата истечения (пусто = бессрочно)</label>
+                    <input className="adm-input" type="date" value={promoForm.expiresAt} onChange={(e) => setPromoForm({ ...promoForm, expiresAt: e.target.value })} />
+                  </div>
+                  <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
+                    <button className="adm-btn adm-btn--primary" disabled={promoSaving} onClick={async () => {
+                      setPromoSaving(true);
+                      const payload: any = {
+                        code: promoForm.code,
+                        discount: Number(promoForm.discount),
+                        usageLimit: promoForm.usageLimit ? Number(promoForm.usageLimit) : null,
+                        expiresAt: promoForm.expiresAt || null,
+                      };
+                      if (promoModal !== "new") payload.id = promoModal.id;
+                      await handleAction("POST", "/api/admin/promo", payload, promoModal === "new" ? "Промокод создан" : "Промокод обновлён", fetchPromos);
+                      setPromoSaving(false);
+                      setPromoModal(null);
+                    }}>{promoSaving ? "..." : promoModal === "new" ? "Создать" : "Сохранить"}</button>
+                    <button className="adm-btn adm-btn--ghost" onClick={() => setPromoModal(null)}>Отмена</button>
                   </div>
                 </div>
               </div>

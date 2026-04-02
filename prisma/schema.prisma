@@ -266,6 +266,20 @@ model Review {
   updatedAt DateTime @updatedAt
 }
 
+model PromoCode {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  discount    Decimal  @db.Decimal(5, 2)
+  isActive    Boolean  @default(true)
+  usageLimit  Int?
+  usageCount  Int      @default(0)
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([code])
+}
+
 model AuditLog {
   id        String   @id @default(cuid())
   actorId   String

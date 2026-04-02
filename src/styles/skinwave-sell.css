@@ -2845,6 +2845,19 @@
 }
 .pay-summary-row__value--fee {
   color: #f87171 !important;
+}
+.pay-summary-row--promo {
+  border-bottom: none;
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  padding: 3px 0;
+}
+.pay-summary-row--promo .pay-summary-row__label svg {
+  color: #22c55e;
+  opacity: 0.9;
+}
+.pay-summary-row__value--promo {
+  color: #22c55e !important;
   font-size: 13px !important;
   font-weight: 600 !important;
 }
@@ -3097,6 +3110,42 @@
   0% { border-color: rgba(255,255,255,0.12); }
   50% { border-color: rgba(34,197,94,0.6); box-shadow: 0 0 0 6px rgba(34,197,94,0.1); }
   100% { border-color: rgba(34,197,94,0.4); box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+}
+.promo-input-wrap--applied {
+  border-color: rgba(34,197,94,0.4) !important;
+  border-style: solid !important;
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.15) !important;
+  animation: promoSuccess 0.5s ease;
+}
+.promo-input-wrap--applied .promo-input__icon { color: #22c55e; opacity: 1; }
+.promo-input-wrap--error {
+  border-color: rgba(239,68,68,0.4) !important;
+  border-style: solid !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12) !important;
+}
+.promo-input-wrap--error .promo-input__icon { color: #ef4444; opacity: 1; }
+.promo-input__btn--remove {
+  background: rgba(239,68,68,0.15) !important;
+  color: #f87171 !important;
+  font-size: 13px !important;
+  min-width: 36px;
+}
+.promo-input__btn--remove:hover {
+  background: rgba(239,68,68,0.25) !important;
+}
+.promo-applied-msg {
+  font-size: 11px;
+  color: #22c55e;
+  font-weight: 600;
+  margin-top: 6px;
+  text-align: center;
+}
+.promo-error-msg {
+  font-size: 11px;
+  color: #ef4444;
+  font-weight: 600;
+  margin-top: 6px;
+  text-align: center;
 }
 
 /* Trust badges */

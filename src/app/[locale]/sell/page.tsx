@@ -387,7 +387,8 @@ export default function SellPage() {
     if (fromDb) return parseFloat(fromDb.commission) / 100;
     return COMMISSION_FALLBACK[effectivePayType] ?? COMMISSION_FALLBACK[paymentMethod] ?? 0;
   }, [effectivePayType, paymentMethod, dbPaymentMethods]);
-  const youReceive = selectedTotal * (1 - commission);
+  const promoMultiplier = promoDiscount ? 1 + promoDiscount / 100 : 1;
+  const youReceive = selectedTotal * (1 - commission) * promoMultiplier;
   const tradeUrlValid = TRADE_URL_RE.test(tradeUrl);
 
   const step1Done = selectedItems.length > 0;
@@ -458,6 +459,12 @@ export default function SellPage() {
 
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [gameMixPopup, setGameMixPopup] = useState<"cs2" | "other" | null>(null);
+
+  const [promoCode, setPromoCode] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState<number | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoApplied, setPromoApplied] = useState<string | null>(null);
 
   const validateFields = useCallback((): boolean => {
     const errs: Record<string, string> = {};
@@ -1266,9 +1273,20 @@ export default function SellPage() {
                     Commission
                   </span>
                   <span className="pay-summary-row__value pay-summary-row__value--fee">
-                    -{format(selectedTotal - youReceive)}
+                    -{format(selectedTotal * commission)}
                   </span>
                 </div>
+                {promoApplied && promoDiscount && (
+                  <div className="pay-summary-row pay-summary-row--promo">
+                    <span className="pay-summary-row__label">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12" /><path d="M2 7h20v5H2z" /><path d="M12 22V7" /></svg>
+                      Promo ({promoApplied})
+                    </span>
+                    <span className="pay-summary-row__value pay-summary-row__value--promo">
+                      +{format(selectedTotal * (1 - commission) * (promoDiscount / 100))}
+                    </span>
+                  </div>
+                )}
                 <div className="pay-summary-row pay-summary-row--total">
                   <span className="pay-summary-row__label">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /><path d="M20 21H4" /></svg>
@@ -1302,18 +1320,53 @@ export default function SellPage() {
               </button>
 
               <div className="sell-pay__promo">
-                <div className="promo-input-wrap">
+                <div className={`promo-input-wrap${promoApplied ? " promo-input-wrap--applied" : ""}${promoError ? " promo-input-wrap--error" : ""}`}>
                   <svg className="promo-input__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12" /><path d="M2 7h20v5H2z" /><path d="M12 22V7" /><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z" /></svg>
-                  <input type="text" className="promo-input" placeholder={t("promoPlaceholder")} />
-                  <button className="promo-input__btn" onClick={() => {
-                    const input = document.querySelector<HTMLInputElement>('.promo-input');
-                    if (input && input.value.trim()) {
-                      input.classList.add('promo-input--applied');
-                      const btn = input.nextElementSibling as HTMLElement;
-                      if (btn) { btn.textContent = t("promoApply"); setTimeout(() => { btn.textContent = t("promoApply"); }, 2000); }
-                    }
-                  }}>{t("promoApply")}</button>
+                  <input
+                    type="text"
+                    className={`promo-input${promoApplied ? " promo-input--applied" : ""}`}
+                    placeholder={t("promoPlaceholder")}
+                    value={promoCode}
+                    onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromoError(null); }}
+                    disabled={!!promoApplied}
+                  />
+                  {promoApplied ? (
+                    <button className="promo-input__btn promo-input__btn--remove" onClick={() => {
+                      setPromoApplied(null);
+                      setPromoDiscount(null);
+                      setPromoCode("");
+                      setPromoError(null);
+                    }}>✕</button>
+                  ) : (
+                    <button className="promo-input__btn" disabled={promoLoading || !promoCode.trim()} onClick={async () => {
+                      setPromoLoading(true);
+                      setPromoError(null);
+                      try {
+                        const res = await fetch("/api/promo/validate", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ code: promoCode.trim() }),
+                        });
+                        const json = await res.json();
+                        if (json.success) {
+                          setPromoDiscount(json.data.discount);
+                          setPromoApplied(json.data.code);
+                        } else {
+                          setPromoError(json.error || "Invalid code");
+                        }
+                      } catch {
+                        setPromoError("Network error");
+                      }
+                      setPromoLoading(false);
+                    }}>{promoLoading ? "..." : t("promoApply")}</button>
+                  )}
                 </div>
+                {promoApplied && promoDiscount && (
+                  <div className="promo-applied-msg">+{promoDiscount}% bonus applied</div>
+                )}
+                {promoError && (
+                  <div className="promo-error-msg">{promoError}</div>
+                )}
               </div>
 
               <div className="sell-pay__trust">

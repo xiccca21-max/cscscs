@@ -147,6 +147,9 @@ export default function AdminPage() {
   const [eurRate, setEurRate] = useState("");
   const [exchangeRateSaving, setExchangeRateSaving] = useState(false);
 
+  const [minItemPrice, setMinItemPrice] = useState("");
+  const [minItemPriceSaving, setMinItemPriceSaving] = useState(false);
+
   const [pmModal, setPmModal] = useState(false);
   const [pmForm, setPmForm] = useState({ name: "", type: "card", commission: "0", minAmount: "0", currencies: "RUB" });
   const [pmSaving, setPmSaving] = useState(false);
@@ -294,6 +297,7 @@ export default function AdminPage() {
           setSocialLinks(d.data);
           if (d.data.exchange_rate_usd_rub) setExchangeRate(d.data.exchange_rate_usd_rub);
           if (d.data.exchange_rate_usd_eur) setEurRate(d.data.exchange_rate_usd_eur);
+          if (d.data.min_item_price_usd) setMinItemPrice(d.data.min_item_price_usd);
         }
       });
     };
@@ -683,6 +687,29 @@ export default function AdminPage() {
                   {orderDetail.status === "CREATED" && (
                     <div style={{ marginTop: 16, padding: 14, background: "rgba(99,102,241,0.06)", borderRadius: 10, border: "1px solid rgba(99,102,241,0.15)" }}>
                       <span className="adm-label" style={{ display: "block", marginBottom: 8 }}>Отправить трейд оффер</span>
+                      {orderDetail.tradeUrl && (
+                        <button
+                          className="adm-btn adm-btn--primary adm-btn--sm"
+                          style={{ marginBottom: 10 }}
+                          onClick={() => {
+                            const GAME_APP_IDS: Record<string, string> = { CS2: "730", DOTA2: "570", TF2: "440", RUST: "252490" };
+                            const tradeUrl: string = orderDetail.tradeUrl;
+                            const url = new URL(tradeUrl);
+                            const partner = url.searchParams.get("partner") ?? "";
+                            const token = url.searchParams.get("token") ?? "";
+                            if (!partner || !token) { alert("Невалидный Trade URL пользователя"); return; }
+                            const params = new URLSearchParams({ partner, token });
+                            (orderDetail.items ?? []).forEach((it: any) => {
+                              const appId = GAME_APP_IDS[it.game] ?? "730";
+                              if (it.externalId) params.append("for_item", `${appId}_2_${it.externalId}`);
+                            });
+                            window.open(`https://steamcommunity.com/tradeoffer/new/?${params.toString()}`, "_blank");
+                          }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                          {" "}Открыть трейд с предметами
+                        </button>
+                      )}
                       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                         <input className="adm-input" placeholder="Ссылка на профиль бота Steam" value={botUrlInput} onChange={(e) => setBotUrlInput(e.target.value)} />
                         <input className="adm-input" placeholder="ID трейд оффера (число)" value={tradeOfferUrlInput} onChange={(e) => setTradeOfferUrlInput(e.target.value)} />
@@ -959,6 +986,41 @@ export default function AdminPage() {
               <div className="adm-card adm-card--stat">
                 <span className="adm-stat__label">Активных правил</span>
                 <span className="adm-stat__value">{pricingRules.length}</span>
+              </div>
+            </div>
+
+            <div className="adm-card" style={{ marginBottom: 16, padding: "16px 20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                <span style={{ fontWeight: 700, fontSize: 14, whiteSpace: "nowrap" }}>Мин. цена предмета ($)</span>
+                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Предметы дешевле этого порога нельзя будет выбрать для продажи</span>
+                <div style={{ display: "flex", gap: 8, alignItems: "center", marginLeft: "auto" }}>
+                  <input
+                    className="adm-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={minItemPrice}
+                    onChange={(e) => setMinItemPrice(e.target.value)}
+                    style={{ width: 120 }}
+                  />
+                  <button
+                    className="adm-btn adm-btn--primary adm-btn--sm"
+                    disabled={minItemPriceSaving}
+                    onClick={async () => {
+                      setMinItemPriceSaving(true);
+                      try {
+                        await fetch("/api/admin/settings", {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ key: "min_item_price_usd", value: minItemPrice || "0" }),
+                        });
+                        addToast("Мин. цена сохранена", "default");
+                      } catch { addToast("Ошибка сохранения", "default"); }
+                      finally { setMinItemPriceSaving(false); }
+                    }}
+                  >{minItemPriceSaving ? "..." : "Сохранить"}</button>
+                </div>
               </div>
             </div>
 

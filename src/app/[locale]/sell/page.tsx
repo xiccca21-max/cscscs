@@ -202,6 +202,7 @@ export default function SellPage() {
 
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [loadingInventory, setLoadingInventory] = useState(false);
+  const [minItemPrice, setMinItemPrice] = useState(0);
 
   const [activeGame, setActiveGame] = useState("cs2");
   const [searchQuery, setSearchQuery] = useState("");
@@ -250,13 +251,16 @@ export default function SellPage() {
     } catch {
       return [];
     }
-    let json: { success?: boolean; data?: { items?: Record<string, unknown>[] } };
+    let json: { success?: boolean; data?: { items?: Record<string, unknown>[]; minPrice?: number } };
     try {
       json = await res.json();
     } catch {
       return [];
     }
     if (!json.success || !json.data?.items) return [];
+    if (typeof json.data.minPrice === "number" && json.data.minPrice > 0) {
+      setMinItemPrice((prev) => Math.max(prev, json.data!.minPrice!));
+    }
     const wearMap: Record<string, string> = { "Factory New": "FN", "Minimal Wear": "MW", "Field-Tested": "FT", "Well-Worn": "WW", "Battle-Scarred": "BS" };
     return json.data.items.map((item: Record<string, unknown>) => {
       const name = (item.name as string) || "Unknown";
@@ -422,6 +426,7 @@ export default function SellPage() {
 
   /* ---- handlers ---- */
   const toggleItem = useCallback((item: InventoryItem) => {
+    if (minItemPrice > 0 && item.price < minItemPrice) return;
     setSelectedItems((prev) => {
       if (prev.find((i) => i.id === item.id)) return prev.filter((i) => i.id !== item.id);
       const hasCs2 = prev.some((i) => i.game === "cs2");
@@ -436,7 +441,7 @@ export default function SellPage() {
       }
       return [...prev, item];
     });
-  }, []);
+  }, [minItemPrice]);
 
   const selectAll = useCallback(() => {
     setSelectedItems((prev) => {
@@ -445,6 +450,7 @@ export default function SellPage() {
       const ids = new Set(prev.map((i) => i.id));
       const toAdd = filteredItems.filter((i) => {
         if (ids.has(i.id)) return false;
+        if (minItemPrice > 0 && i.price < minItemPrice) return false;
         if (i.game === "cs2" && hasOther) return false;
         if (i.game !== "cs2" && hasCs2) return false;
         return true;
@@ -455,7 +461,7 @@ export default function SellPage() {
       if (combinedHasCs2 && combinedHasOther) return prev;
       return combined;
     });
-  }, [filteredItems]);
+  }, [filteredItems, minItemPrice]);
 
   const clearAll = useCallback(() => setSelectedItems([]), []);
 
@@ -1047,11 +1053,12 @@ export default function SellPage() {
                 const floatPct = item.float != null ? (item.float * 100).toFixed(2) : null;
                 const { whole, cents } = formatParts(item.price);
                 const isSelected = selectedItems.some((s) => s.id === item.id);
+                const isBelowMin = minItemPrice > 0 && item.price < minItemPrice;
 
                 return (
                   <div
                     key={item.id}
-                    className={`inv-card${isSelected ? " selected" : ""}`}
+                    className={`inv-card${isSelected ? " selected" : ""}${isBelowMin ? " unavailable" : ""}`}
                     data-game={item.game}
                     data-name={item.name}
                     data-price={item.price}

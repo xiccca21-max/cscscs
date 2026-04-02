@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { getBulkPrices } from "@/lib/pricing";
 import { getSteamInventory } from "@/lib/steam";
 import type { Game } from "@prisma/client";
@@ -85,7 +86,13 @@ export async function GET(request: NextRequest) {
       price: priceMap.get(item.assetId)?.buyoutPrice ?? null,
     }));
 
-    return NextResponse.json({ success: true, data: { items: itemsWithPrices } });
+    let minPrice = 0;
+    try {
+      const row = await db.siteSettings.findUnique({ where: { key: "min_item_price_usd" } });
+      if (row) minPrice = parseFloat(row.value) || 0;
+    } catch {}
+
+    return NextResponse.json({ success: true, data: { items: itemsWithPrices, minPrice } });
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
     console.error(`[inventory] Error after ${Date.now() - t0}ms:`, message);

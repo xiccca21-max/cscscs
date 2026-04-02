@@ -10,6 +10,21 @@ type ToastItem = { id: number; message: string; type?: "order" | "cashout" | "me
 
 let toastIdCounter = 0;
 
+function createWorkerInterval(callback: () => void, ms: number): () => void {
+  try {
+    const blob = new Blob(
+      [`setInterval(()=>postMessage(1),${ms})`],
+      { type: "application/javascript" },
+    );
+    const w = new Worker(URL.createObjectURL(blob));
+    w.onmessage = () => callback();
+    return () => w.terminate();
+  } catch {
+    const id = setInterval(callback, ms);
+    return () => clearInterval(id);
+  }
+}
+
 async function playNotifSound(type: "order" | "cashout" | "message" | "default") {
   try {
     const ctx = new AudioContext();
@@ -285,56 +300,58 @@ export default function AdminPage() {
     init();
   }, [fetchUsers, fetchAuditLogs, fetchPayments, fetchPrices, fetchReviews, fetchPromos, safeFetch]);
 
+  const pollRef = useRef<() => void>(() => {});
+  pollRef.current = async () => {
+    {
+      const params = new URLSearchParams();
+      params.set("limit", "50");
+      if (section === "orders") {
+        if (ordersStatus) params.set("status", ordersStatus);
+        if (ordersSearch.trim()) params.set("search", ordersSearch.trim());
+      }
+      const d = await safeFetch(`/api/admin/orders?${params.toString()}`);
+      if (d) {
+        const newOrders = d.data?.orders ?? [];
+        const newIds = new Set<string>(newOrders.map((o: any) => o.id as string));
+        if (prevOrderIdsRef.current.size > 0) {
+          const fresh = newOrders.filter((o: any) => !prevOrderIdsRef.current.has(o.id));
+          fresh.forEach((o: any) => addToast(`Новый заказ #${o.orderNumber} — $${parseFloat(o.totalAmount).toFixed(2)}`, "order"));
+        }
+        prevOrderIdsRef.current = newIds;
+        if (section === "orders") setOrders(newOrders);
+        setNewOrdersCount(newOrders.filter((o: any) => o.status === "CREATED").length);
+      }
+    }
+    {
+      const dc = await safeFetch("/api/admin/cashouts");
+      if (dc) {
+        const newCashouts = dc.data?.cashouts ?? [];
+        const newCIds = new Set<string>(newCashouts.map((c: any) => c.id as string));
+        if (prevCashoutIdsRef.current.size > 0) {
+          const fresh = newCashouts.filter((c: any) => !prevCashoutIdsRef.current.has(c.id));
+          fresh.forEach((c: any) => addToast(`Новый запрос на вывод — $${parseFloat(c.amount ?? 0).toFixed(2)}`, "cashout"));
+        }
+        prevCashoutIdsRef.current = newCIds;
+        if (section === "cashouts") setCashouts(newCashouts);
+        setNewCashoutsCount(newCashouts.filter((c: any) => c.status === "CREATED").length);
+      }
+    }
+    {
+      const dm = await safeFetch("/api/admin/orders/unread-messages");
+      if (dm) {
+        const cnt = dm.data?.count ?? 0;
+        if (prevUnreadRef.current > 0 && cnt > prevUnreadRef.current) {
+          addToast(`Новое сообщение от клиента`, "message");
+        }
+        prevUnreadRef.current = cnt;
+      }
+    }
+  };
+
   useEffect(() => {
     if (!adminReady || authError) return;
-    const id = setInterval(async () => {
-      {
-        const params = new URLSearchParams();
-        params.set("limit", "50");
-        if (section === "orders") {
-          if (ordersStatus) params.set("status", ordersStatus);
-          if (ordersSearch.trim()) params.set("search", ordersSearch.trim());
-        }
-        const d = await safeFetch(`/api/admin/orders?${params.toString()}`);
-        if (d) {
-          const newOrders = d.data?.orders ?? [];
-          const newIds = new Set<string>(newOrders.map((o: any) => o.id as string));
-          if (prevOrderIdsRef.current.size > 0) {
-            const fresh = newOrders.filter((o: any) => !prevOrderIdsRef.current.has(o.id));
-            fresh.forEach((o: any) => addToast(`Новый заказ #${o.orderNumber} — $${parseFloat(o.totalAmount).toFixed(2)}`, "order"));
-          }
-          prevOrderIdsRef.current = newIds;
-          if (section === "orders") setOrders(newOrders);
-          setNewOrdersCount(newOrders.filter((o: any) => o.status === "CREATED").length);
-        }
-      }
-      {
-        const dc = await safeFetch("/api/admin/cashouts");
-        if (dc) {
-          const newCashouts = dc.data?.cashouts ?? [];
-          const newCIds = new Set<string>(newCashouts.map((c: any) => c.id as string));
-          if (prevCashoutIdsRef.current.size > 0) {
-            const fresh = newCashouts.filter((c: any) => !prevCashoutIdsRef.current.has(c.id));
-            fresh.forEach((c: any) => addToast(`Новый запрос на вывод — $${parseFloat(c.amount ?? 0).toFixed(2)}`, "cashout"));
-          }
-          prevCashoutIdsRef.current = newCIds;
-          if (section === "cashouts") setCashouts(newCashouts);
-          setNewCashoutsCount(newCashouts.filter((c: any) => c.status === "CREATED").length);
-        }
-      }
-      {
-        const dm = await safeFetch("/api/admin/orders/unread-messages");
-        if (dm) {
-          const cnt = dm.data?.count ?? 0;
-          if (prevUnreadRef.current > 0 && cnt > prevUnreadRef.current) {
-            addToast(`Новое сообщение от клиента`, "message");
-          }
-          prevUnreadRef.current = cnt;
-        }
-      }
-    }, 3000);
-    return () => clearInterval(id);
-  }, [adminReady, authError, section, ordersSearch, ordersStatus, safeFetch, addToast]);
+    return createWorkerInterval(() => pollRef.current(), 3000);
+  }, [adminReady, authError]);
 
   useEffect(() => {
     if (!adminReady || authError || section !== "orders") return;
@@ -344,34 +361,36 @@ export default function AdminPage() {
     return () => clearTimeout(t);
   }, [ordersSearch, ordersStatus, section, adminReady, authError, fetchOrders]);
 
+  const orderDetailPollRef = useRef<() => void>(() => {});
+  orderDetailPollRef.current = async () => {
+    if (!orderDetail?.id || section !== "orders") return;
+    const d = await safeFetch(`/api/admin/orders/${orderDetail.id}`);
+    if (d?.data) setOrderDetail(d.data);
+  };
   useEffect(() => {
     if (!orderDetail?.id || section !== "orders") return;
-    const id = setInterval(async () => {
-      const d = await safeFetch(`/api/admin/orders/${orderDetail.id}`);
-      if (d?.data) setOrderDetail(d.data);
-    }, 3000);
-    return () => clearInterval(id);
-  }, [orderDetail?.id, section, safeFetch]);
+    return createWorkerInterval(() => orderDetailPollRef.current(), 3000);
+  }, [orderDetail?.id, section]);
 
+  const chatPollRef = useRef<() => void>(() => {});
+  chatPollRef.current = async () => {
+    if (!orderDetail?.id) return;
+    const d = await safeFetch(`/api/admin/orders/${orderDetail.id}/messages`);
+    if (d?.data) {
+      const msgs = d.data;
+      const userMsgs = msgs.filter((m: any) => m.authorRole === "user");
+      if (prevChatCountRef.current > 0 && userMsgs.length > prevChatCountRef.current) {
+        addToast(`Новое сообщение от клиента (заказ #${orderDetail.orderNumber ?? ""})`, "message");
+      }
+      prevChatCountRef.current = userMsgs.length;
+      setChatMessages(msgs);
+    }
+  };
   useEffect(() => {
     if (!orderDetail?.id) { setChatMessages([]); prevChatCountRef.current = 0; return; }
-    let cancelled = false;
-    const fetchMsgs = async () => {
-      const d = await safeFetch(`/api/admin/orders/${orderDetail.id}/messages`);
-      if (!cancelled && d?.data) {
-        const msgs = d.data;
-        const userMsgs = msgs.filter((m: any) => m.authorRole === "user");
-        if (prevChatCountRef.current > 0 && userMsgs.length > prevChatCountRef.current) {
-          addToast(`Новое сообщение от клиента (заказ #${orderDetail.orderNumber ?? ""})`, "message");
-        }
-        prevChatCountRef.current = userMsgs.length;
-        setChatMessages(msgs);
-      }
-    };
-    fetchMsgs();
-    const iv = setInterval(fetchMsgs, 4000);
-    return () => { cancelled = true; clearInterval(iv); };
-  }, [orderDetail?.id, safeFetch, addToast]);
+    chatPollRef.current();
+    return createWorkerInterval(() => chatPollRef.current(), 4000);
+  }, [orderDetail?.id]);
 
 
   const sendChatMsg = async () => {

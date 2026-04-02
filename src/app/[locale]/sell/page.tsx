@@ -232,6 +232,15 @@ export default function SellPage() {
 
   const offerItemsRef = useRef<HTMLDivElement>(null);
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [gameMixPopup, setGameMixPopup] = useState<"cs2" | "other" | null>(null);
+
+  const [promoCode, setPromoCode] = useState("");
+  const [promoDiscount, setPromoDiscount] = useState<number | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoApplied, setPromoApplied] = useState<string | null>(null);
+
   /* ---- fetch inventory ---- */
   const fetchGame = useCallback(async (game: string) => {
     const gameApiMap: Record<string, string> = { cs2: "CS2", dota2: "DOTA2", tf2: "TF2", rust: "RUST" };
@@ -456,15 +465,6 @@ export default function SellPage() {
     const delta = dir === "left" ? -200 : 200;
     el.scrollTo({ left: el.scrollLeft + delta, behavior: "smooth" });
   }, []);
-
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [gameMixPopup, setGameMixPopup] = useState<"cs2" | "other" | null>(null);
-
-  const [promoCode, setPromoCode] = useState("");
-  const [promoDiscount, setPromoDiscount] = useState<number | null>(null);
-  const [promoError, setPromoError] = useState<string | null>(null);
-  const [promoLoading, setPromoLoading] = useState(false);
-  const [promoApplied, setPromoApplied] = useState<string | null>(null);
 
   const validateFields = useCallback((): boolean => {
     const errs: Record<string, string> = {};

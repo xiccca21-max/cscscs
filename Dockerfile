@@ -30,6 +30,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Standalone не копирует prisma/ — без этого `exec app npx prisma db push` не находит схему
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
+# seed-client.ts импортирует dotenv/config; standalone не тащит dotenv в node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/dotenv ./node_modules/dotenv
 RUN npm install -g prisma@7.5.0 tsx@4.21.0
 USER nextjs
 EXPOSE 3000

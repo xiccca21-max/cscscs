@@ -1,239 +1,172 @@
-Полная настройка SKINSELL на своём VPS (один раз)
+# Деплой SKINSELL на VPS (Docker)
 
-Ниже один рабочий путь: Ubuntu-сервер, Docker, Postgres и сайт на одной машине, как в docker-compose.yml репозитория. Делай по порядку, не перескакивай.
+Стек: Ubuntu, Docker, Postgres + приложение из `docker-compose.yml`. Шаги по порядку.
 
-Что это даёт
+**До сервера:** Ubuntu 22.04+, ~2 ГБ RAM, белый IP, SSH.  
+Подготовь: [Steam Web API key](https://steamcommunity.com/dev/apikey), `SESSION_SECRET` (`openssl rand -hex 32`), [steamID64](https://steamid.io) для `ADMIN_STEAM_IDS`, решение по URL первого захода (IP:3000 или домен) → это будет `NEXT_PUBLIC_APP_URL`.
 
-На сервере поднимутся два контейнера: база PostgreSQL и сам сайт. Строка подключения к базе для приложения уже прописана внутри docker-compose.yml (хост db, логин postgres, база cs_ne_go). Тебе не нужно отдельно «искать» DATABASE_URL в интернете — для Docker ты либо оставляешь как в файле, либо меняешь пароль в одном месте и копируешь его в строку подключения (это расписано в шаге про пароль).
+---
 
-Файл .env на сервере нужен не для DATABASE_URL в типовом деплое через compose из этого репозитория: compose подставляет секреты из .env в переменные вроде SESSION_SECRET и STEAM_API_KEY. Подключение app к Postgres задаётся прямо в docker-compose.yml в блоке app → environment.
+### 1. SSH
 
-
-Нулевой шаг. Что подготовить до сервера
-
-1) Сервер с Ubuntu 22.04 или новее, минимум около 2 ГБ ОЗУ, белый IP.
-
-2) Доступ по SSH (логин и пароль или ключ).
-
-3) Ключ Steam Web API: зайти на https://steamcommunity.com/dev/apikey , залогиниться, указать любой домен (можно заглушку), скопировать ключ.
-
-4) Секрет для сессий: на своём ПК выполнить команду openssl rand -hex 32 и сохранить вывод в блокнот — это значение для SESSION_SECRET.
-
-5) Твой Steam ID в виде длинного числа (steamID64): открыть https://steamid.io , вставить ссылку на профиль Steam, скопировать steamID64 — это для ADMIN_STEAM_IDS.
-
-6) Решить, с какого адреса первый заход: только IP (например http://12.34.56.78:3000) или сразу домен. От этого зависит NEXT_PUBLIC_APP_URL (см. шаг 4).
-
-
-Шаг 1. Зайти на сервер по SSH
-
-Подставь свой пользователь и IP:
-
+```bash
 ssh ubuntu@ТВОЙ_IP
+```
 
-Дальше все команды выполняются на сервере, если не сказано иначе.
+Дальше команды — на сервере.
 
+### 2. Docker
 
-Шаг 2. Установить Docker
-
-Выполнить по очереди:
-
+```bash
 sudo apt update && sudo apt upgrade -y
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
+```
 
-Выйти из SSH и зайти снова , чтобы группа docker подхватилась. Проверка:
+Выйти из SSH и зайти снова. Проверка: `docker run --rm hello-world`
 
-docker run --rm hello-world
+### 3. Код
 
-
-Шаг 3. Скачать код
-
-Установи git, если спросит:
-
+```bash
 sudo apt install -y git
-
-Клонируй репозиторий (подставь свой URL):
-
 cd ~
 git clone https://github.com/ТВОЙ_АККАУНТ/cs_ne_go.git
 cd cs_ne_go
+```
 
+### 4. `.env`
 
-Шаг 4. Создать файл .env на сервере
-
-Скопировать пример:
-
+```bash
 cp .env.example .env
-
-Открыть редактором:
-
 nano .env
+```
 
-Заполни так (пустые кавычки заменить реальными значениями):
+Заполнить:
 
-STEAM_API_KEY — ключ с шага 0.
+| Переменная | Смысл |
+|------------|--------|
+| `STEAM_API_KEY` | ключ Steam API |
+| `SESSION_SECRET` | вывод `openssl rand -hex 32` |
+| `NEXT_PUBLIC_APP_URL` | **точный** URL из браузера, без `/` в конце (первый тест: `http://ТВОЙ_IP:3000`, потом `https://домен`) |
+| `ADMIN_STEAM_IDS` | steamID64, через запятую если несколько |
+| `STEAMAPIS_KEY` | при необходимости SteamApis |
 
-SESSION_SECRET — строка с openssl rand -hex 32.
+`DATABASE_URL` / `DIRECT_URL` для **docker compose** приложения задаются в `docker-compose.yml`, не в `.env` (в `.env` они нужны для локального запуска без Docker).
 
-NEXT_PUBLIC_APP_URL — очень важно. Это ровно тот адрес, по которому открываешь сайт в браузере, без слэша на конце.
+### 5. Пароль Postgres (прод)
 
-  Если первый тест без домена, с порта 3000: http://ТВОЙ_IP:3000 (подставь белый IP сервера).
+По умолчанию везде пароль `postgres` — сменить.
 
-  Когда повесишь домен и HTTPS — поменяешь на https://твой-домен.ru
-
-ADMIN_STEAM_IDS — steamID64 с шага 0, одно число или несколько через запятую.
-
-STEAMAPIS_KEY - стимапис ключ
-
-Строки DATABASE_URL и DIRECT_URL в .env для запуска через docker compose из этого проекта можно не трогать: они используются если гоняешь сайт локально без Docker. В контейнере app база задаётся в docker-compose.yml. Не путай.
-
-
-Шаг 5. Пароль Postgres (обязательно для реального сервера)
-
-Сейчас в docker-compose.yml везде пароль postgres — так нельзя оставлять в проде.
-
-Открой файл:
-
+```bash
 nano docker-compose.yml
+```
 
-В сервисе db в блоке environment поменяй POSTGRES_PASSWORD на свой сложный пароль.
+- `db` → `POSTGRES_PASSWORD`: свой пароль  
+- `app` → `DATABASE_URL` и `DIRECT_URL`: в URI заменить `postgres:СТАРЫЙ` на `postgres:НОВЫЙ`:
 
-В сервисе app в блоке environment в двух строках DATABASE_URL и DIRECT_URL замени слово postgres после двоеточия на тот же пароль. Формат строки:
+`postgresql://postgres:НОВЫЙ_ПАРОЛЬ@db:5432/cs_ne_go?schema=public`
 
-postgresql://postgres:ТВОЙ_НОВЫЙ_ПАРОЛЬ@db:5432/cs_ne_go?schema=public
+Сохранить: Ctrl+O, Enter, Ctrl+X.
 
-Сохрани файл (в nano: Ctrl+O, Enter, Ctrl+X).
-
-
-Шаг 6. Собрать и запустить контейнеры
+### 6. Запуск
 
 Из папки проекта:
 
+```bash
 export DOCKER_BUILDKIT=1
 docker compose up -d --build
+```
 
-Первая сборка может занять несколько минут. Посмотреть логи приложения:
+Логи: `docker compose logs -f app` (выход: Ctrl+C)
 
-docker compose logs -f app
+### 7. База: таблицы + сиды оплат
 
-Выйти из логов: Ctrl+C.
+Один раз после успешного старта. **Сначала схема, потом сид** (иначе «таблица не существует»).
 
+На сервере **без Node** (обычный случай):
 
-Шаг 7. Создать таблицы в базе и залить способы оплаты
-
-Один раз после первого успешного запуска.
-
-**Сначала схема в Postgres, потом сид.** Если запустить только сид без `db push`, будет ошибка «таблица … не существует».
-
-На VPS часто **нет** установленного `npm` — это нормально. Одной строкой (из папки проекта):
-
+```bash
 docker compose exec app sh -lc "npx prisma db push && tsx prisma/seed-payments.ts"
+```
 
-Если у тебя на машине с проектом есть Node/npm:
+С Node на машине с репозиторием: `npm run docker:db:setup`  
+Или по отдельности: `docker compose exec app npx prisma db push` затем `docker compose exec app tsx prisma/seed-payments.ts`
 
-npm run docker:db:setup
+Проблемы с БД: `docker compose ps` (db healthy?), пароль в шаге 5.
 
-Или вручную по шагам:
+### 8. Проверка
 
-docker compose exec app npx prisma db push
-docker compose exec app tsx prisma/seed-payments.ts
+На сервере:
 
-Не вставляй в терминал **вывод** других команд (строки с `✔`, стектрейсы Node) — только сами команды, иначе bash попытается выполнить мусор.
-
-Если Prisma ругается на подключение — смотри пароль в шаге 5 и что контейнер db в статусе healthy: docker compose ps
-
-
-Шаг 8. Проверить, что сайт живой
-
-На самом сервере:
-
+```bash
 curl -s http://127.0.0.1:3000/api/health
+```
 
-Должен быть ответ с ok и числом ts.
+В браузере с другой машины (порт 3000 открыт — см. шаг 9): `http://ТВОЙ_IP:3000`
 
-С другого компьютера в браузере (открой порт в фаерволе, см. шаг 9):
+### 9. Фаервол (ufw)
 
-http://ТВОЙ_IP:3000
-
-
-Шаг 9. Фаервол (чтобы снаружи открыть сайт)
-
-Пример для ufw:
-
+```bash
 sudo ufw allow OpenSSH
 sudo ufw allow 3000/tcp
 sudo ufw enable
+sudo ufw status
+```
 
-Проверь статус: sudo ufw status
+Если фаервол у провайдера в панели — открыть 3000 там тоже.
 
-Если провайдер даёт панель с отдельным фаерволом — открой там тоже порт 3000 для первого теста.
+### 10. Домен и HTTPS (позже)
 
-
-Шаг 10. Домен и HTTPS (когда будешь готов)
-
-Поставь Nginx и certbot (пример для Ubuntu):
-
+```bash
 sudo apt install -y nginx certbot python3-certbot-nginx
-
-Настрой server в Nginx: proxy_pass на http://127.0.0.1:3000 , заголовки как в любой инструкции для Next.js (Host, X-Forwarded-For, X-Forwarded-Proto).
-
-Получи сертификат:
-
 sudo certbot --nginx -d твой-домен.ru
+```
 
-Потом обязательно:
+В `.env`: `NEXT_PUBLIC_APP_URL=https://твой-домен.ru`  
+Перезапуск:
 
-Открой .env на сервере и выстави NEXT_PUBLIC_APP_URL=https://твой-домен.ru
-
-Перезапусти контейнеры, чтобы подтянулись переменные:
-
+```bash
 cd ~/cs_ne_go
 docker compose up -d
+```
 
-Важно: адрес в браузере и NEXT_PUBLIC_APP_URL должны совпадать по схеме (https) и имени хоста. Иначе логин Steam часто ломается.
+URL в браузере и `NEXT_PUBLIC_APP_URL` должны совпадать (схема и хост) — иначе Steam OAuth часто ломается.
 
+### 11. Проверка функционала
 
-Шаг 11. Финальная проверка
+Сайт → вход Steam → при необходимости `/admin` (steamID64 в `ADMIN_STEAM_IDS`). В админке способы оплаты должны быть; если пусто — как при сиде / кнопка набора по умолчанию.
 
-Открыть главную страницу.
+---
 
-Нажать вход через Steam — должен пустить.
+### Обновление кода
 
-Зайти на /admin — только если твой steamID64 был в ADMIN_STEAM_IDS.
-
-В админке раздел оплаты: должны быть методы; если пусто — кнопка добавления стандартного набора (тот же смысл, что seed).
-
-
-Обновление сайта после правок в git
-
+```bash
 cd ~/cs_ne_go
 git pull
 docker compose up -d --build
+```
 
-Если менялась схема Prisma:
+Менялась схема Prisma:
 
+```bash
 docker compose exec app npx prisma db push
+```
 
+---
 
-Локальная разработка на своём ПК (кратко)
+### Локально у себя
 
-Нужны Node 20 и Postgres (или только контейнер с базой: npm run docker:db).
+Node 20, Postgres или `npm run docker:db`.  
+`cp .env.example .env` → `NEXT_PUBLIC_APP_URL=http://localhost:3000`, `DATABASE_URL`/`DIRECT_URL` как в примере.  
+`npm install` → `npm run setup` → `npm run dev` → http://localhost:3000
 
-cp .env.example .env — заполнить ключи как на сервере, для локалки NEXT_PUBLIC_APP_URL=http://localhost:3000 , DATABASE_URL и DIRECT_URL на localhost как в примере.
+---
 
-npm install
-npm run setup
-npm run dev
+### Частые сбои
 
-Браузер: http://localhost:3000
-
-
-Если что-то сломалось
-
-Логин Steam не работает — почти всегда NEXT_PUBLIC_APP_URL не совпадает с реальным URL в адресной строке.
-
-Нет админки — в ADMIN_STEAM_IDS только steamID64, не никнейм.
-
-База — проверь docker compose ps , пароль в строках подключения и POSTGRES_PASSWORD.
-
-docker compose logs app — смотреть ошибки приложения.
+| Симптом | Что проверить |
+|---------|----------------|
+| Steam login | `NEXT_PUBLIC_APP_URL` = реальный URL в адресной строке |
+| Нет админки | В `ADMIN_STEAM_IDS` только steamID64 |
+| БД | `docker compose ps`, пароль в compose и `POSTGRES_PASSWORD` |
+| Ошибки приложения | `docker compose logs app` |

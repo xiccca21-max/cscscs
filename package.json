@@ -17,6 +17,7 @@
     "docker:build": "docker compose build app",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
+    "docker:db:setup": "docker compose exec app sh -lc \"npx prisma db push && tsx prisma/seed-payments.ts\"",
     "setup": "npm install && prisma generate && prisma db push && npx tsx prisma/seed-payments.ts"
   },
   "dependencies": {

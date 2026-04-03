@@ -21,7 +21,7 @@ RUN npm run build
 # Зависимости Prisma+pg+dotenv для `npx prisma db push` и `tsx prisma/seed-*.ts` (Next standalone их не включает)
 FROM builder AS seed-modules
 RUN mkdir -p /opt/seed-modules && cd /app/node_modules && \
-    cp -r '@prisma' dotenv \
+    cp -r '@prisma' dotenv prisma mysql2 \
       pg pg-cloudflare pg-connection-string pg-int8 pg-numeric \
       pg-pool pg-protocol pg-types pgpass \
       postgres postgres-array postgres-bytea postgres-date postgres-interval postgres-range \

@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const SYSTEM_TYPES = new Set([
-  "balance", "card", "crypto", "btc", "usdt-trc20", "usdt-erc20", "eth", "ltc", "bank",
+  "balance", "card", "paypal", "crypto", "btc", "usdt-trc20", "usdt-erc20", "eth", "ltc", "bank",
 ]);
 
 type PatchBody = {

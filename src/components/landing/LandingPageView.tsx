@@ -405,6 +405,7 @@ export function LandingPageView() {
           <div className="payouts-grid">
             {[
               { pc: "#1A1F71", badge: t("payoutBadgeInstant"), h: t("payoutVisa"), p: t("payoutVisaDesc") },
+              { pc: "#0070ba", badge: t("payoutBadgeInstant"), h: t("payoutPaypal"), p: t("payoutPaypalDesc") },
               { pc: "#F7931A", badge: t("payoutBadge10m"), h: t("payoutBtc"), p: t("payoutBtcDesc") },
               { pc: "#26A17B", badge: t("payoutBadgeInstant"), h: t("payoutUsdt"), p: t("payoutUsdtDesc") },
               { pc: "#6366f1", badge: t("payoutBadge12d"), h: t("payoutBank"), p: t("payoutBankDesc") },

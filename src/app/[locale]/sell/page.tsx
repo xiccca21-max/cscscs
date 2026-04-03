@@ -40,12 +40,14 @@ const COMMISSION_FALLBACK: Record<string, number> = {
   balance: 0,
   crypto: 0.01,
   card: 0.025,
+  paypal: 0.025,
   bank: 0.03,
 };
 
 const PAY_ICONS: Record<string, { src: string; cls: string }> = {
   balance:      { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
   card:         { src: "/icons/pay-card.png",    cls: "pay-btn__img" },
+  paypal:       { src: "/icons/pay-paypal.svg", cls: "pay-btn__img" },
   crypto:       { src: "/icons/pay-crypto.png",  cls: "pay-btn__img pay-btn__img--circle pay-btn__img--crypto" },
   btc:          { src: "/icons/pay-crypto.png",  cls: "pay-btn__img pay-btn__img--circle pay-btn__img--crypto" },
   "usdt-trc20": { src: "/icons/tether.png",      cls: "pay-btn__img pay-btn__img--circle" },
@@ -61,8 +63,11 @@ const PAY_ICONS: Record<string, { src: string; cls: string }> = {
 
 const ICON_WRAP_CLS: Record<string, string> = {
   card: "pay-btn__icon pay-btn__icon--card",
+  paypal: "pay-btn__icon pay-btn__icon--paypal",
   bank: "pay-btn__icon pay-btn__icon--bank",
 };
+
+const PAYPAL_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const CRYPTO_TYPES = new Set(["crypto", "btc", "usdt-trc20", "usdt-erc20", "eth", "ltc"]);
 
@@ -480,6 +485,10 @@ export default function SellPage() {
     if (paymentMethod === "card") {
       req("cardNumber", "Card number");
       req("cardName", "Cardholder name");
+    } else if (paymentMethod === "paypal") {
+      const em = payDetails.paypalEmail?.trim() ?? "";
+      if (!em) errs.paypalEmail = t("paypalEmailRequired");
+      else if (!PAYPAL_EMAIL_RE.test(em)) errs.paypalEmail = t("paypalEmailInvalid");
     } else if (paymentMethod === "crypto") {
       if (!payDetails.network) errs.network = "Select a network";
       req("walletAddress", "Wallet address");
@@ -495,7 +504,7 @@ export default function SellPage() {
     }
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [paymentMethod, payDetails, effectivePayType, dbPaymentMethods, youReceive]);
+  }, [paymentMethod, payDetails, effectivePayType, dbPaymentMethods, youReceive, t]);
 
   const handleSubmit = useCallback(async () => {
     if (!canSubmit) return;
@@ -1228,6 +1237,15 @@ export default function SellPage() {
                     </button>
                   );
                 })()}
+                {(() => {
+                  const paypalPm = mainMethods.find((m) => m.type === "paypal");
+                  return (
+                    <button className={`pay-btn${paymentMethod === "paypal" ? " active" : ""}`} data-method="paypal" onClick={() => { setPaymentMethod("paypal"); setCryptoDropOpen(false); }}>
+                      <span className="pay-btn__icon pay-btn__icon--paypal"><img src="/icons/pay-paypal.svg" alt="PayPal" className="pay-btn__img" /></span>
+                      <span className="pay-btn__name">{paypalPm?.name ?? t("payPaypal")}</span>
+                    </button>
+                  );
+                })()}
                 {/* Crypto (grouped) */}
                 <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" onClick={() => { setPaymentMethod("crypto"); }}>
                   <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
@@ -1258,6 +1276,7 @@ export default function SellPage() {
                   }
                   if (paymentMethod === "balance") return <span>{t("fee0")}</span>;
                   if (paymentMethod === "card") return <span>{t("fee25")} · {t("minLabel")}: {format(1)}</span>;
+                  if (paymentMethod === "paypal") return <span>{t("fee25")} · {t("minLabel")}: {format(1)}</span>;
                   if (paymentMethod === "crypto") return <span>{t("fee1")} · {t("minLabel")}: {format(5)}</span>;
                   if (paymentMethod === "bank") return <span>{t("fee3")} · {t("minLabel")}: {format(10)}</span>;
                   return null;
@@ -1412,13 +1431,16 @@ export default function SellPage() {
                 {paymentMethod === "card" && (
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 )}
+                {paymentMethod === "paypal" && (
+                  <img src="/icons/pay-paypal.svg" alt="" width={36} height={36} className="checkout-modal__paypal-mark" />
+                )}
                 {paymentMethod === "crypto" && (
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
                 )}
                 {paymentMethod === "bank" && (
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/></svg>
                 )}
-                {!["balance", "card", "crypto", "bank"].includes(paymentMethod) && (
+                {!["balance", "card", "paypal", "crypto", "bank"].includes(paymentMethod) && (
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 )}
               </div>
@@ -1436,9 +1458,10 @@ export default function SellPage() {
                 <span className="checkout-modal__method-badge">
                   {paymentMethod === "balance" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg> Balance</>)}
                   {paymentMethod === "card" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> {t("payCard")}</>)}
+                  {paymentMethod === "paypal" && (<><img src="/icons/pay-paypal.svg" alt="" width={14} height={14} className="checkout-modal__paypal-badge" /> {t("payPaypal")}</>)}
                   {paymentMethod === "crypto" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> {t("payCrypto")}</>)}
                   {paymentMethod === "bank" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/></svg> {t("payBank")}</>)}
-                  {!["balance", "card", "crypto", "bank"].includes(paymentMethod) && paymentMethod}
+                  {!["balance", "card", "paypal", "crypto", "bank"].includes(paymentMethod) && paymentMethod}
                 </span>
               </div>
             </div>
@@ -1454,6 +1477,22 @@ export default function SellPage() {
                     <p>Funds will be credited to your SKINSELL balance instantly.</p>
                   </div>
                 </div>
+              )}
+
+              {paymentMethod === "paypal" && (
+                <>
+                  <label className={`checkout-modal__field${fieldErrors.paypalEmail ? " has-error" : ""}`}>
+                    <span>{t("checkoutPaypalEmail")}</span>
+                    <div className="checkout-modal__input-wrap">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                      <input type="email" inputMode="email" autoComplete="email" placeholder="name@email.com"
+                        value={payDetails.paypalEmail || ""}
+                        onChange={(e) => { setPayDetails(p => ({ ...p, paypalEmail: e.target.value })); setFieldErrors(p => { const n = { ...p }; delete n.paypalEmail; return n; }); }} />
+                    </div>
+                    {fieldErrors.paypalEmail && <span className="checkout-modal__field-error">{fieldErrors.paypalEmail}</span>}
+                  </label>
+                  <p className="checkout-modal__hint">{t("checkoutPaypalHint")}</p>
+                </>
               )}
 
               {paymentMethod === "card" && (

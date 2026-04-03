@@ -125,7 +125,11 @@ docker compose logs -f app
 
 **Сначала схема в Postgres, потом сид.** Если запустить только сид без `db push`, будет ошибка «таблица … не существует».
 
-Всё одной командой из папки проекта на сервере (рекомендуется):
+На VPS часто **нет** установленного `npm` — это нормально. Одной строкой (из папки проекта):
+
+docker compose exec app sh -lc "npx prisma db push && tsx prisma/seed-payments.ts"
+
+Если у тебя на машине с проектом есть Node/npm:
 
 npm run docker:db:setup
 

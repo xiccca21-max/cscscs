@@ -18,16 +18,6 @@ ENV DIRECT_URL="postgresql://postgres:postgres@127.0.0.1:5432/cs_ne_go?schema=pu
 RUN npx prisma generate
 RUN npm run build
 
-# Зависимости Prisma+pg+dotenv для `npx prisma db push` и `tsx prisma/seed-*.ts` (Next standalone их не включает)
-FROM builder AS seed-modules
-RUN mkdir -p /opt/seed-modules && cd /app/node_modules && \
-    cp -r '@prisma' dotenv prisma mysql2 \
-      pg pg-cloudflare pg-connection-string pg-int8 pg-numeric \
-      pg-pool pg-protocol pg-types pgpass \
-      postgres postgres-array postgres-bytea postgres-date postgres-interval postgres-range \
-      split2 xtend \
-      /opt/seed-modules/
-
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
@@ -37,8 +27,8 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=seed-modules --chown=nextjs:nodejs /opt/seed-modules/ ./node_modules/
-# Standalone не копирует prisma/ — без этого `exec app npx prisma db push` не находит схему
+# Полный node_modules из builder: prisma db push грузит prisma.config + @prisma/config + effect + … — standalone кладёт лишь срез под Next
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 RUN npm install -g prisma@7.5.0 tsx@4.21.0

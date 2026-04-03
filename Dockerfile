@@ -13,6 +13,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Нет .env в контексте сборки; prisma.config.ts требует DIRECT_URL только для загрузки конфига (generate к БД не ходит)
+ENV DIRECT_URL="postgresql://postgres:postgres@127.0.0.1:5432/cs_ne_go?schema=public"
 RUN npx prisma generate
 RUN npm run build
 

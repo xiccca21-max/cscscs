@@ -127,13 +127,11 @@ docker compose logs -f app
 
 docker compose exec app npx prisma db push
 
-Сид способов оплат (`seed-payments.ts` тянет код из `src/`, его **нет** в минимальном production-образе). Запускай с **клона репозитория на сервере**, где уже есть `npm install` (или один раз `npm ci`):
+Сид способов оплат (`DATABASE_URL` уже подставляется compose в контейнер `app`):
 
-export DATABASE_URL="postgresql://postgres:ТВОЙ_ПАРОЛЬ@127.0.0.1:5432/cs_ne_go?schema=public"
-export DIRECT_URL="$DATABASE_URL"
-npx tsx prisma/seed-payments.ts
+docker compose exec app tsx prisma/seed-payments.ts
 
-Порт 5432 к Postgres в `docker-compose.yml` проброшен на хост — с сервера `127.0.0.1` подходит. Если Prisma ругается на подключение — смотри пароль в шаге 5 и что контейнер db в статусе healthy: docker compose ps
+Если Prisma ругается на подключение — смотри пароль в шаге 5 и что контейнер db в статусе healthy: docker compose ps
 
 
 Шаг 8. Проверить, что сайт живой

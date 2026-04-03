@@ -1,7 +1,5 @@
 import { Prisma } from "@prisma/client";
-import { createPrismaClient } from "../src/lib/create-prisma-client";
-
-const db = createPrismaClient();
+import { db } from "./seed-client";
 
 const methods = [
   { name: "Balance",             type: "balance",    commission: 0,   minAmount: 0,   currencies: ["USD", "RUB", "EUR"], sortOrder: 0 },

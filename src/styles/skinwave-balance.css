@@ -779,6 +779,23 @@
 .bal-pay-btn.active .bal-pay-btn__name {
   color: #4f46e5;
 }
+.bal-pay-btn[data-method="paypal"]:hover {
+  border-color: rgba(0, 112, 186, 0.35);
+  background: rgba(0, 156, 222, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 112, 186, 0.12);
+}
+.bal-pay-btn[data-method="paypal"].active {
+  border-color: #0070ba;
+  background: rgba(0, 156, 222, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 112, 186, 0.2);
+}
+.bal-pay-btn[data-method="paypal"].active .bal-pay-btn__icon {
+  background: linear-gradient(135deg, #003087, #009cde);
+  box-shadow: 0 3px 10px rgba(0, 112, 186, 0.35);
+}
+.bal-pay-btn[data-method="paypal"].active .bal-pay-btn__name {
+  color: #0070ba;
+}
 .bal-pay-info {
   display: flex;
   gap: 16px;
@@ -1590,6 +1607,12 @@
   font-size: 11px;
   color: #ef4444;
   font-weight: 500;
+}
+.bal-modal__hint {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.45);
+  margin: -4px 0 8px;
 }
 .bal-modal__submit {
   width: 100%;

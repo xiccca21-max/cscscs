@@ -553,6 +553,11 @@
     "cardNumber": "Номер карты",
     "cardholderName": "Имя владельца",
     "recipientName": "Имя получателя",
+    "payPal": "PayPal",
+    "paypalEmail": "Email PayPal",
+    "paypalHint": "Укажите email, привязанный к аккаунту PayPal.",
+    "paypalEmailRequired": "Укажите email PayPal",
+    "paypalEmailInvalid": "Введите корректный email",
     "types": {
       "CREDIT": "Плюс",
       "DEBIT": "Минус",

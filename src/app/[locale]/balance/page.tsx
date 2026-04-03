@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -36,8 +36,11 @@ type PaymentMethodDB = {
   currencies: string[];
 };
 
+const PAYPAL_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const CASHOUT_ICONS: Record<string, string> = {
   card:         "/icons/pay-card.png",
+  paypal:       "/icons/pay-paypal.svg",
   crypto:       "/icons/pay-crypto.png",
   btc:          "/icons/crypto-btc.svg",
   "usdt-trc20": "/icons/crypto-usdt.svg",
@@ -148,7 +151,14 @@ export default function BalancePage() {
 
   const cashoutAmountNum = parseFloat(cashoutAmount) || 0;
   const selectedPM = paymentMethods.find((m) => m.type === cashoutMethod || m.id === cashoutMethod);
-  const commissionRate = selectedPM ? parseFloat(selectedPM.commission) / 100 : 0;
+  const commissionRate = useMemo(() => {
+    if (selectedPM) return parseFloat(selectedPM.commission) / 100;
+    if (cashoutMethod === "card") return 0.025;
+    if (cashoutMethod === "paypal") return 0.025;
+    if (cashoutMethod === "bank") return 0.03;
+    if (cashoutMethod === "crypto") return 0.01;
+    return 0;
+  }, [selectedPM, cashoutMethod]);
   const commissionAmount = cashoutAmountNum * commissionRate;
   const youReceive = cashoutAmountNum - commissionAmount;
 
@@ -178,10 +188,14 @@ export default function BalancePage() {
       req("iban", "IBAN");
       req("swift", "SWIFT / BIC");
       req("recipientName", "Recipient name");
+    } else if (cashoutMethod === "paypal") {
+      const em = payDetails.paypalEmail?.trim() ?? "";
+      if (!em) errs.paypalEmail = t("paypalEmailRequired");
+      else if (!PAYPAL_EMAIL_RE.test(em)) errs.paypalEmail = t("paypalEmailInvalid");
     }
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
-  }, [cashoutMethod, payDetails]);
+  }, [cashoutMethod, payDetails, t]);
 
   const openDetailsModal = () => {
     const amount = parseFloat(cashoutAmount);
@@ -442,11 +456,13 @@ export default function BalancePage() {
                       return (
                         <button
                           key={pm.id}
+                          type="button"
+                          data-method={pm.type}
                           className={`bal-pay-btn${cashoutMethod === pm.type ? " active" : ""}`}
                           onClick={() => setCashoutMethod(pm.type)}
                         >
                           <span className="bal-pay-btn__icon">
-                            <img src={icon} alt={pm.name} width="24" height="24" />
+                            <img src={icon} alt="" width="24" height="24" />
                           </span>
                           <span className="bal-pay-btn__name">{pm.name}</span>
                         </button>
@@ -454,6 +470,8 @@ export default function BalancePage() {
                     })}
                     {hasCrypto && (
                       <button
+                        type="button"
+                        data-method="crypto"
                         className={`bal-pay-btn${cashoutMethod === "crypto" ? " active" : ""}`}
                         onClick={() => setCashoutMethod("crypto")}
                       >
@@ -465,16 +483,20 @@ export default function BalancePage() {
                     )}
                     {mainCashoutMethods.length === 0 && !hasCrypto && (
                       <>
-                        <button className={`bal-pay-btn${cashoutMethod === "card" ? " active" : ""}`} onClick={() => setCashoutMethod("card")}>
-                          <span className="bal-pay-btn__icon"><img src="/icons/pay-card.png" alt="Card" width="24" height="24" /></span>
+                        <button type="button" data-method="card" className={`bal-pay-btn${cashoutMethod === "card" ? " active" : ""}`} onClick={() => setCashoutMethod("card")}>
+                          <span className="bal-pay-btn__icon"><img src="/icons/pay-card.png" alt="" width="24" height="24" /></span>
                           <span className="bal-pay-btn__name">{t("debitCard")}</span>
                         </button>
-                        <button className={`bal-pay-btn${cashoutMethod === "crypto" ? " active" : ""}`} onClick={() => setCashoutMethod("crypto")}>
-                          <span className="bal-pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" width="24" height="24" /></span>
+                        <button type="button" data-method="paypal" className={`bal-pay-btn${cashoutMethod === "paypal" ? " active" : ""}`} onClick={() => setCashoutMethod("paypal")}>
+                          <span className="bal-pay-btn__icon"><img src="/icons/pay-paypal.svg" alt="" width="24" height="24" /></span>
+                          <span className="bal-pay-btn__name">{t("payPal")}</span>
+                        </button>
+                        <button type="button" data-method="crypto" className={`bal-pay-btn${cashoutMethod === "crypto" ? " active" : ""}`} onClick={() => setCashoutMethod("crypto")}>
+                          <span className="bal-pay-btn__icon"><img src="/icons/pay-crypto.png" alt="" width="24" height="24" /></span>
                           <span className="bal-pay-btn__name">{t("cryptocurrency")}</span>
                         </button>
-                        <button className={`bal-pay-btn${cashoutMethod === "bank" ? " active" : ""}`} onClick={() => setCashoutMethod("bank")}>
-                          <span className="bal-pay-btn__icon"><img src="/icons/pay-bank.png" alt="Bank" width="24" height="24" /></span>
+                        <button type="button" data-method="bank" className={`bal-pay-btn${cashoutMethod === "bank" ? " active" : ""}`} onClick={() => setCashoutMethod("bank")}>
+                          <span className="bal-pay-btn__icon"><img src="/icons/pay-bank.png" alt="" width="24" height="24" /></span>
                           <span className="bal-pay-btn__name">{t("bankTransfer")}</span>
                         </button>
                       </>
@@ -631,7 +653,17 @@ export default function BalancePage() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
             <h3 className="bal-modal__title">{t("paymentDetails")}</h3>
-            <p className="bal-modal__subtitle">{cashoutMethod === "card" ? t("debitCard") : cashoutMethod === "crypto" ? "Crypto" : t("bankTransfer")} · {cashoutAmountNum.toFixed(2)}$</p>
+            <p className="bal-modal__subtitle">
+              {cashoutMethod === "card"
+                ? t("debitCard")
+                : cashoutMethod === "paypal"
+                  ? t("payPal")
+                  : cashoutMethod === "crypto"
+                    ? "Crypto"
+                    : t("bankTransfer")}
+              {" · "}
+              {cashoutAmountNum.toFixed(2)}$
+            </p>
 
             <div className="bal-modal__fields">
               {cashoutMethod === "card" && (
@@ -646,6 +678,30 @@ export default function BalancePage() {
                     <input type="text" placeholder="John Doe" value={payDetails.cardName ?? ""} onChange={(e) => setPayDetails((p) => ({ ...p, cardName: e.target.value }))} />
                     {fieldErrors.cardName && <span className="bal-modal__err">{fieldErrors.cardName}</span>}
                   </label>
+                </>
+              )}
+
+              {cashoutMethod === "paypal" && (
+                <>
+                  <label className={`bal-modal__field${fieldErrors.paypalEmail ? " has-error" : ""}`}>
+                    <span>{t("paypalEmail")}</span>
+                    <input
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@example.com"
+                      value={payDetails.paypalEmail ?? ""}
+                      onChange={(e) => {
+                        setPayDetails((p) => ({ ...p, paypalEmail: e.target.value }));
+                        setFieldErrors((fe) => {
+                          const n = { ...fe };
+                          delete n.paypalEmail;
+                          return n;
+                        });
+                      }}
+                    />
+                    {fieldErrors.paypalEmail && <span className="bal-modal__err">{fieldErrors.paypalEmail}</span>}
+                  </label>
+                  <p className="bal-modal__hint">{t("paypalHint")}</p>
                 </>
               )}
 

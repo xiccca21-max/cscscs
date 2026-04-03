@@ -405,13 +405,18 @@ export function LandingPageView() {
           <div className="payouts-grid">
             {[
               { pc: "#1A1F71", badge: t("payoutBadgeInstant"), h: t("payoutVisa"), p: t("payoutVisaDesc") },
-              { pc: "#0070ba", badge: t("payoutBadgeInstant"), h: t("payoutPaypal"), p: t("payoutPaypalDesc") },
+              { pc: "#0070ba", badge: t("payoutBadgeInstant"), h: t("payoutPaypal"), p: t("payoutPaypalDesc"), logoSrc: "/icons/pay-paypal.svg" },
               { pc: "#F7931A", badge: t("payoutBadge10m"), h: t("payoutBtc"), p: t("payoutBtcDesc") },
               { pc: "#26A17B", badge: t("payoutBadgeInstant"), h: t("payoutUsdt"), p: t("payoutUsdtDesc") },
               { pc: "#6366f1", badge: t("payoutBadge12d"), h: t("payoutBank"), p: t("payoutBankDesc") },
             ].map((c) => (
               <div key={c.h} className="payout-card" style={{ "--pc": c.pc } as CSSProperties}>
                 <div className="payout-card__inner payout-card__front">
+                  {"logoSrc" in c && c.logoSrc ? (
+                    <div className="payout-card__logo-wrap payout-card__logo-wrap--mark" aria-hidden>
+                      <img src={c.logoSrc} alt="" className="payout-card__logo-img" width={72} height={44} />
+                    </div>
+                  ) : null}
                   <span className="payout-card__badge">{c.badge}</span>
                   <h3>{c.h}</h3>
                   <p>{c.p}</p>

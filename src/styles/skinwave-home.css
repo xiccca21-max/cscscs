@@ -450,6 +450,18 @@ section + section::before {
   height: 44px;
   margin-bottom: 4px;
 }
+.payout-card__logo-wrap--mark {
+  height: auto;
+  min-height: 36px;
+  margin-bottom: 10px;
+}
+.payout-card__logo-img {
+  height: 32px;
+  width: auto;
+  max-width: 92px;
+  object-fit: contain;
+  display: block;
+}
 .payout-card__badge {
   display: inline-block;
   font-size: 11px;

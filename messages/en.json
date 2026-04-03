@@ -555,6 +555,11 @@
     "cardNumber": "Card Number",
     "cardholderName": "Cardholder Name",
     "recipientName": "Recipient Name",
+    "payPal": "PayPal",
+    "paypalEmail": "PayPal email",
+    "paypalHint": "Use the email linked to your PayPal account.",
+    "paypalEmailRequired": "PayPal email is required",
+    "paypalEmailInvalid": "Enter a valid email address",
     "types": {
       "CREDIT": "Credit",
       "DEBIT": "Debit",

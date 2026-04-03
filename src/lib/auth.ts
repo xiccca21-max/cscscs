@@ -2,11 +2,22 @@ import { SessionOptions, getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { db } from "./db";
 
-const SESSION_SECRET = process.env.SESSION_SECRET;
-if (!SESSION_SECRET) {
-  throw new Error(
-    "SESSION_SECRET environment variable is not set. The application cannot start without it.",
-  );
+function getSessionOptions(): SessionOptions {
+  const password = process.env.SESSION_SECRET;
+  if (!password) {
+    throw new Error(
+      "SESSION_SECRET environment variable is not set. The application cannot start without it.",
+    );
+  }
+  return {
+    password,
+    cookieName: "cs_ne_go_session",
+    cookieOptions: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax" as const,
+    },
+  };
 }
 
 export interface SessionData {
@@ -19,19 +30,9 @@ export interface SessionData {
   referralId?: string;
 }
 
-export const sessionOptions: SessionOptions = {
-  password: SESSION_SECRET,
-  cookieName: "cs_ne_go_session",
-  cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-    sameSite: "lax" as const,
-  },
-};
-
 export async function getSession() {
   const cookieStore = await cookies();
-  return getIronSession<SessionData>(cookieStore, sessionOptions);
+  return getIronSession<SessionData>(cookieStore, getSessionOptions());
 }
 
 export async function requireAuth(): Promise<SessionData & { userId: string }> {

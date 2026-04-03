@@ -1,12 +1,6 @@
-import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
+import { createPrismaClient } from "../src/lib/create-prisma-client";
 
-const adapter = new PrismaNeon({
-  connectionString:
-    process.env.DATABASE_URL ??
-    "postgresql://postgres:postgres@localhost:5432/cs_ne_go",
-});
-const db = new PrismaClient({ adapter });
+const db = createPrismaClient();
 
 const reviews = [
   { user: "Donation / Trash Bot", steam: "https://steamcommunity.com/id/DonationTrashBot", avatar: "https://avatars.fastly.steamstatic.com/408cf6038cdf995d3ed371ed5c629825020a4496_full.jpg", en: "Listed a few surplus items and the whole flow took minutes. Payout hit my wallet faster than I expected.", ru: "Выставил пару лишних предметов — весь процесс занял минуты. Деньги пришли быстрее, чем я ожидал.", game: "CS2", stars: 5 },

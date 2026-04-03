@@ -796,6 +796,23 @@
 .bal-pay-btn[data-method="paypal"].active .bal-pay-btn__name {
   color: #0070ba;
 }
+.bal-pay-btn[data-method="alipay"]:hover {
+  border-color: rgba(22, 119, 255, 0.38);
+  background: rgba(22, 119, 255, 0.06);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.12);
+}
+.bal-pay-btn[data-method="alipay"].active {
+  border-color: #1677ff;
+  background: rgba(22, 119, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(22, 119, 255, 0.2);
+}
+.bal-pay-btn[data-method="alipay"].active .bal-pay-btn__icon {
+  background: linear-gradient(135deg, #0958d9, #1677ff);
+  box-shadow: 0 3px 10px rgba(22, 119, 255, 0.35);
+}
+.bal-pay-btn[data-method="alipay"].active .bal-pay-btn__name {
+  color: #1677ff;
+}
 .bal-pay-info {
   display: flex;
   gap: 16px;

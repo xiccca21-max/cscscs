@@ -20,7 +20,6 @@
     "setup": "npm install && prisma generate && prisma db push && npx tsx prisma/seed-payments.ts"
   },
   "dependencies": {
-    "@prisma/adapter-neon": "^7.5.0",
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
     "clsx": "^2.1.1",

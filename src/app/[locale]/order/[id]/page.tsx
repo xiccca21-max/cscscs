@@ -270,6 +270,8 @@ export default function OrderPage({
       iban: { en: "IBAN", ru: "IBAN" },
       swift: { en: "SWIFT", ru: "SWIFT" },
       recipientName: { en: "Recipient Name", ru: "Имя получателя" },
+      paypalEmail: { en: "PayPal email", ru: "Email PayPal" },
+      alipayAccount: { en: "Alipay account", ru: "Аккаунт Alipay" },
     };
     const normalized = labels[key];
     if (normalized) return locale === "ru" ? normalized.ru : normalized.en;

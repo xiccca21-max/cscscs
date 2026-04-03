@@ -1,41 +1,28 @@
 #!/bin/bash
 set -e
 
-echo "══════════════════════════════════════"
-echo "  SKINSELL — Настройка"
-echo "══════════════════════════════════════"
+echo "SKINSELL — настройка"
 
-# Проверка .env
 if [ ! -f .env ]; then
-  echo "ОШИБКА: файл .env не найден."
-  echo "Скопируй .env.example → .env и заполни значения."
+  echo "Ошибка: нет файла .env. Скопируйте .env.example в .env и заполните."
   exit 1
 fi
 
-# Установка зависимостей
 echo ""
-echo "→ Установка зависимостей..."
+echo "Зависимости..."
 npm install
 
-# Генерация Prisma Client
 echo ""
-echo "→ Генерация Prisma Client..."
+echo "Prisma generate..."
 npx prisma generate
 
-# Создание таблиц в БД
 echo ""
-echo "→ Создание таблиц в базе данных..."
+echo "Таблицы в базе..."
 npx prisma db push
 
-# Заливка базовых данных (способы оплаты)
 echo ""
-echo "→ Заливка способов оплаты..."
+echo "Способы оплаты (сид)..."
 npx tsx prisma/seed-payments.ts
 
 echo ""
-echo "══════════════════════════════════════"
-echo "  ✓ Настройка завершена!"
-echo ""
-echo "  Запуск:  npm run dev"
-echo "  Открыть: http://localhost:3000"
-echo "══════════════════════════════════════"
+echo "Готово. Запуск: npm run dev → http://localhost:3000"

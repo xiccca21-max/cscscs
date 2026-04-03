@@ -41,6 +41,7 @@ const COMMISSION_FALLBACK: Record<string, number> = {
   crypto: 0.01,
   card: 0.025,
   paypal: 0.025,
+  alipay: 0.025,
   bank: 0.03,
 };
 
@@ -48,6 +49,7 @@ const PAY_ICONS: Record<string, { src: string; cls: string }> = {
   balance:      { src: "/icons/pay-balance.png", cls: "pay-btn__img pay-btn__img--circle" },
   card:         { src: "/icons/pay-card.png",    cls: "pay-btn__img" },
   paypal:       { src: "/icons/pay-paypal.svg", cls: "pay-btn__img" },
+  alipay:       { src: "/icons/pay-alipay.svg", cls: "pay-btn__img" },
   crypto:       { src: "/icons/pay-crypto.png",  cls: "pay-btn__img pay-btn__img--circle pay-btn__img--crypto" },
   btc:          { src: "/icons/pay-crypto.png",  cls: "pay-btn__img pay-btn__img--circle pay-btn__img--crypto" },
   "usdt-trc20": { src: "/icons/tether.png",      cls: "pay-btn__img pay-btn__img--circle" },
@@ -64,10 +66,13 @@ const PAY_ICONS: Record<string, { src: string; cls: string }> = {
 const ICON_WRAP_CLS: Record<string, string> = {
   card: "pay-btn__icon pay-btn__icon--card",
   paypal: "pay-btn__icon pay-btn__icon--paypal",
+  alipay: "pay-btn__icon pay-btn__icon--alipay",
   bank: "pay-btn__icon pay-btn__icon--bank",
 };
 
 const PAYPAL_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Email или телефон (Alipay ID). */
+const ALIPAY_ACCOUNT_RE = /^([^\s@]+@[^\s@]+\.[^\s@]+|\+?\d{8,20})$/;
 
 const CRYPTO_TYPES = new Set(["crypto", "btc", "usdt-trc20", "usdt-erc20", "eth", "ltc"]);
 
@@ -222,6 +227,8 @@ export default function SellPage() {
 
   const [tradeUrl, setTradeUrl] = useState("");
   const [tradeUrlSaved, setTradeUrlSaved] = useState(false);
+  /** Совпадает с последним сохранённым в localStorage значением — предупреждение у кнопки прячем только когда URL валиден и сохранён. */
+  const [persistedTradeUrl, setPersistedTradeUrl] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("balance");
   const [selectedCrypto, setSelectedCrypto] = useState<string | null>(null);
   const [cryptoDropOpen, setCryptoDropOpen] = useState(false);
@@ -408,9 +415,12 @@ export default function SellPage() {
   const promoMultiplier = promoDiscount ? 1 + promoDiscount / 100 : 1;
   const youReceive = selectedTotal * (1 - commission) * promoMultiplier;
   const tradeUrlValid = TRADE_URL_RE.test(tradeUrl);
+  const tradeUrlSavedAndMatching =
+    tradeUrlValid && persistedTradeUrl !== null && persistedTradeUrl === tradeUrl;
 
   const step1Done = selectedItems.length > 0;
-  const step2Done = tradeUrlValid;
+  /** Гость: достаточно валидного URL в поле. Вошедший: URL должен совпадать с сохранённым (Save / прошлая сессия). */
+  const step2Done = tradeUrlValid && (!user || tradeUrlSavedAndMatching);
   const step3Done = !!paymentMethod;
   const step3Active = step1Done && step2Done && checkoutOpen;
   const progressPercent =
@@ -489,6 +499,10 @@ export default function SellPage() {
       const em = payDetails.paypalEmail?.trim() ?? "";
       if (!em) errs.paypalEmail = t("paypalEmailRequired");
       else if (!PAYPAL_EMAIL_RE.test(em)) errs.paypalEmail = t("paypalEmailInvalid");
+    } else if (paymentMethod === "alipay") {
+      const ac = payDetails.alipayAccount?.trim() ?? "";
+      if (!ac) errs.alipayAccount = t("alipayAccountRequired");
+      else if (!ALIPAY_ACCOUNT_RE.test(ac)) errs.alipayAccount = t("alipayAccountInvalid");
     } else if (paymentMethod === "crypto") {
       if (!payDetails.network) errs.network = "Select a network";
       req("walletAddress", "Wallet address");
@@ -551,7 +565,10 @@ export default function SellPage() {
   useEffect(() => {
     if (!user) return;
     const saved = localStorage.getItem("sw_tradeUrl");
-    if (saved) setTradeUrl(saved);
+    if (saved) {
+      setTradeUrl(saved);
+      setPersistedTradeUrl(saved);
+    }
   }, [user]);
 
   const pasteTradeUrl = useCallback(async () => {
@@ -567,6 +584,7 @@ export default function SellPage() {
   const saveTradeUrl = useCallback(() => {
     if (!tradeUrlValid) return;
     localStorage.setItem("sw_tradeUrl", tradeUrl);
+    setPersistedTradeUrl(tradeUrl);
     setTradeUrlSaved(true);
     setTimeout(() => setTradeUrlSaved(false), 2000);
   }, [tradeUrl, tradeUrlValid]);
@@ -1246,6 +1264,15 @@ export default function SellPage() {
                     </button>
                   );
                 })()}
+                {(() => {
+                  const alipayPm = mainMethods.find((m) => m.type === "alipay");
+                  return (
+                    <button className={`pay-btn${paymentMethod === "alipay" ? " active" : ""}`} data-method="alipay" onClick={() => { setPaymentMethod("alipay"); setCryptoDropOpen(false); }}>
+                      <span className="pay-btn__icon pay-btn__icon--alipay"><img src="/icons/pay-alipay.svg" alt="Alipay" className="pay-btn__img" /></span>
+                      <span className="pay-btn__name">{alipayPm?.name ?? t("payAlipay")}</span>
+                    </button>
+                  );
+                })()}
                 {/* Crypto (grouped) */}
                 <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" onClick={() => { setPaymentMethod("crypto"); }}>
                   <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
@@ -1277,6 +1304,7 @@ export default function SellPage() {
                   if (paymentMethod === "balance") return <span>{t("fee0")}</span>;
                   if (paymentMethod === "card") return <span>{t("fee25")} · {t("minLabel")}: {format(1)}</span>;
                   if (paymentMethod === "paypal") return <span>{t("fee25")} · {t("minLabel")}: {format(1)}</span>;
+                  if (paymentMethod === "alipay") return <span>{t("fee25")} · {t("minLabel")}: {format(1)}</span>;
                   if (paymentMethod === "crypto") return <span>{t("fee1")} · {t("minLabel")}: {format(5)}</span>;
                   if (paymentMethod === "bank") return <span>{t("fee3")} · {t("minLabel")}: {format(10)}</span>;
                   return null;
@@ -1332,6 +1360,12 @@ export default function SellPage() {
                 <div className="sell-pay__hold-warn sell-pay__hold-warn--info">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
                   <span>{t("balanceFrozenNote")}</span>
+                </div>
+              )}
+              {user && !tradeUrlSavedAndMatching && (
+                <div className="sell-pay__hold-warn sell-pay__hold-warn--trade-url" id="tradeUrlSellHint">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <span>{t("tradeUrlSellWarning")}</span>
                 </div>
               )}
 
@@ -1434,13 +1468,16 @@ export default function SellPage() {
                 {paymentMethod === "paypal" && (
                   <img src="/icons/pay-paypal.svg" alt="" width={36} height={36} className="checkout-modal__paypal-mark" />
                 )}
+                {paymentMethod === "alipay" && (
+                  <img src="/icons/pay-alipay.svg" alt="" width={36} height={36} className="checkout-modal__alipay-mark" />
+                )}
                 {paymentMethod === "crypto" && (
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
                 )}
                 {paymentMethod === "bank" && (
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/></svg>
                 )}
-                {!["balance", "card", "paypal", "crypto", "bank"].includes(paymentMethod) && (
+                {!["balance", "card", "paypal", "alipay", "crypto", "bank"].includes(paymentMethod) && (
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 )}
               </div>
@@ -1459,9 +1496,10 @@ export default function SellPage() {
                   {paymentMethod === "balance" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg> Balance</>)}
                   {paymentMethod === "card" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> {t("payCard")}</>)}
                   {paymentMethod === "paypal" && (<><img src="/icons/pay-paypal.svg" alt="" width={14} height={14} className="checkout-modal__paypal-badge" /> {t("payPaypal")}</>)}
+                  {paymentMethod === "alipay" && (<><img src="/icons/pay-alipay.svg" alt="" width={14} height={14} className="checkout-modal__alipay-badge" /> {t("payAlipay")}</>)}
                   {paymentMethod === "crypto" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> {t("payCrypto")}</>)}
                   {paymentMethod === "bank" && (<><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18"/><path d="M3 10h18"/><path d="M5 6l7-3 7 3"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/></svg> {t("payBank")}</>)}
-                  {!["balance", "card", "paypal", "crypto", "bank"].includes(paymentMethod) && paymentMethod}
+                  {!["balance", "card", "paypal", "alipay", "crypto", "bank"].includes(paymentMethod) && paymentMethod}
                 </span>
               </div>
             </div>
@@ -1492,6 +1530,22 @@ export default function SellPage() {
                     {fieldErrors.paypalEmail && <span className="checkout-modal__field-error">{fieldErrors.paypalEmail}</span>}
                   </label>
                   <p className="checkout-modal__hint">{t("checkoutPaypalHint")}</p>
+                </>
+              )}
+
+              {paymentMethod === "alipay" && (
+                <>
+                  <label className={`checkout-modal__field${fieldErrors.alipayAccount ? " has-error" : ""}`}>
+                    <span>{t("checkoutAlipayAccount")}</span>
+                    <div className="checkout-modal__input-wrap">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                      <input type="text" inputMode="email" autoComplete="email" placeholder="email or phone"
+                        value={payDetails.alipayAccount || ""}
+                        onChange={(e) => { setPayDetails(p => ({ ...p, alipayAccount: e.target.value })); setFieldErrors(p => { const n = { ...p }; delete n.alipayAccount; return n; }); }} />
+                    </div>
+                    {fieldErrors.alipayAccount && <span className="checkout-modal__field-error">{fieldErrors.alipayAccount}</span>}
+                  </label>
+                  <p className="checkout-modal__hint">{t("checkoutAlipayHint")}</p>
                 </>
               )}
 

@@ -2449,6 +2449,10 @@
   box-shadow: 0 8px 24px rgba(0,112,186,0.25);
   border-color: rgba(0,112,186,0.35);
 }
+.pay-btn[data-method="alipay"]:hover {
+  box-shadow: 0 8px 24px rgba(22,119,255,0.28);
+  border-color: rgba(22,119,255,0.38);
+}
 .pay-btn[data-method="crypto"]:hover {
   box-shadow: 0 8px 24px rgba(245,158,11,0.2);
   border-color: rgba(245,158,11,0.3);
@@ -2473,6 +2477,7 @@
 .pay-btn[data-method="balance"]::after { background: linear-gradient(90deg, #f97316, #fb923c); }
 .pay-btn[data-method="card"]::after { background: linear-gradient(90deg, #4f46e5, #818cf8); }
 .pay-btn[data-method="paypal"]::after { background: linear-gradient(90deg, #003087, #009cde); }
+.pay-btn[data-method="alipay"]::after { background: linear-gradient(90deg, #0958d9, #1677ff); }
 .pay-btn[data-method="crypto"]::after { background: linear-gradient(90deg, #d97706, #fbbf24); }
 .pay-btn[data-method="bank"]::after { background: linear-gradient(90deg, #2563eb, #60a5fa); }
 
@@ -2510,6 +2515,12 @@
   background: rgba(0,112,186,0.14);
   box-shadow: 0 4px 20px rgba(0,112,186,0.22), 0 0 0 1px rgba(0,156,222,0.2);
 }
+.pay-btn[data-method="alipay"].active {
+  color: #93c5fd;
+  border-color: rgba(22,119,255,0.45);
+  background: rgba(22,119,255,0.12);
+  box-shadow: 0 4px 20px rgba(22,119,255,0.22), 0 0 0 1px rgba(22,119,255,0.22);
+}
 .pay-btn[data-method="crypto"].active {
   color: #fbbf24;
   border-color: rgba(245,158,11,0.4);
@@ -2534,11 +2545,13 @@
 .pay-btn[data-method="balance"] .pay-btn__icon { background: rgba(251,146,60,0.12); }
 .pay-btn[data-method="card"] .pay-btn__icon { background: rgba(99,102,241,0.12); }
 .pay-btn[data-method="paypal"] .pay-btn__icon { background: rgba(0,156,222,0.12); }
+.pay-btn[data-method="alipay"] .pay-btn__icon { background: rgba(22,119,255,0.14); }
 .pay-btn[data-method="crypto"] .pay-btn__icon { background: rgba(245,158,11,0.12); }
 .pay-btn[data-method="bank"] .pay-btn__icon { background: rgba(59,130,246,0.12); }
 .pay-btn[data-method="balance"].active .pay-btn__icon { background: rgba(251,146,60,0.2); }
 .pay-btn[data-method="card"].active .pay-btn__icon { background: rgba(99,102,241,0.2); }
 .pay-btn[data-method="paypal"].active .pay-btn__icon { background: rgba(0,156,222,0.2); }
+.pay-btn[data-method="alipay"].active .pay-btn__icon { background: rgba(22,119,255,0.22); }
 .pay-btn[data-method="crypto"].active .pay-btn__icon { background: rgba(245,158,11,0.2); }
 .pay-btn[data-method="bank"].active .pay-btn__icon { background: rgba(59,130,246,0.2); }
 
@@ -2657,6 +2670,7 @@
 }
 .pay-btn__icon--card .pay-btn__img,
 .pay-btn__icon--paypal .pay-btn__img,
+.pay-btn__icon--alipay .pay-btn__img,
 .pay-btn__icon--bank .pay-btn__img {
   width: 38px;
   height: 38px;
@@ -2743,6 +2757,11 @@
   border-color: rgba(0,156,222,0.22);
   color: #7dd3fc;
 }
+.pay-info-bar[data-method="alipay"] {
+  background: rgba(22,119,255,0.1);
+  border-color: rgba(22,119,255,0.22);
+  color: #93c5fd;
+}
 .pay-info-bar[data-method="crypto"] {
   background: rgba(245,158,11,0.08);
   border-color: rgba(245,158,11,0.15);
@@ -2776,6 +2795,9 @@
 }
 .pay-info-bar[data-method="paypal"] .pay-info-bar__icon {
   background: linear-gradient(135deg, #003087, #009cde);
+}
+.pay-info-bar[data-method="alipay"] .pay-info-bar__icon {
+  background: linear-gradient(135deg, #0958d9, #1677ff);
 }
 .pay-info-bar[data-method="crypto"] .pay-info-bar__icon {
   background: linear-gradient(135deg, #d97706, #fbbf24);
@@ -2960,6 +2982,14 @@
 }
 .sell-pay__hold-warn--info svg {
   color: #a5b4fc;
+}
+.sell-pay__hold-warn--trade-url {
+  color: #7dd3fc;
+  background: rgba(14, 165, 233, 0.1);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+.sell-pay__hold-warn--trade-url svg {
+  color: #38bdf8;
 }
 
 /* Sell button */
@@ -4767,6 +4797,13 @@
   --ck-glow: rgba(0,112,186,0.22);
   --ck-glow-soft: rgba(0,156,222,0.08);
 }
+.checkout-modal[data-method="alipay"] {
+  --ck-color: #1677ff;
+  --ck-color-light: #4096ff;
+  --ck-color-pale: #93c5fd;
+  --ck-glow: rgba(22,119,255,0.24);
+  --ck-glow-soft: rgba(22,119,255,0.09);
+}
 .checkout-modal[data-method="crypto"] {
   --ck-color: #f59e0b;
   --ck-color-light: #fbbf24;
@@ -4847,6 +4884,15 @@
   display: block;
 }
 .checkout-modal__paypal-badge {
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+.checkout-modal__alipay-mark {
+  width: 36px;
+  height: auto;
+  display: block;
+}
+.checkout-modal__alipay-badge {
   vertical-align: -2px;
   margin-right: 4px;
 }

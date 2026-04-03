@@ -37,10 +37,12 @@ type PaymentMethodDB = {
 };
 
 const PAYPAL_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ALIPAY_ACCOUNT_RE = /^([^\s@]+@[^\s@]+\.[^\s@]+|\+?\d{8,20})$/;
 
 const CASHOUT_ICONS: Record<string, string> = {
   card:         "/icons/pay-card.png",
   paypal:       "/icons/pay-paypal.svg",
+  alipay:       "/icons/pay-alipay.svg",
   crypto:       "/icons/pay-crypto.png",
   btc:          "/icons/crypto-btc.svg",
   "usdt-trc20": "/icons/crypto-usdt.svg",
@@ -62,6 +64,15 @@ const PAYPAL_UI_FALLBACK: PaymentMethodDB = {
   commission: "2.5",
   minAmount: "1",
   currencies: ["USD", "EUR", "RUB"],
+};
+
+const ALIPAY_UI_FALLBACK: PaymentMethodDB = {
+  id: "__alipay_ui",
+  name: "Alipay",
+  type: "alipay",
+  commission: "2.5",
+  minAmount: "1",
+  currencies: ["USD", "EUR", "CNY", "HKD"],
 };
 
 const CRYPTO_NETWORKS = [
@@ -124,13 +135,23 @@ export default function BalancePage() {
 
   const cashoutMethods = paymentMethods.filter((m) => m.type !== "balance");
   const mainCashoutMethods = cashoutMethods.filter((m) => !CRYPTO_TYPES.has(m.type));
-  /** Всегда показываем PayPal рядом с картой, если в БД метода ещё нет (иначе кнопка пропадала при непустом списке). */
+  /** PayPal / Alipay в сетке, если в ответе API ещё нет строки с этим type (как на /sell). */
   const mainCashoutMethodsDisplay = useMemo(() => {
-    if (mainCashoutMethods.some((m) => m.type === "paypal")) return mainCashoutMethods;
-    const next = [...mainCashoutMethods];
-    const afterCard = next.findIndex((m) => m.type === "card");
-    if (afterCard >= 0) next.splice(afterCard + 1, 0, PAYPAL_UI_FALLBACK);
-    else next.unshift(PAYPAL_UI_FALLBACK);
+    let next = [...mainCashoutMethods];
+    if (!next.some((m) => m.type === "paypal")) {
+      const afterCard = next.findIndex((m) => m.type === "card");
+      if (afterCard >= 0) next.splice(afterCard + 1, 0, PAYPAL_UI_FALLBACK);
+      else next.unshift(PAYPAL_UI_FALLBACK);
+    }
+    if (!next.some((m) => m.type === "alipay")) {
+      const paypalIdx = next.findIndex((m) => m.type === "paypal");
+      if (paypalIdx >= 0) next.splice(paypalIdx + 1, 0, ALIPAY_UI_FALLBACK);
+      else {
+        const afterCard = next.findIndex((m) => m.type === "card");
+        if (afterCard >= 0) next.splice(afterCard + 1, 0, ALIPAY_UI_FALLBACK);
+        else next.unshift(ALIPAY_UI_FALLBACK);
+      }
+    }
     return next;
   }, [mainCashoutMethods]);
   const cryptoMethods = cashoutMethods.filter((m) => CRYPTO_TYPES.has(m.type));
@@ -174,6 +195,7 @@ export default function BalancePage() {
     if (selectedPM) return parseFloat(selectedPM.commission) / 100;
     if (cashoutMethod === "card") return 0.025;
     if (cashoutMethod === "paypal") return 0.025;
+    if (cashoutMethod === "alipay") return 0.025;
     if (cashoutMethod === "bank") return 0.03;
     if (cashoutMethod === "crypto") return 0.01;
     return 0;
@@ -211,6 +233,10 @@ export default function BalancePage() {
       const em = payDetails.paypalEmail?.trim() ?? "";
       if (!em) errs.paypalEmail = t("paypalEmailRequired");
       else if (!PAYPAL_EMAIL_RE.test(em)) errs.paypalEmail = t("paypalEmailInvalid");
+    } else if (cashoutMethod === "alipay") {
+      const ac = payDetails.alipayAccount?.trim() ?? "";
+      if (!ac) errs.alipayAccount = t("alipayAccountRequired");
+      else if (!ALIPAY_ACCOUNT_RE.test(ac)) errs.alipayAccount = t("alipayAccountInvalid");
     }
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
@@ -238,6 +264,12 @@ export default function BalancePage() {
       }
     } else if (cashoutMethod === "paypal") {
       const minAmt = parseFloat(PAYPAL_UI_FALLBACK.minAmount);
+      if (minAmt > 0 && amount < minAmt) {
+        setCashoutError(`${t("methodMin")}: ${minAmt}$`);
+        return;
+      }
+    } else if (cashoutMethod === "alipay") {
+      const minAmt = parseFloat(ALIPAY_UI_FALLBACK.minAmount);
       if (minAmt > 0 && amount < minAmt) {
         setCashoutError(`${t("methodMin")}: ${minAmt}$`);
         return;
@@ -516,6 +548,10 @@ export default function BalancePage() {
                           <span className="bal-pay-btn__icon"><img src="/icons/pay-paypal.svg" alt="" width="24" height="24" /></span>
                           <span className="bal-pay-btn__name">{t("payPal")}</span>
                         </button>
+                        <button type="button" data-method="alipay" className={`bal-pay-btn${cashoutMethod === "alipay" ? " active" : ""}`} onClick={() => setCashoutMethod("alipay")}>
+                          <span className="bal-pay-btn__icon"><img src="/icons/pay-alipay.svg" alt="" width="24" height="24" /></span>
+                          <span className="bal-pay-btn__name">{t("payAlipay")}</span>
+                        </button>
                         <button type="button" data-method="crypto" className={`bal-pay-btn${cashoutMethod === "crypto" ? " active" : ""}`} onClick={() => setCashoutMethod("crypto")}>
                           <span className="bal-pay-btn__icon"><img src="/icons/pay-crypto.png" alt="" width="24" height="24" /></span>
                           <span className="bal-pay-btn__name">{t("cryptocurrency")}</span>
@@ -683,9 +719,11 @@ export default function BalancePage() {
                 ? t("debitCard")
                 : cashoutMethod === "paypal"
                   ? t("payPal")
-                  : cashoutMethod === "crypto"
-                    ? "Crypto"
-                    : t("bankTransfer")}
+                  : cashoutMethod === "alipay"
+                    ? t("payAlipay")
+                    : cashoutMethod === "crypto"
+                      ? "Crypto"
+                      : t("bankTransfer")}
               {" · "}
               {cashoutAmountNum.toFixed(2)}$
             </p>
@@ -727,6 +765,30 @@ export default function BalancePage() {
                     {fieldErrors.paypalEmail && <span className="bal-modal__err">{fieldErrors.paypalEmail}</span>}
                   </label>
                   <p className="bal-modal__hint">{t("paypalHint")}</p>
+                </>
+              )}
+
+              {cashoutMethod === "alipay" && (
+                <>
+                  <label className={`bal-modal__field${fieldErrors.alipayAccount ? " has-error" : ""}`}>
+                    <span>{t("alipayAccount")}</span>
+                    <input
+                      type="text"
+                      autoComplete="email"
+                      placeholder="email or phone"
+                      value={payDetails.alipayAccount ?? ""}
+                      onChange={(e) => {
+                        setPayDetails((p) => ({ ...p, alipayAccount: e.target.value }));
+                        setFieldErrors((fe) => {
+                          const n = { ...fe };
+                          delete n.alipayAccount;
+                          return n;
+                        });
+                      }}
+                    />
+                    {fieldErrors.alipayAccount && <span className="bal-modal__err">{fieldErrors.alipayAccount}</span>}
+                  </label>
+                  <p className="bal-modal__hint">{t("alipayHint")}</p>
                 </>
               )}
 

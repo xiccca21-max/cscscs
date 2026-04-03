@@ -87,6 +87,7 @@ const FALLBACK_METHODS: PaymentMethodDB[] = [
   { id: "fb-balance",    name: "Balance",            type: "balance",    commission: "0",   minAmount: "0",  currencies: ["USD"] },
   { id: "fb-card",       name: "Visa / Mastercard",  type: "card",       commission: "2.5", minAmount: "1",  currencies: ["USD"] },
   { id: "fb-paypal",     name: "PayPal",             type: "paypal",     commission: "2.5", minAmount: "1",  currencies: ["USD", "EUR", "RUB"] },
+  { id: "fb-alipay",     name: "Alipay",             type: "alipay",     commission: "2.5", minAmount: "1",  currencies: ["USD", "EUR", "CNY", "HKD"] },
   { id: "fb-btc",        name: "Bitcoin (BTC)",       type: "btc",        commission: "1",   minAmount: "10", currencies: ["USD"] },
   { id: "fb-usdt-trc20", name: "USDT (TRC-20)",      type: "usdt-trc20", commission: "0",   minAmount: "5",  currencies: ["USD"] },
   { id: "fb-eth",        name: "Ethereum (ERC-20)",   type: "eth",        commission: "1",   minAmount: "10", currencies: ["USD"] },
@@ -99,6 +100,7 @@ const PAYOUT_CARD_COLORS: Record<string, string> = {
   balance:      "#f59e0b",
   card:         "#1A1F71",
   paypal:       "#0070ba",
+  alipay:       "#1677FF",
   crypto:       "#F7931A",
   btc:          "#F7931A",
   "usdt-trc20": "#26A17B",
@@ -129,6 +131,16 @@ function PayoutCardIcon({ type }: { type: string }) {
           width={88}
           height={36}
           className="payout-card__logo-img payout-card__logo-img--paypal"
+        />
+      );
+    case "alipay":
+      return (
+        <img
+          src="/icons/pay-alipay.svg"
+          alt=""
+          width={88}
+          height={36}
+          className="payout-card__logo-img payout-card__logo-img--alipay"
         />
       );
     case "crypto":
@@ -184,22 +196,40 @@ export default function HomePage() {
       .catch(() => {});
   }, []);
 
-  /** Реальная главная берёт методы из API; если в БД ещё нет PayPal — показываем карточку всё равно (как на /sell). */
+  /** Методы из API; при отсутствии PayPal / Alipay в БД подмешиваем карточки (как на /sell). */
   const payoutMethodsForGrid = useMemo(() => {
     if (homePaymentMethods.length === 0) return FALLBACK_METHODS;
-    if (homePaymentMethods.some((m) => m.type === "paypal")) return homePaymentMethods;
-    const paypalPm: PaymentMethodDB = {
-      id: "ui-paypal",
-      name: "PayPal",
-      type: "paypal",
-      commission: "2.5",
-      minAmount: "1",
-      currencies: ["USD", "EUR", "RUB"],
-    };
-    const out = [...homePaymentMethods];
-    const afterCard = out.findIndex((m) => m.type === "card");
-    if (afterCard >= 0) out.splice(afterCard + 1, 0, paypalPm);
-    else out.unshift(paypalPm);
+    let out = [...homePaymentMethods];
+    if (!out.some((m) => m.type === "paypal")) {
+      const paypalPm: PaymentMethodDB = {
+        id: "ui-paypal",
+        name: "PayPal",
+        type: "paypal",
+        commission: "2.5",
+        minAmount: "1",
+        currencies: ["USD", "EUR", "RUB"],
+      };
+      const afterCard = out.findIndex((m) => m.type === "card");
+      if (afterCard >= 0) out.splice(afterCard + 1, 0, paypalPm);
+      else out.unshift(paypalPm);
+    }
+    if (!out.some((m) => m.type === "alipay")) {
+      const alipayPm: PaymentMethodDB = {
+        id: "ui-alipay",
+        name: "Alipay",
+        type: "alipay",
+        commission: "2.5",
+        minAmount: "1",
+        currencies: ["USD", "EUR", "CNY", "HKD"],
+      };
+      const paypalIdx = out.findIndex((m) => m.type === "paypal");
+      if (paypalIdx >= 0) out.splice(paypalIdx + 1, 0, alipayPm);
+      else {
+        const afterCard = out.findIndex((m) => m.type === "card");
+        if (afterCard >= 0) out.splice(afterCard + 1, 0, alipayPm);
+        else out.unshift(alipayPm);
+      }
+    }
     return out;
   }, [homePaymentMethods]);
 

@@ -47,7 +47,7 @@ nano .env
 |------------|--------|
 | `STEAM_API_KEY` | ключ Steam API |
 | `SESSION_SECRET` | вывод `openssl rand -hex 32` |
-| `NEXT_PUBLIC_APP_URL` | **точный** URL из браузера, без `/` в конце (первый тест: `http://ТВОЙ_IP:3000`, потом `https://домен`) |
+| `NEXT_PUBLIC_APP_URL` | **точный** URL, с которого открываешь сайт (без `/` в конце). Совпадает с адресной строкой: `http://ТВОЙ_IP:3000` / `https://домен`. Не используй в браузере `0.0.0.0` — только `localhost`, `127.0.0.1`, IP или домен |
 | `ADMIN_STEAM_IDS` | steamID64, через запятую если несколько |
 | `STEAMAPIS_KEY` | при необходимости SteamApis |
 
@@ -166,6 +166,7 @@ Node 20, Postgres или `npm run docker:db`.
 
 | Симптом | Что проверить |
 |---------|----------------|
+| Steam login / 503 после входа | Открывай сайт не с `0.0.0.0`, а с тем же хостом, что в `NEXT_PUBLIC_APP_URL`; после правки `.env` — `docker compose up -d --build` |
 | Steam login | `NEXT_PUBLIC_APP_URL` = реальный URL в адресной строке |
 | Нет админки | В `ADMIN_STEAM_IDS` только steamID64 |
 | БД | `docker compose ps`, пароль в compose и `POSTGRES_PASSWORD` |

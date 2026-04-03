@@ -1,5 +1,6 @@
 import { SessionOptions, getIronSession } from "iron-session";
 import { cookies } from "next/headers";
+import { cookieSecure } from "./cookie-secure";
 import { db } from "./db";
 
 function getSessionOptions(): SessionOptions {
@@ -13,7 +14,7 @@ function getSessionOptions(): SessionOptions {
     password,
     cookieName: "cs_ne_go_session",
     cookieOptions: {
-      secure: process.env.NODE_ENV === "production",
+      secure: cookieSecure(),
       httpOnly: true,
       sameSite: "lax" as const,
     },

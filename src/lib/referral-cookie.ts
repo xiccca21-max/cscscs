@@ -1,4 +1,5 @@
 import type { NextResponse } from "next/server";
+import { cookieSecure } from "./cookie-secure";
 
 /** Имя cookie — то же, что читает `/api/auth/callback`. */
 export const REFERRAL_COOKIE_NAME = "referral_code";
@@ -20,7 +21,7 @@ export function setReferralCookieOnResponse(res: NextResponse, code: string) {
     path: "/",
     maxAge: REFERRAL_COOKIE_MAX_AGE,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: cookieSecure(),
     httpOnly: true,
   });
 }
@@ -30,7 +31,7 @@ export function clearReferralCookieOnResponse(res: NextResponse) {
     path: "/",
     maxAge: 0,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: cookieSecure(),
     httpOnly: true,
   });
 }

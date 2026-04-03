@@ -41,7 +41,7 @@ sudo apt update && sudo apt upgrade -y
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 
-Выйти из SSH и зайти снова (или newgrp docker), чтобы группа docker подхватилась. Проверка:
+Выйти из SSH и зайти снова , чтобы группа docker подхватилась. Проверка:
 
 docker run --rm hello-world
 
@@ -83,7 +83,7 @@ NEXT_PUBLIC_APP_URL — очень важно. Это ровно тот адре
 
 ADMIN_STEAM_IDS — steamID64 с шага 0, одно число или несколько через запятую.
 
-STEAMAPIS_KEY и остальные STEAMAPIS — по желанию; можно оставить пустыми, инвентарь будет хуже/медленнее.
+STEAMAPIS_KEY - стимапис ключ
 
 Строки DATABASE_URL и DIRECT_URL в .env для запуска через docker compose из этого проекта можно не трогать: они используются если гоняешь сайт локально без Docker. В контейнере app база задаётся в docker-compose.yml. Не путай.
 
@@ -121,12 +121,19 @@ docker compose logs -f app
 
 Шаг 7. Создать таблицы в базе и залить способы оплаты
 
-Один раз после первого успешного запуска:
+Один раз после первого успешного запуска.
+
+Таблицы (в образе приложения есть папка `prisma/` и Prisma CLI — команда выполняется **внутри** контейнера `app`):
 
 docker compose exec app npx prisma db push
-docker compose exec app npx tsx prisma/seed-payments.ts
 
-Ошибок быть не должно. Если Prisma ругается на подключение — смотри пароль в шаге 5 и что контейнер db в статусе healthy: docker compose ps
+Сид способов оплат (`seed-payments.ts` тянет код из `src/`, его **нет** в минимальном production-образе). Запускай с **клона репозитория на сервере**, где уже есть `npm install` (или один раз `npm ci`):
+
+export DATABASE_URL="postgresql://postgres:ТВОЙ_ПАРОЛЬ@127.0.0.1:5432/cs_ne_go?schema=public"
+export DIRECT_URL="$DATABASE_URL"
+npx tsx prisma/seed-payments.ts
+
+Порт 5432 к Postgres в `docker-compose.yml` проброшен на хост — с сервера `127.0.0.1` подходит. Если Prisma ругается на подключение — смотри пароль в шаге 5 и что контейнер db в статусе healthy: docker compose ps
 
 
 Шаг 8. Проверить, что сайт живой

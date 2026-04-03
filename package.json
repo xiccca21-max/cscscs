@@ -4,20 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "prisma generate && next build",
+    "build": "run-s db:generate build:next",
+    "build:next": "next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "npx tsx prisma/seed-payments.ts",
-    "db:setup": "prisma db push && npx tsx prisma/seed-payments.ts",
+    "db:seed": "tsx prisma/seed-payments.ts",
+    "db:setup": "run-s db:push db:seed",
     "db:studio": "prisma studio",
     "docker:db": "docker compose up db -d",
     "docker:build": "docker compose build app",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "setup": "npm install && prisma generate && prisma db push && npx tsx prisma/seed-payments.ts"
+    "setup": "npm install && run-s db:generate db:push db:seed"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
@@ -43,8 +44,10 @@
     "@types/react-dom": "^19.2.3",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.1",
+    "npm-run-all": "^4.1.5",
     "prisma": "^7.5.0",
     "tailwindcss": "^4.2.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

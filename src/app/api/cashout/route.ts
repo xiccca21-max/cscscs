@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import { getMinCashoutUsd } from "@/lib/referral-reward";
 import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -28,6 +29,17 @@ export async function POST(request: NextRequest) {
     if (!Number.isFinite(amount) || amount <= 0) {
       return NextResponse.json(
         { success: false, error: "amount must be greater than 0" },
+        { status: 400 },
+      );
+    }
+
+    const minCashout = await getMinCashoutUsd(db);
+    if (amount < minCashout) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Minimum withdrawal is $${minCashout.toFixed(2)}`,
+        },
         { status: 400 },
       );
     }

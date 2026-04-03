@@ -24,6 +24,8 @@ model User {
   blockedAt   DateTime?
   referralId  String?
   referral    Referral?  @relation(fields: [referralId], references: [id])
+  /** После первого начисления бонуса пригласившему за этого пользователя */
+  referralBonusPaidToReferrerAt DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 

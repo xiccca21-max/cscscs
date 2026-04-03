@@ -1,5 +1,9 @@
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/auth";
+import {
+  getReferralProgramSettings,
+  REFERRAL_BONUS_COMMENT_PREFIX,
+} from "@/lib/referral-reward";
 import { NextResponse } from "next/server";
 
 function generateCode(steamLogin: string | undefined): string {
@@ -86,6 +90,18 @@ export async function GET() {
       }
     }
 
+    const bonusAgg = await db.balanceTransaction.aggregate({
+      where: {
+        userId: session.userId,
+        type: "CREDIT",
+        comment: { startsWith: REFERRAL_BONUS_COMMENT_PREFIX },
+      },
+      _sum: { amount: true },
+    });
+    const referralBonusesPaid = bonusAgg._sum.amount?.toFixed(2) ?? "0.00";
+
+    const program = await getReferralProgramSettings(db);
+
     return NextResponse.json({
       success: true,
       data: {
@@ -95,6 +111,10 @@ export async function GET() {
         ordered,
         done,
         volume: volume.toFixed(2),
+        referralBonusesPaid,
+        rewardPerReferralUsd: program.rewardUsd,
+        minOrderForRewardUsd: program.minOrderUsd,
+        minCashoutUsd: program.minCashoutUsd,
         users: referral.users.map((u) => ({
           id: u.id,
           steamLogin: u.steamLogin,

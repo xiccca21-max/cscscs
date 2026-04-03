@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { logAudit } from "@/lib/audit";
+import { applyReferralRewardOnOrderPaid } from "@/lib/referral-reward";
 import { Prisma, type OrderStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -149,6 +150,15 @@ export async function PATCH(
             changedBy: session.userId!,
             comment: body.adminComment ?? undefined,
           },
+        });
+
+        await applyReferralRewardOnOrderPaid(tx, {
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          sellerUserId: order.userId,
+          orderTotal: order.totalAmount,
+          previousStatus: existing.status,
+          newStatus: order.status,
         });
 
         if (existing.paymentMethod.type === "balance") {

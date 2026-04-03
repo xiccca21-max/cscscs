@@ -22,6 +22,10 @@ type StatsData = {
   ordered: number;
   done: number;
   volume: string;
+  referralBonusesPaid: string;
+  rewardPerReferralUsd: number;
+  minOrderForRewardUsd: number;
+  minCashoutUsd: number;
   users: ReferralUser[];
 };
 
@@ -47,6 +51,10 @@ export default function ReferralPage() {
       const fallback: Record<string, string> = {
         title: "Referrals",
         availableEarnings: "Available Earnings",
+        referralBonusesToBalance: "Referral bonuses (balance)",
+        referredSalesVolume: "Referred sales (paid)",
+        referralBonusHint:
+          "Bonuses go to your site balance when a referred user’s first order is paid. Withdraw from Balance.",
         referredUsers: "Referred Users",
         totalEarnings: "Total Earnings",
         claim: "CLAIM",
@@ -164,9 +172,11 @@ export default function ReferralPage() {
         <div className="ref-stats">
           <div className="ref-stat">
             <div className="ref-stat__body">
-              <span className="ref-stat__label">{t("availableEarnings")}</span>
-              <span className="ref-stat__val">{data?.volume || "0.00"} <small>$</small></span>
-              <button className="ref-stat__claim" id="claimBtn">{t("claim")}</button>
+              <span className="ref-stat__label">{t("referralBonusesToBalance")}</span>
+              <span className="ref-stat__val">{data?.referralBonusesPaid ?? "0.00"} <small>$</small></span>
+              <p className="ref-stat__hint" style={{ margin: "8px 0 0", fontSize: 12, opacity: 0.75, lineHeight: 1.35 }}>
+                {t("referralBonusHint")}
+              </p>
             </div>
             <div className="ref-stat__icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 10h20"/></svg>
@@ -183,7 +193,7 @@ export default function ReferralPage() {
           </div>
           <div className="ref-stat">
             <div className="ref-stat__body">
-              <span className="ref-stat__label">{t("totalEarnings")}</span>
+              <span className="ref-stat__label">{t("referredSalesVolume")}</span>
               <span className="ref-stat__val">{data?.volume || "0.00"} <small>$</small></span>
             </div>
             <div className="ref-stat__icon">

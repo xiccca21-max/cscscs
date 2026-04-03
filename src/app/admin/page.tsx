@@ -150,6 +150,11 @@ export default function AdminPage() {
   const [minItemPrice, setMinItemPrice] = useState("");
   const [minItemPriceSaving, setMinItemPriceSaving] = useState(false);
 
+  const [referralRewardUsd, setReferralRewardUsd] = useState("");
+  const [referralMinOrderUsd, setReferralMinOrderUsd] = useState("");
+  const [minCashoutUsd, setMinCashoutUsd] = useState("");
+  const [referralSettingsSaving, setReferralSettingsSaving] = useState(false);
+
   const [pmModal, setPmModal] = useState(false);
   const [pmForm, setPmForm] = useState({ name: "", type: "card", commission: "0", minAmount: "0", currencies: "RUB" });
   const [pmSaving, setPmSaving] = useState(false);
@@ -298,6 +303,9 @@ export default function AdminPage() {
           if (d.data.exchange_rate_usd_rub) setExchangeRate(d.data.exchange_rate_usd_rub);
           if (d.data.exchange_rate_usd_eur) setEurRate(d.data.exchange_rate_usd_eur);
           if (d.data.min_item_price_usd) setMinItemPrice(d.data.min_item_price_usd);
+          if (d.data.referral_reward_usd !== undefined) setReferralRewardUsd(d.data.referral_reward_usd);
+          if (d.data.referral_min_order_usd !== undefined) setReferralMinOrderUsd(d.data.referral_min_order_usd);
+          if (d.data.min_cashout_usd !== undefined) setMinCashoutUsd(d.data.min_cashout_usd);
         }
       });
     };
@@ -434,6 +442,47 @@ export default function AdminPage() {
       addToast("Ссылки сохранены");
     } catch { addToast("Ошибка сохранения"); }
     finally { setSocialSaving(false); }
+  };
+
+  const handleSaveReferralSettings = async () => {
+    const reward = parseFloat(referralRewardUsd);
+    const minOrd = parseFloat(referralMinOrderUsd);
+    const minOut = parseFloat(minCashoutUsd);
+    if (referralRewardUsd.trim() !== "" && (!Number.isFinite(reward) || reward < 0)) {
+      addToast("Некорректная сумма бонуса за рефа");
+      return;
+    }
+    if (referralMinOrderUsd.trim() !== "" && (!Number.isFinite(minOrd) || minOrd < 0)) {
+      addToast("Некорректный мин. заказ для бонуса");
+      return;
+    }
+    if (minCashoutUsd.trim() !== "" && (!Number.isFinite(minOut) || minOut <= 0)) {
+      addToast("Некорректный минимальный вывод");
+      return;
+    }
+    setReferralSettingsSaving(true);
+    try {
+      await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "referral_reward_usd", value: referralRewardUsd.trim() || "0" }),
+      });
+      await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "referral_min_order_usd", value: referralMinOrderUsd.trim() || "0" }),
+      });
+      await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "min_cashout_usd", value: minCashoutUsd.trim() || "1" }),
+      });
+      addToast("Настройки рефералки сохранены");
+    } catch {
+      addToast("Ошибка сохранения");
+    } finally {
+      setReferralSettingsSaving(false);
+    }
   };
 
   const handleSaveExchangeRates = async () => {
@@ -1361,6 +1410,29 @@ export default function AdminPage() {
         {section === "referrals" && (
           <div className="adm-section">
             <div className="adm-section__top"><h1>Реферальная программа</h1></div>
+            <div className="adm-card" style={{ marginBottom: 16 }}>
+              <h2 style={{ margin: "0 0 12px", fontSize: 16 }}>Начисления на баланс</h2>
+              <p style={{ margin: "0 0 14px", fontSize: 13, color: "var(--muted)", lineHeight: 1.45 }}>
+                Бонус зачисляется на баланс пригласившего, когда приведённый пользователь впервые получает заказ в статусе <b>PAID</b>, сумма заказа не ниже порога. Вывод средств — только с баланса; ниже — минимальная сумма одного вывода.
+              </p>
+              <div className="adm-form adm-form--wide" style={{ display: "grid", gap: 10, maxWidth: 420 }}>
+                <label>
+                  Бонус за первого оплаченного рефера ($)
+                  <input className="adm-input" type="text" inputMode="decimal" placeholder="0 = выкл" value={referralRewardUsd} onChange={(e) => setReferralRewardUsd(e.target.value)} />
+                </label>
+                <label>
+                  Мин. сумма заказа ($) для начисления бонуса
+                  <input className="adm-input" type="text" inputMode="decimal" placeholder="0" value={referralMinOrderUsd} onChange={(e) => setReferralMinOrderUsd(e.target.value)} />
+                </label>
+                <label>
+                  Мин. сумма вывода с баланса ($)
+                  <input className="adm-input" type="text" inputMode="decimal" placeholder="1" value={minCashoutUsd} onChange={(e) => setMinCashoutUsd(e.target.value)} />
+                </label>
+              </div>
+              <button type="button" className="adm-btn adm-btn--primary" style={{ marginTop: 12 }} onClick={handleSaveReferralSettings} disabled={referralSettingsSaving}>
+                {referralSettingsSaving ? "Сохранение..." : "Сохранить настройки"}
+              </button>
+            </div>
             <div className="adm-card">
               <table className="adm-table">
                 <thead><tr><th>Партнёр</th><th>Код</th><th>Приведено</th><th>Активен</th><th>Создан</th></tr></thead>
@@ -1370,7 +1442,7 @@ export default function AdminPage() {
                       <td className="adm-bold">{r.name ?? "-"}</td>
                       <td className="adm-mono">{r.code ?? "-"}</td>
                       <td>{r.userCount ?? 0}</td>
-                      <td><span className={`adm-badge adm-badge--${r.active !== false ? "success" : "danger"}`}>{r.active !== false ? "Да" : "Нет"}</span></td>
+                      <td><span className={`adm-badge adm-badge--${r.isActive !== false ? "success" : "danger"}`}>{r.isActive !== false ? "Да" : "Нет"}</span></td>
                       <td>{r.createdAt ? new Date(r.createdAt).toLocaleDateString("ru-RU") : "-"}</td>
                     </tr>
                   )) : <tr><td colSpan={5} className="adm-empty">Нет рефералов</td></tr>}

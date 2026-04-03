@@ -584,6 +584,9 @@
   "referral": {
     "title": "Referrals",
     "availableEarnings": "Available Earnings",
+    "referralBonusesToBalance": "Referral bonuses (your balance)",
+    "referredSalesVolume": "Referred users sales (paid)",
+    "referralBonusHint": "Rewards are added to your site balance when a referred user’s first order is marked paid (if the order meets the minimum set by the site). Withdraw from Balance; minimum withdrawal is set in the same way.",
     "referredUsers": "Referred Users",
     "totalEarnings": "Total Earnings",
     "claim": "CLAIM",
@@ -593,7 +596,7 @@
     "howTitle": "How It Works",
     "how1": "Share your unique referral link with friends",
     "how2": "They sign up and sell skins using your link",
-    "how3": "You earn commission on every sale they make",
+    "how3": "When their first order is completed and paid, a fixed bonus is credited to your balance",
     "transTitle": "Recent Transactions",
     "searchPlaceholder": "Search by Steam ID",
     "earnings": "Earnings",

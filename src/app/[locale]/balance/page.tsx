@@ -158,6 +158,34 @@ export default function BalancePage() {
   const hasCrypto = cryptoMethods.length > 0;
 
   useEffect(() => {
+    if (cashoutMethod == null) return;
+    const isCryptoFamily =
+      cashoutMethod === "crypto" || CRYPTO_TYPES.has(cashoutMethod);
+    if (isCryptoFamily && !hasCrypto) {
+      const next =
+        mainCashoutMethodsDisplay[0]?.type ??
+        mainCashoutMethods[0]?.type ??
+        "card";
+      setCashoutMethod(next);
+      setCryptoDropOpen(false);
+      return;
+    }
+    if (isCryptoFamily && hasCrypto && cashoutMethod !== "crypto") {
+      const still = cryptoMethods.some((m) => m.type === cashoutMethod);
+      if (!still) {
+        setCashoutMethod("crypto");
+        setPayDetails((prev) => ({ ...prev, network: "" }));
+      }
+    }
+  }, [
+    hasCrypto,
+    cashoutMethod,
+    cryptoMethods,
+    mainCashoutMethodsDisplay,
+    mainCashoutMethods,
+  ]);
+
+  useEffect(() => {
     if (!cryptoDropOpen) return;
     const handler = (e: Event) => {
       if (cryptoDropRef.current && !cryptoDropRef.current.contains(e.target as Node)) setCryptoDropOpen(false);
@@ -551,10 +579,6 @@ export default function BalancePage() {
                         <button type="button" data-method="alipay" className={`bal-pay-btn${cashoutMethod === "alipay" ? " active" : ""}`} onClick={() => setCashoutMethod("alipay")}>
                           <span className="bal-pay-btn__icon"><img src="/icons/pay-alipay.svg" alt="" width="24" height="24" /></span>
                           <span className="bal-pay-btn__name">{t("payAlipay")}</span>
-                        </button>
-                        <button type="button" data-method="crypto" className={`bal-pay-btn${cashoutMethod === "crypto" ? " active" : ""}`} onClick={() => setCashoutMethod("crypto")}>
-                          <span className="bal-pay-btn__icon"><img src="/icons/pay-crypto.png" alt="" width="24" height="24" /></span>
-                          <span className="bal-pay-btn__name">{t("cryptocurrency")}</span>
                         </button>
                         <button type="button" data-method="bank" className={`bal-pay-btn${cashoutMethod === "bank" ? " active" : ""}`} onClick={() => setCashoutMethod("bank")}>
                           <span className="bal-pay-btn__icon"><img src="/icons/pay-bank.png" alt="" width="24" height="24" /></span>

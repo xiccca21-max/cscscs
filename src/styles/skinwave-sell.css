@@ -2552,6 +2552,11 @@
 .pay-btn[data-method="card"].active .pay-btn__icon { background: rgba(99,102,241,0.2); }
 .pay-btn[data-method="paypal"].active .pay-btn__icon { background: rgba(0,156,222,0.2); }
 .pay-btn[data-method="alipay"].active .pay-btn__icon { background: rgba(22,119,255,0.22); }
+/* На активном синем фоне кружка — монохромный белый логотип */
+.pay-btn[data-method="paypal"].active .pay-btn__icon .pay-btn__img,
+.pay-btn[data-method="alipay"].active .pay-btn__icon .pay-btn__img {
+  filter: brightness(0) invert(1);
+}
 .pay-btn[data-method="crypto"].active .pay-btn__icon { background: rgba(245,158,11,0.2); }
 .pay-btn[data-method="bank"].active .pay-btn__icon { background: rgba(59,130,246,0.2); }
 

@@ -1,5 +1,10 @@
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import {
+  clearReferralCookieOnResponse,
+  normalizeReferralCodeInput,
+  REFERRAL_COOKIE_NAME,
+} from "@/lib/referral-cookie";
 import { getSteamProfile, verifySteamLogin } from "@/lib/steam";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -40,16 +45,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const referralCode =
-      request.cookies.get("referral_code")?.value ||
+    const referralCodeRaw =
+      request.cookies.get(REFERRAL_COOKIE_NAME)?.value ||
       searchParams.get("ref") ||
       undefined;
+    const referralCode = normalizeReferralCodeInput(referralCodeRaw);
 
     if (referralCode && !existing?.referralId) {
       const referral = await db.referral.findFirst({
         where: { code: referralCode, isActive: true },
       });
-      if (referral) {
+      // Не привязываем «сам к себе»: у авто-рефералов name = steamId пригласившего
+      if (referral && referral.name !== user.steamId) {
         await db.user.update({
           where: { id: user.id },
           data: { referralId: referral.id },
@@ -72,7 +79,9 @@ export async function GET(request: NextRequest) {
     const savedLocale = user.locale || "en";
     const validLocales = ["en", "ru"];
     const locale = validLocales.includes(savedLocale) ? savedLocale : "en";
-    return NextResponse.redirect(new URL(`/${locale}`, request.url));
+    const res = NextResponse.redirect(new URL(`/${locale}`, request.url));
+    clearReferralCookieOnResponse(res);
+    return res;
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
     return NextResponse.redirect(

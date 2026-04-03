@@ -402,10 +402,27 @@ export default function SellPage() {
     () => dbPaymentMethods.filter((m) => CRYPTO_TYPES.has(m.type)),
     [dbPaymentMethods],
   );
+  const hasCrypto = cryptoMethods.length > 0;
   const mainMethods = useMemo(
     () => dbPaymentMethods.filter((m) => !CRYPTO_TYPES.has(m.type)),
     [dbPaymentMethods],
   );
+
+  useEffect(() => {
+    if (!hasCrypto && paymentMethod === "crypto") {
+      const first = dbPaymentMethods.find((m) => !CRYPTO_TYPES.has(m.type));
+      setPaymentMethod(first?.type ?? "balance");
+      setSelectedCrypto(null);
+      setCryptoDropOpen(false);
+      return;
+    }
+    if (hasCrypto && paymentMethod === "crypto" && selectedCrypto) {
+      const ok = cryptoMethods.some((m) => m.type === selectedCrypto);
+      if (!ok) {
+        setSelectedCrypto(cryptoMethods[0]?.type ?? null);
+      }
+    }
+  }, [hasCrypto, paymentMethod, selectedCrypto, cryptoMethods, dbPaymentMethods]);
 
   const commission = useMemo(() => {
     const fromDb = dbPaymentMethods.find((m) => m.type === effectivePayType);
@@ -1273,11 +1290,13 @@ export default function SellPage() {
                     </button>
                   );
                 })()}
-                {/* Crypto (grouped) */}
-                <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" onClick={() => { setPaymentMethod("crypto"); }}>
-                  <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
-                  <span className="pay-btn__name">{t("payCrypto")}</span>
-                </button>
+                {/* Crypto (grouped) — только если в админке включены crypto-методы */}
+                {hasCrypto && (
+                  <button className={`pay-btn${paymentMethod === "crypto" ? " active" : ""}`} data-method="crypto" onClick={() => { setPaymentMethod("crypto"); }}>
+                    <span className="pay-btn__icon"><img src="/icons/pay-crypto.png" alt="Crypto" className="pay-btn__img pay-btn__img--circle pay-btn__img--crypto" /></span>
+                    <span className="pay-btn__name">{t("payCrypto")}</span>
+                  </button>
+                )}
                 {/* Bank */}
                 {(() => {
                   const bankPm = mainMethods.find((m) => m.type === "bank");

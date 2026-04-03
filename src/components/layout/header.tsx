@@ -77,13 +77,12 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    const urlLang = currentLocale === "ru" ? "RU" : "EN";
-    const savedLang = localStorage.getItem("sw_lang");
-    if (savedLang) {
-      setLang(savedLang);
-    } else {
-      setLang(urlLang);
-      localStorage.setItem("sw_lang", urlLang);
+    const label = currentLocale === "ru" ? "RU" : "EN";
+    setLang(label);
+    try {
+      localStorage.setItem("sw_lang", label);
+    } catch {
+      // ignore
     }
   }, [currentLocale]);
 
@@ -94,11 +93,26 @@ export function Header() {
     setCurrencyOpen(false);
   };
 
-  const handleLang = (l: string) => {
+  const handleLang = async (l: string) => {
     setLang(l);
     setLangOpen(false);
-    localStorage.setItem("sw_lang", l);
+    try {
+      localStorage.setItem("sw_lang", l);
+    } catch {
+      // ignore
+    }
     const locale = l.toLowerCase() as "en" | "ru";
+    if (user) {
+      try {
+        await fetch("/api/user/locale", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ locale }),
+        });
+      } catch {
+        // still navigate; DB sync is best-effort
+      }
+    }
     router.replace(pathname || "/", { locale });
   };
 

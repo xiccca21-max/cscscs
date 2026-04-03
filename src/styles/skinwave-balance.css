@@ -813,6 +813,11 @@
 .bal-pay-btn[data-method="alipay"].active .bal-pay-btn__name {
   color: #1677ff;
 }
+/* Логотипы PayPal / Alipay на синем градиенте — белые, иначе сливаются с фоном */
+.bal-pay-btn[data-method="paypal"].active .bal-pay-btn__icon img,
+.bal-pay-btn[data-method="alipay"].active .bal-pay-btn__icon img {
+  filter: brightness(0) invert(1);
+}
 .bal-pay-info {
   display: flex;
   gap: 16px;

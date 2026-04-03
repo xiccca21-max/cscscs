@@ -54,6 +54,16 @@ const CASHOUT_ICONS: Record<string, string> = {
 
 const CRYPTO_TYPES = new Set(["crypto", "btc", "usdt-trc20", "usdt-erc20", "eth", "ltc"]);
 
+/** Показываем в сетке, если в ответе API ещё нет строки type=paypal (как на /sell). */
+const PAYPAL_UI_FALLBACK: PaymentMethodDB = {
+  id: "__paypal_ui",
+  name: "PayPal",
+  type: "paypal",
+  commission: "2.5",
+  minAmount: "1",
+  currencies: ["USD", "EUR", "RUB"],
+};
+
 const CRYPTO_NETWORKS = [
   { val: "BTC", label: "Bitcoin", tag: "BTC", color: "#f7931a" },
   { val: "ETH", label: "Ethereum", tag: "ERC-20", color: "#627eea" },
@@ -114,6 +124,15 @@ export default function BalancePage() {
 
   const cashoutMethods = paymentMethods.filter((m) => m.type !== "balance");
   const mainCashoutMethods = cashoutMethods.filter((m) => !CRYPTO_TYPES.has(m.type));
+  /** Всегда показываем PayPal рядом с картой, если в БД метода ещё нет (иначе кнопка пропадала при непустом списке). */
+  const mainCashoutMethodsDisplay = useMemo(() => {
+    if (mainCashoutMethods.some((m) => m.type === "paypal")) return mainCashoutMethods;
+    const next = [...mainCashoutMethods];
+    const afterCard = next.findIndex((m) => m.type === "card");
+    if (afterCard >= 0) next.splice(afterCard + 1, 0, PAYPAL_UI_FALLBACK);
+    else next.unshift(PAYPAL_UI_FALLBACK);
+    return next;
+  }, [mainCashoutMethods]);
   const cryptoMethods = cashoutMethods.filter((m) => CRYPTO_TYPES.has(m.type));
   const hasCrypto = cryptoMethods.length > 0;
 
@@ -213,6 +232,12 @@ export default function BalancePage() {
     }
     if (selectedPM) {
       const minAmt = parseFloat(selectedPM.minAmount);
+      if (minAmt > 0 && amount < minAmt) {
+        setCashoutError(`${t("methodMin")}: ${minAmt}$`);
+        return;
+      }
+    } else if (cashoutMethod === "paypal") {
+      const minAmt = parseFloat(PAYPAL_UI_FALLBACK.minAmount);
       if (minAmt > 0 && amount < minAmt) {
         setCashoutError(`${t("methodMin")}: ${minAmt}$`);
         return;
@@ -451,7 +476,7 @@ export default function BalancePage() {
                 <div className="form-group">
                   <label>{t("selectMethod")}</label>
                   <div className="bal-pay-grid">
-                    {mainCashoutMethods.map((pm) => {
+                    {mainCashoutMethodsDisplay.map((pm) => {
                       const icon = CASHOUT_ICONS[pm.type] ?? CASHOUT_ICONS.other;
                       return (
                         <button

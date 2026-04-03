@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useCurrency } from "@/components/currency-provider";
@@ -86,6 +86,7 @@ type PaymentMethodDB = {
 const FALLBACK_METHODS: PaymentMethodDB[] = [
   { id: "fb-balance",    name: "Balance",            type: "balance",    commission: "0",   minAmount: "0",  currencies: ["USD"] },
   { id: "fb-card",       name: "Visa / Mastercard",  type: "card",       commission: "2.5", minAmount: "1",  currencies: ["USD"] },
+  { id: "fb-paypal",     name: "PayPal",             type: "paypal",     commission: "2.5", minAmount: "1",  currencies: ["USD", "EUR", "RUB"] },
   { id: "fb-btc",        name: "Bitcoin (BTC)",       type: "btc",        commission: "1",   minAmount: "10", currencies: ["USD"] },
   { id: "fb-usdt-trc20", name: "USDT (TRC-20)",      type: "usdt-trc20", commission: "0",   minAmount: "5",  currencies: ["USD"] },
   { id: "fb-eth",        name: "Ethereum (ERC-20)",   type: "eth",        commission: "1",   minAmount: "10", currencies: ["USD"] },
@@ -97,6 +98,7 @@ const FALLBACK_METHODS: PaymentMethodDB[] = [
 const PAYOUT_CARD_COLORS: Record<string, string> = {
   balance:      "#f59e0b",
   card:         "#1A1F71",
+  paypal:       "#0070ba",
   crypto:       "#F7931A",
   btc:          "#F7931A",
   "usdt-trc20": "#26A17B",
@@ -118,6 +120,16 @@ function PayoutCardIcon({ type }: { type: string }) {
           <svg width="40" height="28" viewBox="0 0 48 32"><rect width="48" height="32" rx="4" fill="#1A1F71" /><text x="24" y="20" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="700" fontFamily="Arial,sans-serif" letterSpacing="1">VISA</text></svg>
           <svg width="40" height="28" viewBox="0 0 48 32"><rect width="48" height="32" rx="4" fill="#EB001B" opacity="0" /><circle cx="18" cy="16" r="10" fill="#EB001B" /><circle cx="30" cy="16" r="10" fill="#F79E1B" /><path d="M24 8.6a10 10 0 0 1 3.7 7.4A10 10 0 0 1 24 23.4 10 10 0 0 1 20.3 16 10 10 0 0 1 24 8.6z" fill="#FF5F00" /></svg>
         </>
+      );
+    case "paypal":
+      return (
+        <img
+          src="/icons/pay-paypal.svg"
+          alt=""
+          width={88}
+          height={36}
+          className="payout-card__logo-img payout-card__logo-img--paypal"
+        />
       );
     case "crypto":
     case "btc":
@@ -171,6 +183,25 @@ export default function HomePage() {
       })
       .catch(() => {});
   }, []);
+
+  /** Реальная главная берёт методы из API; если в БД ещё нет PayPal — показываем карточку всё равно (как на /sell). */
+  const payoutMethodsForGrid = useMemo(() => {
+    if (homePaymentMethods.length === 0) return FALLBACK_METHODS;
+    if (homePaymentMethods.some((m) => m.type === "paypal")) return homePaymentMethods;
+    const paypalPm: PaymentMethodDB = {
+      id: "ui-paypal",
+      name: "PayPal",
+      type: "paypal",
+      commission: "2.5",
+      minAmount: "1",
+      currencies: ["USD", "EUR", "RUB"],
+    };
+    const out = [...homePaymentMethods];
+    const afterCard = out.findIndex((m) => m.type === "card");
+    if (afterCard >= 0) out.splice(afterCard + 1, 0, paypalPm);
+    else out.unshift(paypalPm);
+    return out;
+  }, [homePaymentMethods]);
 
   /* ── A) Payout rotation ── */
   const payoutIdxRef = useRef(0);
@@ -586,7 +617,7 @@ export default function HomePage() {
           <h2 className="payouts-section__title">{t("payoutTitle")} <span>{t("payoutTitleAccent")}</span></h2>
           <p className="payouts-section__sub">{t("payoutSub")}</p>
           <div className="payouts-grid">
-            {(homePaymentMethods.length > 0 ? homePaymentMethods : FALLBACK_METHODS).map((pm) => {
+            {payoutMethodsForGrid.map((pm) => {
               const color = PAYOUT_CARD_COLORS[pm.type] ?? PAYOUT_CARD_COLORS.other;
               const fee = parseFloat(pm.commission);
               const minAmt = parseFloat(pm.minAmount);

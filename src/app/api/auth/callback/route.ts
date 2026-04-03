@@ -5,23 +5,34 @@ import {
   normalizeReferralCodeInput,
   REFERRAL_COOKIE_NAME,
 } from "@/lib/referral-cookie";
+import { getAppOrigin } from "@/lib/app-url";
 import { getSteamProfile, verifySteamLogin } from "@/lib/steam";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
+  let origin: string;
+  try {
+    origin = getAppOrigin();
+  } catch {
+    return NextResponse.json(
+      { error: "NEXT_PUBLIC_APP_URL is not configured" },
+      { status: 500 },
+    );
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const steamId = await verifySteamLogin(searchParams);
     if (!steamId) {
       return NextResponse.redirect(
-        new URL("/?error=auth_failed", request.url),
+        new URL("/?error=auth_failed", origin),
       );
     }
 
     const profile = await getSteamProfile(steamId);
     if (!profile) {
       return NextResponse.redirect(
-        new URL("/?error=auth_failed", request.url),
+        new URL("/?error=auth_failed", origin),
       );
     }
 
@@ -41,7 +52,7 @@ export async function GET(request: NextRequest) {
 
     if (user.status === "BLOCKED") {
       return NextResponse.redirect(
-        new URL("/?error=account_blocked", request.url),
+        new URL("/?error=account_blocked", origin),
       );
     }
 
@@ -79,16 +90,18 @@ export async function GET(request: NextRequest) {
     const savedLocale = user.locale || "en";
     const validLocales = ["en", "ru"];
     const locale = validLocales.includes(savedLocale) ? savedLocale : "en";
-    const res = NextResponse.redirect(new URL(`/${locale}`, request.url));
+    const res = NextResponse.redirect(new URL(`/${locale}`, origin));
     clearReferralCookieOnResponse(res);
     return res;
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
-    return NextResponse.redirect(
-      new URL(
-        `/?error=${encodeURIComponent(message)}`,
-        request.url,
-      ),
-    );
+    try {
+      const o = getAppOrigin();
+      return NextResponse.redirect(
+        new URL(`/?error=${encodeURIComponent(message)}`, o),
+      );
+    } catch {
+      return NextResponse.json({ error: message }, { status: 500 });
+    }
   }
 }

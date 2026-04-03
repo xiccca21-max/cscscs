@@ -1,9 +1,20 @@
 import { getSession } from "@/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { getAppOrigin } from "@/lib/app-url";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json({ error: "Not available" }, { status: 403 });
+  }
+
+  let origin: string;
+  try {
+    origin = getAppOrigin();
+  } catch {
+    return NextResponse.json(
+      { error: "NEXT_PUBLIC_APP_URL is not configured" },
+      { status: 500 },
+    );
   }
 
   const session = await getSession();
@@ -14,5 +25,5 @@ export async function GET(request: NextRequest) {
   session.isAdmin = true;
   await session.save();
 
-  return NextResponse.redirect(new URL("/", request.url));
+  return NextResponse.redirect(new URL("/", origin));
 }

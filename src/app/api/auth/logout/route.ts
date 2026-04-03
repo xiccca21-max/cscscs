@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/auth";
-import { NextRequest, NextResponse } from "next/server";
+import { getAppOrigin } from "@/lib/app-url";
+import { NextResponse } from "next/server";
 
 export async function POST() {
   try {
@@ -16,9 +17,18 @@ export async function POST() {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
+  let origin: string;
+  try {
+    origin = getAppOrigin();
+  } catch {
+    return NextResponse.json(
+      { error: "NEXT_PUBLIC_APP_URL is not configured" },
+      { status: 500 },
+    );
+  }
   const session = await getSession();
   session.destroy();
   await session.save();
-  return NextResponse.redirect(new URL("/", request.url));
+  return NextResponse.redirect(new URL("/", origin));
 }

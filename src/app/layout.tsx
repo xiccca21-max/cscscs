@@ -13,6 +13,10 @@ export const metadata: Metadata = {
   title: "SKINSELL - Sell Your Game Skins Instantly",
   description:
     "Sell your CS2, Dota 2, TF2 & Rust skins instantly. Get up to 95% of market value with fast payout.",
+  icons: {
+    icon: [{ url: "/favicon.jpeg", type: "image/jpeg" }],
+    apple: "/favicon.jpeg",
+  },
 };
 
 export default function RootLayout({

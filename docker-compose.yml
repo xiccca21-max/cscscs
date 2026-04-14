@@ -17,7 +17,10 @@ services:
       retries: 5
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_META_PIXEL_ID: ${NEXT_PUBLIC_META_PIXEL_ID:-}
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -31,6 +34,7 @@ services:
       STEAMAPIS_KEY_TF2: "${STEAMAPIS_KEY_TF2}"
       STEAMAPIS_KEY_RUST: "${STEAMAPIS_KEY_RUST}"
       NEXT_PUBLIC_APP_URL: "${NEXT_PUBLIC_APP_URL:-http://localhost:3000}"
+      NEXT_PUBLIC_META_PIXEL_ID: "${NEXT_PUBLIC_META_PIXEL_ID:-}"
       ADMIN_STEAM_IDS: "${ADMIN_STEAM_IDS}"
     depends_on:
       db:

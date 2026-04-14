@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
+import { ExampleMetaPixel } from "@/components/analytics/example-meta-pixel";
+
 import "./globals.css";
 
 const inter = Inter({
@@ -30,6 +32,7 @@ export default function RootLayout({
         className={`${inter.variable} font-sans antialiased min-h-screen`}
       >
         {children}
+        <ExampleMetaPixel />
         <script
           dangerouslySetInnerHTML={{
             __html: `document.addEventListener('contextmenu',function(e){if(e.target.tagName==='IMG'){e.preventDefault()}});document.addEventListener('dragstart',function(e){if(e.target.tagName==='IMG'){e.preventDefault()}});`,

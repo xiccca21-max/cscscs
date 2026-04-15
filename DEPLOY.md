@@ -49,7 +49,8 @@ nano .env
 | `SESSION_SECRET` | вывод `openssl rand -hex 32` |
 | `NEXT_PUBLIC_APP_URL` | **точный** URL, с которого открываешь сайт (без `/` в конце). Совпадает с адресной строкой: `http://ТВОЙ_IP:3000` / `https://домен`. Не используй в браузере `0.0.0.0` — только `localhost`, `127.0.0.1`, IP или домен |
 | `ADMIN_STEAM_IDS` | steamID64, через запятую если несколько |
-| `STEAMAPIS_KEY` | при необходимости SteamApis |
+| `STEAMAPIS_KEY` | один ключ [SteamApis](https://steamapis.com) на подгрузку инвентаря (любой AppID) |
+| `TM_MARKET_API_KEY_CS2` и т.д. | приватные ключи TM Market по игре (`_DOTA2`, `_TF2`, `_RUST`) для прайсов; см. API в кабинете маркета |
 
 `DATABASE_URL` / `DIRECT_URL` для **docker compose** приложения задаются в `docker-compose.yml`, не в `.env` (в `.env` они нужны для локального запуска без Docker).
 

@@ -8,6 +8,21 @@ const TM_PRICES_URLS: Record<Game, string> = {
   TF2: "https://tf2.tm/api/v2/prices/USD.json",
   RUST: "https://rust.tm/api/v2/prices/USD.json",
 };
+
+/** Имя env-переменной с приватным API-ключом TM Market по игре. */
+const TM_MARKET_API_KEYS: Record<Game, string> = {
+  CS2: "TM_MARKET_API_KEY_CS2",
+  DOTA2: "TM_MARKET_API_KEY_DOTA2",
+  TF2: "TM_MARKET_API_KEY_TF2",
+  RUST: "TM_MARKET_API_KEY_RUST",
+};
+
+function tmMarketApiKey(game: Game): string | undefined {
+  const name = TM_MARKET_API_KEYS[game];
+  const v = process.env[name]?.trim();
+  return v || undefined;
+}
+
 const CACHE_TTL = 10 * 60 * 1000;
 
 export interface ItemPrice {
@@ -35,8 +50,12 @@ async function loadTmPrices(game: Game): Promise<Map<string, number>> {
   }
 
   const url = TM_PRICES_URLS[game];
+  const apiKey = tmMarketApiKey(game);
+  const headers: HeadersInit = {};
+  if (apiKey) headers["X-API-KEY"] = apiKey;
+
   try {
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(url, { cache: "no-store", headers });
     if (!res.ok) throw new Error(`TM API ${res.status} for ${game}`);
     const data = await res.json();
     const map = new Map<string, number>();

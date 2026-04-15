@@ -7,8 +7,9 @@ services:
       # Один источник пароля: .env (docker compose подставляет ${...} из файла .env в каталоге проекта)
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: cs_ne_go
+    # Только localhost на хосте — не 0.0.0.0:5432 (иначе боты и readme_to_recover).
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

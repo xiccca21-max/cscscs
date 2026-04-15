@@ -56,18 +56,15 @@ nano .env
 
 ### 5. Пароль Postgres (прод)
 
-По умолчанию везде пароль `postgres` — сменить.
+По умолчанию пароль `postgres`. Чтобы сменить, достаточно **одной** строки в `.env` (compose подставляет её в `POSTGRES_PASSWORD` и в `DATABASE_URL` / `DIRECT_URL` у сервиса `app`):
 
 ```bash
-nano docker-compose.yml
+nano .env
 ```
 
-- `db` → `POSTGRES_PASSWORD`: свой пароль  
-- `app` → `DATABASE_URL` и `DIRECT_URL`: в URI заменить `postgres:СТАРЫЙ` на `postgres:НОВЫЙ`:
+Добавь или измени: `POSTGRES_PASSWORD=твой_надёжный_пароль` (без `#`, `@`, `:` в пароле — иначе нужно URL-кодирование в URI).
 
-`postgresql://postgres:НОВЫЙ_ПАРОЛЬ@db:5432/cs_ne_go?schema=public`
-
-Сохранить: Ctrl+O, Enter, Ctrl+X.
+**Важно:** пароль в контейнере Postgres задаётся **только при первом создании** тома `pgdata`. Если база уже поднята со старым паролем, смена `POSTGRES_PASSWORD` в `.env` сама по себе пароль внутри БД **не обновит**. Варианты: (1) вернуть в `.env` тот пароль, с которым том изначально создали; (2) сбросить данные: `docker compose down -v`, затем снова `up -d` (удалит БД); (3) зайти в контейнер `db` и выполнить `ALTER USER postgres WITH PASSWORD '...';` под суперпользователем.
 
 ### 6. Запуск
 

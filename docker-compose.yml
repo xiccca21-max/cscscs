@@ -4,7 +4,8 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      # Один источник пароля: .env (docker compose подставляет ${...} из файла .env в каталоге проекта)
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: cs_ne_go
     ports:
       - "5432:5432"
@@ -25,8 +26,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@db:5432/cs_ne_go?schema=public"
-      DIRECT_URL: "postgresql://postgres:postgres@db:5432/cs_ne_go?schema=public"
+      DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/cs_ne_go?schema=public"
+      DIRECT_URL: "postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/cs_ne_go?schema=public"
       SESSION_SECRET: "${SESSION_SECRET}"
       STEAM_API_KEY: "${STEAM_API_KEY}"
       STEAMAPIS_KEY: "${STEAMAPIS_KEY}"

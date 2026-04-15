@@ -25,14 +25,14 @@ export async function GET(request: NextRequest) {
     const steamId = await verifySteamLogin(searchParams);
     if (!steamId) {
       return NextResponse.redirect(
-        new URL("/?error=auth_failed", origin),
+        new URL("/?error=steam_openid", origin),
       );
     }
 
     const profile = await getSteamProfile(steamId);
     if (!profile) {
       return NextResponse.redirect(
-        new URL("/?error=auth_failed", origin),
+        new URL("/?error=steam_api", origin),
       );
     }
 

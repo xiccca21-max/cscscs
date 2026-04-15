@@ -58,7 +58,13 @@ export async function verifySteamLogin(
   });
 
   const text = await response.text();
-  if (!text.includes("is_valid:true")) return null;
+  if (!text.includes("is_valid:true")) {
+    console.error(
+      "[steam] OpenID check_authentication failed, body head:",
+      text.slice(0, 600).replace(/\s+/g, " "),
+    );
+    return null;
+  }
 
   const claimedId = params.get("openid.claimed_id");
   if (!claimedId) return null;
@@ -73,9 +79,16 @@ export async function getSteamProfile(steamId: string) {
 
   const url = `${STEAM_API_URL}/ISteamUser/GetPlayerSummaries/v2/?key=${apiKey}&steamids=${steamId}`;
   const res = await fetch(url);
+  if (!res.ok) {
+    console.error("[steam] GetPlayerSummaries HTTP", res.status, await res.text().then((t) => t.slice(0, 300)));
+    return null;
+  }
   const data = await res.json();
   const player = data?.response?.players?.[0];
-  if (!player) return null;
+  if (!player) {
+    console.error("[steam] GetPlayerSummaries empty players", steamId, JSON.stringify(data).slice(0, 400));
+    return null;
+  }
 
   return {
     steamId: player.steamid as string,

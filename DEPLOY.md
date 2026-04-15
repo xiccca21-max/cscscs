@@ -169,6 +169,8 @@ Node 20, Postgres или `npm run docker:db`.
 |---------|----------------|
 | Steam login / 503 после входа | Открывай сайт не с `0.0.0.0`, а с тем же хостом, что в `NEXT_PUBLIC_APP_URL`; после правки `.env` — `docker compose up -d --build` |
 | Steam login | `NEXT_PUBLIC_APP_URL` = реальный URL в адресной строке |
+| `?error=steam_openid` | OpenID не подтвердился: чаще всего **не совпадает хост/схема** с `NEXT_PUBLIC_APP_URL` (например `www` vs без, `http` vs `https`). Реже — повторный заход по закладке на `/api/auth/callback` (у Steam ответ `is_valid` одноразовый). Смотри `docker compose logs app`. |
+| `?error=steam_api` | Профиль не отдался: `STEAM_API_KEY` в контейнере `app`, лимиты/ошибка Steam Web API. Логи `app`. |
 | Нет админки | В `ADMIN_STEAM_IDS` только steamID64 |
-| БД | `docker compose ps`, пароль в compose и `POSTGRES_PASSWORD` |
+| БД | `docker compose ps`; URI в compose у `app` и пароль у `db` |
 | Ошибки приложения | `docker compose logs app` |

@@ -12,12 +12,6 @@ declare global {
 
 const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
 
-/**
- * Пример встраивания Meta (Facebook) Pixel для обучения.
- * Задай в .env: NEXT_PUBLIC_META_PIXEL_ID=твой_id — иначе компонент ничего не рендерит.
- *
- * PageView: первый — из init-скрипта Meta; дальше при клиентской навигации Next — из эффекта ниже.
- */
 function MetaPixelRoutePageViews() {
   const pathname = usePathname();
   const searchParams = useSearchParams();

@@ -9,7 +9,6 @@ const TM_PRICES_URLS: Record<Game, string> = {
   RUST: "https://rust.tm/api/v2/prices/USD.json",
 };
 
-/** Имя env-переменной с приватным API-ключом TM Market по игре. */
 const TM_MARKET_API_KEYS: Record<Game, string> = {
   CS2: "TM_MARKET_API_KEY_CS2",
   DOTA2: "TM_MARKET_API_KEY_DOTA2",

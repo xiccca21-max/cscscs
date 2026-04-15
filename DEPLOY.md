@@ -173,4 +173,5 @@ Node 20, Postgres или `npm run docker:db`.
 | `?error=steam_api` | Профиль не отдался: `STEAM_API_KEY` в контейнере `app`, лимиты/ошибка Steam Web API. Логи `app`. |
 | Нет админки | В `ADMIN_STEAM_IDS` только steamID64 |
 | БД | `docker compose ps`; URI в compose у `app` и пароль у `db` |
+| **502 Bad Gateway** (страница от nginx) | Бэкенд не отвечает: `docker compose ps` (есть ли `app` **Up**), `docker compose logs app --tail 150`, с VPS `curl -sI http://127.0.0.1:3000/api/health`. В конфиге nginx `proxy_pass` должен указывать на тот порт, где слушает контейнер (часто `127.0.0.1:3000`). |
 | Ошибки приложения | `docker compose logs app` |

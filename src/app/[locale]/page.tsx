@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { Link } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useCurrency } from "@/components/currency-provider";
+import { usePublicReviews } from "@/hooks/use-public-reviews";
 
 const PAYOUT_NAMES = [
   "hokage", "Wa1halla", "РЫБАК", "kukas", "pinkgose",
@@ -30,41 +31,6 @@ const PAYOUT_NAMES = [
   "p1xel", "РАССВЕТ", "q_tip", "st0rm_", "УРАГАН",
   "d3lta_", "ОГОНЬ", "thr1ve", "zenith", "ЯКОРЬ",
 ];
-
-const REVIEWS: { user: string; steam: string; avatar: string; en: string; ru: string; game: string; stars: number }[] = [
-  { user: "Donation / Trash Bot", steam: "https://steamcommunity.com/id/DonationTrashBot", avatar: "https://avatars.fastly.steamstatic.com/408cf6038cdf995d3ed371ed5c629825020a4496_full.jpg", en: "Listed a few surplus items and the whole flow took minutes. Payout hit my wallet faster than I expected.", ru: "Выставил пару лишних предметов - весь процесс занял минуты. Деньги пришли быстрее, чем я ожидал.", game: "CS2", stars: 5 },
-  { user: "Дырка", steam: "https://steamcommunity.com/id/nZarr", avatar: "https://avatars.fastly.steamstatic.com/b7fbf78e6d2abb73de19ff818cf221d1264cca7f_full.jpg", en: "Quick payout, love it! Super easy to list skins.", ru: "Быстрая выплата, кайф! Очень легко выставить скины на продажу.", game: "CS2", stars: 5 },
-  { user: "ÜberTowelie", steam: "https://steamcommunity.com/id/ubrtwelie", avatar: "https://avatars.fastly.steamstatic.com/9784f13db7219632d3a7c3f49d7176ca44f9043f_full.jpg", en: "Sold my knife here after comparing a few sites - best offer and zero hassle.", ru: "Продал нож тут после сравнения нескольких сайтов - лучшее предложение и ноль проблем.", game: "CS2", stars: 5 },
-  { user: "ВАТНЫЙ БИОСКОТ", steam: "https://steamcommunity.com/profiles/76561198215365185", avatar: "https://avatars.fastly.steamstatic.com/600a54e62405d2696730eabca74233adfd9aea7e_full.jpg", en: "Prices aligned with what I saw on trackers. Payout speed is the main reason I keep coming back.", ru: "Цены совпадают с трекерами. Скорость выплаты - главная причина, почему возвращаюсь.", game: "Dota 2", stars: 5 },
-  { user: "Отпрaвил(a) Опapыши", steam: "https://steamcommunity.com/id/amnyam_mode", avatar: "https://avatars.fastly.steamstatic.com/e12d99edc700e71d2802de3b8b1803602c83a335_full.jpg", en: "Interface is clean and I didn't have to dig through menus. Cashout was smooth.", ru: "Интерфейс чистый, не пришлось копаться в меню. Вывод прошёл гладко.", game: "CS2", stars: 4 },
-  { user: "Hotojour", steam: "https://steamcommunity.com/id/hotojour", avatar: "https://avatars.fastly.steamstatic.com/fac095ae5500bd538b6f5ce0f4f111c29e3c9d40_full.jpg", en: "First time selling skins online and it was straightforward from login to payout. Good prices.", ru: "Первый раз продавал скины онлайн - всё просто от входа до выплаты. Хорошие цены.", game: "Dota 2", stars: 5 },
-  { user: "deshumitsu", steam: "https://steamcommunity.com/id/deshumitsu", avatar: "https://avatars.akamai.steamstatic.com/ffcdcf5811d3d582ca9df3ff17c7008aa002c611_full.jpg", en: "Traded out some Dota arcanas. Speed was great - order cleared and I had funds the same evening.", ru: "Продал несколько арканок из Доты. Скорость отличная - ордер закрылся, и деньги пришли в тот же вечер.", game: "Dota 2", stars: 5 },
-  { user: "✪ ON", steam: "https://steamcommunity.com/profiles/76561198089414875", avatar: "https://avatars.akamai.steamstatic.com/267e59a7196d17a131750595c9dbfde764156c77_full.jpg", en: "Easy for bulk selling - listed several items and didn't get lost in the UI.", ru: "Удобно для массовой продажи - выставил сразу несколько предметов и не запутался.", game: "CS2", stars: 5 },
-  { user: "SalehiTakhasomi-", steam: "https://steamcommunity.com/profiles/76561198070671099", avatar: "https://avatars.fastly.steamstatic.com/caf2ad22ed4dee920e36d81c4028ccebbea8990e_full.jpg", en: "TF2 hats: sold a couple, both trades completed fast. Would recommend.", ru: "Шапки TF2: продал пару, обе сделки прошли быстро. Рекомендую.", game: "TF2", stars: 4 },
-  { user: "киберпсих", steam: "https://steamcommunity.com/id/lilxant", avatar: "https://avatars.fastly.steamstatic.com/99224e78e560e32386229204eb36efb9f48d2635_full.jpg", en: "Reliable for high-tier CS skins. Support answered my question quickly too.", ru: "Надёжный сервис для дорогих скинов CS. Поддержка тоже ответила быстро.", game: "CS2", stars: 5 },
-  { user: "kerfmit", steam: "https://steamcommunity.com/id/kerfmit", avatar: "https://avatars.akamai.steamstatic.com/83dc1a5c8069efed85d7d5ce4276ed4c107e8899_full.jpg", en: "Payout came through without chasing anyone. Ease of use is top tier.", ru: "Выплата пришла без всяких напоминаний. Удобство на высшем уровне.", game: "CS2", stars: 5 },
-  { user: "Vikk", steam: "https://steamcommunity.com/id/vikk01", avatar: "https://avatars.fastly.steamstatic.com/4cbedfb67439252048d73a4a89b691d7d92f8258_full.jpg", en: "Solid rates on gloves. Everything felt transparent; no surprises when the sale completed.", ru: "Хорошие цены на перчатки. Всё прозрачно, никаких сюрпризов при завершении сделки.", game: "CS2", stars: 4 },
-  { user: "Silense", steam: "https://steamcommunity.com/id/SilenseMS", avatar: "https://avatars.fastly.steamstatic.com/ff78ef467e72dacca0175d569ae8d3e3cf6696e2_full.jpg", en: "Been using this for a while. Consistent speed, good liquidity, prices track the market well.", ru: "Пользуюсь уже давно. Стабильная скорость, хорошая ликвидность, цены следят за рынком.", game: "CS2", stars: 5 },
-  { user: "Про Ватан", steam: "https://steamcommunity.com/id/ProVatan", avatar: "https://avatars.fastly.steamstatic.com/3fdb613788603ab0841cbdeaae20feaa2fd9cec9_full.jpg", en: "Quick sale on a mid-tier rifle skin. Site is easy to navigate and the payout didn't drag.", ru: "Быстрая продажа среднего скина на винтовку. Сайт удобный, выплата не затянулась.", game: "CS2", stars: 5 },
-  { user: "ЛЕРАUNDERПИВКО", steam: "https://steamcommunity.com/id/TheTanyaVonDegurechaff", avatar: "https://avatars.fastly.steamstatic.com/9592cd883362e6350af2e91a62d8219b87c3676d_full.jpg", en: "Long review short: I trust this place more than random buyers. Fair quote, fast settlement.", ru: "Коротко: доверяю этому сервису больше, чем рандомным покупателям. Честная цена, быстрый расчёт.", game: "Dota 2", stars: 5 },
-  { user: "alwaysbeingmad", steam: "https://steamcommunity.com/id/alwaysbeingmad", avatar: "https://avatars.akamai.steamstatic.com/6889e542266ff1eca9c32d7f405a723a0e19f756_full.jpg", en: "TF2 unusual sold without drama. Price was competitive and I didn't have to babysit the trade.", ru: "Unusual из TF2 продался без проблем. Цена конкурентная, не пришлось следить за трейдом.", game: "TF2", stars: 5 },
-  { user: "мультиварка", steam: "https://steamcommunity.com/profiles/76561199483113949", avatar: "https://avatars.fastly.steamstatic.com/b16f280ed8855bb587f905123f16015b6acd5cbf_full.jpg", en: "Rust item sale was smooth; offer was upfront and payout didn't make me wait.", ru: "Продажа вещей из Rust прошла гладко; цена была честная, выплата не заставила ждать.", game: "Rust", stars: 5 },
-  { user: "артём туберкулез", steam: "https://steamcommunity.com/profiles/76561199275399375", avatar: "https://avatars.akamai.steamstatic.com/627fe4b25ccb32470ffb155310dddd067d3a3c86_full.jpg", en: "CS2 knife out, cash in - exactly what I needed. Site feels modern and process is quick.", ru: "Нож из CS2 продан, деньги получены - именно то, что нужно. Сайт современный, процесс быстрый.", game: "CS2", stars: 5 },
-  { user: "RIP | гнидыч", steam: "https://steamcommunity.com/profiles/76561199212382946", avatar: "https://avatars.akamai.steamstatic.com/f2286c3e658bef6c18b9c2ad5f3722fd38c4d9b4_full.jpg", en: "Dota courier sold at a price I was happy with. Support was responsive too.", ru: "Курьер из Доты продан по цене, которая устроила. Поддержка тоже отвечала быстро.", game: "Dota 2", stars: 5 },
-  { user: "RKER", steam: "https://steamcommunity.com/profiles/76561199649161705", avatar: "https://avatars.fastly.steamstatic.com/9cf396a0da9cb87d7faefe58feeae7acf6e2b363_full.jpg", en: "Straightforward selling - no endless forms. Payout landed when they said it would.", ru: "Продажа без лишней волокиты - никаких бесконечных форм. Выплата пришла вовремя.", game: "CS2", stars: 5 },
-  { user: "нн какой-то", steam: "https://steamcommunity.com/profiles/76561199172392618", avatar: "https://avatars.fastly.steamstatic.com/b2732234f3fbed341c241f58e1848418941f7d92_full.jpg", en: "Mixed Dota immortals with CS skins; both went fine. Good prices and fast turnaround.", ru: "Продавал иммортали из Доты и скины CS - всё прошло нормально. Хорошие цены и быстрая обработка.", game: "Dota 2", stars: 4 },
-  { user: "Sh\\oomg?!", steam: "https://steamcommunity.com/id/sh_oomg", avatar: "https://avatars.akamai.steamstatic.com/30dcff5ce04a33d33c2d890c472291a39c74b0d7_full.jpg", en: "Rust skins aren't always easy to cash out - here it was painless and the offer beat my expectations.", ru: "Скины из Rust не всегда легко продать - здесь это было просто, и цена превзошла ожидания.", game: "Rust", stars: 5 },
-  { user: "nehapau", steam: "https://steamcommunity.com/id/rubututu", avatar: "https://avatars.fastly.steamstatic.com/e35b436b2ad9ddf56deff6c7235bccc74ce96b6c_full.jpg", en: "Five stars for simplicity. Upload, confirm, get paid - that's it.", ru: "Пять звёзд за простоту. Загрузил, подтвердил, получил деньги - всё.", game: "CS2", stars: 5 },
-  { user: "meSS", steam: "https://steamcommunity.com/id/MES4000", avatar: "https://avatars.fastly.steamstatic.com/feca7d42f8b1da251828346dc0c08f63582a1e35_full.jpg", en: "Good experience overall. Payout arrived quickly once the trade was accepted.", ru: "В целом хороший опыт. Выплата пришла быстро после принятия трейда.", game: "CS2", stars: 4 },
-  { user: "Af1_piece", steam: "https://steamcommunity.com/id/Af1_piece", avatar: "https://avatars.fastly.steamstatic.com/ba7e49834e953d7a99982765049f3feecd4863ac_full.jpg", en: "CS inventory cleanup done right - sold a stack of skins in one session, rates were fair.", ru: "Почистил инвентарь CS как надо - продал пачку скинов за один раз, курсы были честные.", game: "CS2", stars: 5 },
-  { user: "m8chnix", steam: "https://steamcommunity.com/id/m8chnix", avatar: "https://avatars.fastly.steamstatic.com/3f5e9daea59216d7fe13df4e031d3537580e5e21_full.jpg", en: "Dota sets moved fast. I like that I can see what I'm getting before I commit to sell.", ru: "Сеты из Доты ушли быстро. Нравится, что видно сумму до подтверждения продажи.", game: "Dota 2", stars: 5 },
-  { user: "skins for your cases", steam: "https://steamcommunity.com/profiles/76561198358221005", avatar: "https://avatars.fastly.steamstatic.com/50767cea96889a121066ed45c098873cb258f8f3_full.jpg", en: "Steam trade went through cleanly and money followed shortly after. No stress.", ru: "Стим-трейд прошёл чисто, деньги пришли вскоре после. Без стресса.", game: "CS2", stars: 5 },
-  { user: "POD_PIVASS", steam: "https://steamcommunity.com/profiles/76561199222494168", avatar: "https://avatars.fastly.steamstatic.com/a3ca986a183134fc94bf2d872e76a529bc3f71a0_full.jpg", en: "TF2 trading can be a mess - this was the opposite. Clear steps, quick payout.", ru: "Торговля в TF2 бывает тем ещё хаосом - тут всё наоборот. Понятные шаги, быстрая выплата.", game: "TF2", stars: 5 },
-  { user: "deshumitsu", steam: "https://steamcommunity.com/id/deshumitsu", avatar: "https://avatars.akamai.steamstatic.com/ffcdcf5811d3d582ca9df3ff17c7008aa002c611_full.jpg", en: "Came back for a second time and the experience was just as smooth. Highly recommend.", ru: "Вернулся во второй раз - всё так же гладко. Очень рекомендую.", game: "CS2", stars: 5 },
-  { user: "Sh\\oomg?!", steam: "https://steamcommunity.com/id/sh_oomg", avatar: "https://avatars.akamai.steamstatic.com/30dcff5ce04a33d33c2d890c472291a39c74b0d7_full.jpg", en: "Sold a bunch of Rust drops in one go. Quick process and fair pricing.", ru: "Продал кучу дропов из Rust за раз. Быстрый процесс и честные цены.", game: "Rust", stars: 4 },
-];
-
-const SLIDE_COUNT = REVIEWS.length;
 
 /** Mostly under $500; rarely above $1000 (trust display). */
 function randomPayoutAmountUsd(): number {
@@ -274,22 +240,18 @@ export default function HomePage() {
     return () => clearInterval(id);
   }, []);
 
-  /* ── B) Reviews carousel ── */
-  const [liveReviews, setLiveReviews] = useState<typeof REVIEWS | null>(null);
-  useEffect(() => {
-    fetch(`/api/reviews?locale=${locale}`).then((r) => r.json()).then((d) => {
-      if (d?.data?.length) {
-        setLiveReviews(d.data.map((r: any) => ({ user: r.user, steam: r.steam, avatar: r.avatar, en: r.textEn, ru: r.textRu, game: r.game, stars: r.stars })));
-      }
-    }).catch(() => {});
-  }, [locale]);
-  const reviewData = liveReviews ?? REVIEWS;
+  /* ── B) Reviews carousel (источник — GET /api/reviews, те же данные что в админке) ── */
+  const { reviews: reviewData, loading: reviewsLoading } = usePublicReviews(locale);
   const slideCount = reviewData.length;
 
   const [current, setCurrent] = useState(0);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dragStartX = useRef(0);
   const dragging = useRef(false);
+
+  useEffect(() => {
+    setCurrent(0);
+  }, [slideCount]);
 
   const stopAuto = useCallback(() => {
     if (autoRef.current) {
@@ -300,20 +262,32 @@ export default function HomePage() {
 
   const startAuto = useCallback(() => {
     stopAuto();
+    if (slideCount < 1) return;
     autoRef.current = setInterval(() => {
       setCurrent((c) => (c + 1) % slideCount);
     }, 5000);
   }, [stopAuto, slideCount]);
 
   useEffect(() => {
+    if (slideCount < 1 || reviewsLoading) {
+      stopAuto();
+      return;
+    }
     startAuto();
     return stopAuto;
-  }, [startAuto, stopAuto]);
+  }, [startAuto, stopAuto, slideCount, reviewsLoading]);
 
-  const goPrev = () => setCurrent((c) => (c - 1 + slideCount) % slideCount);
-  const goNext = () => setCurrent((c) => (c + 1) % slideCount);
+  const goPrev = () => {
+    if (slideCount < 1) return;
+    setCurrent((c) => (c - 1 + slideCount) % slideCount);
+  };
+  const goNext = () => {
+    if (slideCount < 1) return;
+    setCurrent((c) => (c + 1) % slideCount);
+  };
 
   const getSlideClass = (index: number) => {
+    if (slideCount < 1) return "";
     const diff = ((index - current) % slideCount + slideCount) % slideCount;
     if (diff === 0) return "is-active";
     if (diff === 1) return "is-next";
@@ -687,51 +661,61 @@ export default function HomePage() {
           <p className="section-sub fade-up">{t("reviewsSub")}</p>
         </div>
 
-        <div
-          className="carousel"
-          aria-roledescription="carousel"
-          aria-label="Customer reviews"
-          tabIndex={0}
-          onMouseEnter={stopAuto}
-          onMouseLeave={startAuto}
-          onMouseDown={(e) => handleDragStart(e.clientX)}
-          onMouseUp={(e) => handleDragEnd(e.clientX)}
-          onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
-          onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
-        >
-          <div className="carousel__viewport">
-            {reviewData.map((r, i) => (
-              <div key={`${r.steam}-${i}`} className={`carousel__slide ${getSlideClass(i)}`} data-index={i}>
-                <div className="review-card">
-                <span className="review-card__quote">&ldquo;</span>
-                <div className="review-card__header">
-                    <div className="review-card__avatar"><img src={r.avatar} alt={r.user} loading="lazy" /></div>
-                  <div className="review-card__user">
-                      <a href={r.steam} className="review-card__name" target="_blank" rel="noopener">{r.user}</a>
-                      <div className="review-card__stars" aria-label={`${r.stars} out of 5 stars`}>
-                        {Array.from({ length: 5 }, (_, s) => (
-                          <svg key={s} width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity={s < r.stars ? 1 : 0.25}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                        ))}
-              </div>
-            </div>
-                  </div>
-                  <p className="review-card__text">{locale === "ru" ? (r.ru || r.en) : (r.en || r.ru)}</p>
-                <div className="review-card__footer">
-                    <span className="review-card__game">{r.game}</span>
-                    <a href={r.steam} className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
+        {reviewsLoading ? (
+          <div className="container" style={{ padding: "2rem 0", textAlign: "center", opacity: 0.6 }}>
+            …
+          </div>
+        ) : reviewData.length === 0 ? (
+          <div className="container" style={{ padding: "2rem 0", textAlign: "center", opacity: 0.7 }}>
+            {locale === "ru" ? "Отзывов пока нет." : "No reviews yet."}
+          </div>
+        ) : (
+          <div
+            className="carousel"
+            aria-roledescription="carousel"
+            aria-label="Customer reviews"
+            tabIndex={0}
+            onMouseEnter={stopAuto}
+            onMouseLeave={startAuto}
+            onMouseDown={(e) => handleDragStart(e.clientX)}
+            onMouseUp={(e) => handleDragEnd(e.clientX)}
+            onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+            onTouchEnd={(e) => handleDragEnd(e.changedTouches[0].clientX)}
+          >
+            <div className="carousel__viewport">
+              {reviewData.map((r, i) => (
+                <div key={`${r.steam}-${i}-${r.en.slice(0, 24)}`} className={`carousel__slide ${getSlideClass(i)}`} data-index={i}>
+                  <div className="review-card">
+                    <span className="review-card__quote">&ldquo;</span>
+                    <div className="review-card__header">
+                      <div className="review-card__avatar"><img src={r.avatar} alt={r.user} loading="lazy" /></div>
+                      <div className="review-card__user">
+                        <a href={r.steam} className="review-card__name" target="_blank" rel="noopener">{r.user}</a>
+                        <div className="review-card__stars" aria-label={`${r.stars} out of 5 stars`}>
+                          {Array.from({ length: 5 }, (_, s) => (
+                            <svg key={s} width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity={s < r.stars ? 1 : 0.25}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="review-card__text">{locale === "ru" ? (r.ru || r.en) : (r.en || r.ru)}</p>
+                    <div className="review-card__footer">
+                      <span className="review-card__game">{r.game}</span>
+                      <a href={r.steam} className="review-card__steam-btn" target="_blank" rel="noopener"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg> {t("steamProfile")}</a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          <button className="carousel__arrow carousel__arrow--prev" aria-label="Previous review" onClick={goPrev}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
-          </button>
-          <button className="carousel__arrow carousel__arrow--next" aria-label="Next review" onClick={goNext}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-          </button>
-        </div>
+            <button type="button" className="carousel__arrow carousel__arrow--prev" aria-label="Previous review" onClick={goPrev}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+            </button>
+            <button type="button" className="carousel__arrow carousel__arrow--next" aria-label="Next review" onClick={goNext}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+            </button>
+          </div>
+        )}
       </section>
 
       {/* ═══ FEATURES ═══ */}

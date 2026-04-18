@@ -77,18 +77,20 @@ docker compose up -d --build
 
 Логи: `docker compose logs -f app` (выход: Ctrl+C)
 
-### 7. База: таблицы + сиды оплат
+### 7. База: таблицы + сиды оплат и отзывов
 
-Один раз после успешного старта. **Сначала схема, потом сид** (иначе «таблица не существует»).
+Один раз после успешного старта. **Сначала схема, потом сиды** (иначе «таблица не существует»).
 
 На сервере **без Node** (обычный случай):
 
 ```bash
-docker compose exec app sh -lc "npx prisma db push && tsx prisma/seed-payments.ts"
+docker compose exec app sh -lc "npx prisma db push && tsx prisma/seed-payments.ts && tsx prisma/seed-reviews.ts"
 ```
 
+`seed-reviews.ts` добавляет в БД каталог отзывов с главной (если такой строки ещё нет по паре steam + текст EN), чтобы они отображались в админке и на сайте из одного источника.
+
 С Node на машине с репозиторием: `npm run docker:db:setup`  
-Или по отдельности: `docker compose exec app npx prisma db push` затем `docker compose exec app tsx prisma/seed-payments.ts`
+Или по отдельности: `docker compose exec app npx prisma db push`, затем `tsx prisma/seed-payments.ts`, затем `tsx prisma/seed-reviews.ts`.
 
 Проблемы с БД: `docker compose ps` (db healthy?), пароль в шаге 5.
 

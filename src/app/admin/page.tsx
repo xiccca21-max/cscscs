@@ -262,7 +262,10 @@ export default function AdminPage() {
   const fetchAuditLogs = useCallback(async () => { const d = await safeFetch("/api/admin/audit"); if (d) setAuditLogs(d.data?.logs ?? []); }, [safeFetch]);
   const fetchPayments = useCallback(async () => { const d = await safeFetch("/api/admin/payments"); if (d) setPaymentMethods(d.data ?? []); }, [safeFetch]);
   const fetchPrices = useCallback(async () => { const d = await safeFetch("/api/admin/prices"); if (d) setPricingRules(Array.isArray(d.data) ? d.data : []); }, [safeFetch]);
-  const fetchReviews = useCallback(async () => { const d = await safeFetch("/api/admin/reviews"); if (d?.data) setReviewsList(d.data); }, [safeFetch]);
+  const fetchReviews = useCallback(async () => {
+    const d = await safeFetch("/api/admin/reviews");
+    if (d && Array.isArray(d.data)) setReviewsList(d.data);
+  }, [safeFetch]);
   const fetchPromos = useCallback(async () => { const d = await safeFetch("/api/admin/promo"); if (d?.data) setPromoList(d.data); }, [safeFetch]);
 
   useEffect(() => {

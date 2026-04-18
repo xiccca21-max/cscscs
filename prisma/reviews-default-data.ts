@@ -1,4 +1,4 @@
-/** Каталог отзывов для сида БД (`prisma/seed-reviews.ts`). Главная берёт отзывы только из API. */
+/** Каталог отзывов для `seed-reviews.ts` (лежит в prisma — доступен в Docker-образе без `src/`). */
 export type ReviewSeedRow = {
   user: string;
   steam: string;

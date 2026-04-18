@@ -1,5 +1,5 @@
 import { db } from "./seed-client";
-import { DEFAULT_REVIEWS_FOR_SEED } from "../src/lib/reviews-default-data";
+import { DEFAULT_REVIEWS_FOR_SEED } from "./reviews-default-data";
 
 /** Добавляет отсутствующие отзывы (по паре steam + textEn). Не затирает правки в админке. */
 async function main() {

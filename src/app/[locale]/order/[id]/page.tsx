@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import "@/styles/skinwave-order.css";
 
 import { Link } from "@/i18n/navigation";
+import { trackMetaEvent } from "@/lib/analytics/meta-pixel";
 
 type OrderItem = {
   id: string;
@@ -99,6 +100,7 @@ export default function OrderPage({
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const purchaseTrackedRef = useRef(false);
 
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -130,6 +132,22 @@ export default function OrderPage({
       fetchOrder(p.id);
     });
   }, [params, fetchOrder]);
+
+  useEffect(() => {
+    if (!order) return;
+    if (order.status !== "PAID") return;
+    if (purchaseTrackedRef.current) return;
+    purchaseTrackedRef.current = true;
+    const value = parseFloat(order.totalAmount);
+    trackMetaEvent("Purchase", {
+      value: Number.isFinite(value) ? Number(value.toFixed(2)) : 0,
+      currency: order.currency || "USD",
+      num_items: order.items.length,
+      content_ids: order.items.map((i) => i.id),
+      content_type: "product",
+      order_id: order.orderNumber,
+    });
+  }, [order]);
 
   useEffect(() => {
     if (!orderId || !order) return;

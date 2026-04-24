@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
     const savedLocale = user.locale || "en";
     const validLocales = ["en", "ru"];
     const locale = validLocales.includes(savedLocale) ? savedLocale : "en";
-    const res = NextResponse.redirect(new URL(`/${locale}`, origin));
+    const res = NextResponse.redirect(new URL(`/${locale}?auth=1`, origin));
     clearReferralCookieOnResponse(res);
     return res;
   } catch (e) {

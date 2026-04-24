@@ -11,6 +11,8 @@ import { useSession } from "@/components/session-provider";
 import { useCurrency } from "@/components/currency-provider";
 import { useTranslations, useLocale } from "next-intl";
 
+import { trackMetaEvent } from "@/lib/analytics/meta-pixel";
+
 interface InventoryItem {
   id: string;
   game: string;
@@ -568,6 +570,17 @@ export default function SellPage() {
       });
       const json = await res.json();
       if (json.success && json.data?.orderId) {
+        const totalPayout = selectedItems.reduce(
+          (sum, item) => sum + item.price * (1 - commissionRate),
+          0,
+        );
+        trackMetaEvent("InitiateCheckout", {
+          value: Number(totalPayout.toFixed(2)),
+          currency: "USD",
+          num_items: selectedItems.length,
+          content_ids: selectedItems.map((i) => i.id),
+          content_type: "product",
+        });
         window.location.href = `/${locale}/order/${json.data.orderId}`;
       } else {
         setSubmitError(json.error ?? "Something went wrong. Please try again.");

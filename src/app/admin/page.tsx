@@ -140,7 +140,14 @@ export default function AdminPage() {
 
   const [promoList, setPromoList] = useState<any[]>([]);
   const [promoModal, setPromoModal] = useState<any | null>(null);
-  const [promoForm, setPromoForm] = useState({ code: "", discount: "", usageLimit: "", expiresAt: "" });
+  const [promoForm, setPromoForm] = useState({
+    code: "",
+    discount: "",
+    usageLimit: "",
+    expiresAt: "",
+    newUsersOnly: false,
+    featuredOnHero: false,
+  });
   const [promoSaving, setPromoSaving] = useState(false);
 
   const [exchangeRate, setExchangeRate] = useState("");
@@ -1607,7 +1614,14 @@ export default function AdminPage() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h2 className="adm-section-title">Промокоды</h2>
               <button className="adm-btn adm-btn--primary" onClick={() => {
-                setPromoForm({ code: "", discount: "", usageLimit: "", expiresAt: "" });
+                setPromoForm({
+                  code: "",
+                  discount: "",
+                  usageLimit: "",
+                  expiresAt: "",
+                  newUsersOnly: false,
+                  featuredOnHero: false,
+                });
                 setPromoModal("new");
               }}>+ Добавить</button>
             </div>
@@ -1617,6 +1631,8 @@ export default function AdminPage() {
                   <tr>
                     <th>Код</th>
                     <th>Скидка %</th>
+                    <th>Новые</th>
+                    <th>Герой</th>
                     <th>Использований</th>
                     <th>Лимит</th>
                     <th>Истекает</th>
@@ -1629,6 +1645,8 @@ export default function AdminPage() {
                     <tr key={p.id}>
                       <td><code style={{ background: "rgba(99,102,241,0.1)", padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>{p.code}</code></td>
                       <td style={{ fontWeight: 700, color: "#22c55e" }}>+{Number(p.discount)}%</td>
+                      <td>{p.newUsersOnly ? "Да" : "—"}</td>
+                      <td>{p.featuredOnHero ? "Да" : "—"}</td>
                       <td>{p.usageCount}</td>
                       <td>{p.usageLimit ?? "∞"}</td>
                       <td>{p.expiresAt ? new Date(p.expiresAt).toLocaleDateString("ru-RU") : "—"}</td>
@@ -1647,10 +1665,19 @@ export default function AdminPage() {
                               discount: String(Number(p.discount)),
                               usageLimit: p.usageLimit != null ? String(p.usageLimit) : "",
                               expiresAt: p.expiresAt ? new Date(p.expiresAt).toISOString().slice(0, 10) : "",
+                              newUsersOnly: !!p.newUsersOnly,
+                              featuredOnHero: !!p.featuredOnHero,
                             });
                             setPromoModal(p);
                           }}>Изменить</button>
-                          <button className="adm-btn adm-btn--sm" onClick={() => handleAction("POST", "/api/admin/promo", { id: p.id, code: p.code, discount: Number(p.discount), isActive: !p.isActive }, p.isActive ? "Выключен" : "Включён", fetchPromos)}>
+                          <button className="adm-btn adm-btn--sm" onClick={() => handleAction("POST", "/api/admin/promo", {
+                            id: p.id,
+                            code: p.code,
+                            discount: Number(p.discount),
+                            isActive: !p.isActive,
+                            newUsersOnly: !!p.newUsersOnly,
+                            featuredOnHero: !!p.featuredOnHero,
+                          }, p.isActive ? "Выключен" : "Включён", fetchPromos)}>
                             {p.isActive ? "Выкл" : "Вкл"}
                           </button>
                           <button className="adm-btn adm-btn--danger adm-btn--sm" onClick={async () => {
@@ -1662,7 +1689,7 @@ export default function AdminPage() {
                     </tr>
                   ))}
                   {promoList.length === 0 && (
-                    <tr><td colSpan={7} style={{ textAlign: "center", padding: 24, color: "var(--muted)" }}>Нет промокодов</td></tr>
+                    <tr><td colSpan={9} style={{ textAlign: "center", padding: 24, color: "var(--muted)" }}>Нет промокодов</td></tr>
                   )}
                 </tbody>
               </table>
@@ -1682,6 +1709,32 @@ export default function AdminPage() {
                     <input className="adm-input" type="number" min="0" value={promoForm.usageLimit} onChange={(e) => setPromoForm({ ...promoForm, usageLimit: e.target.value })} placeholder="Без лимита" />
                     <label className="adm-label" style={{ marginTop: 12 }}>Дата истечения (пусто = бессрочно)</label>
                     <input className="adm-input" type="date" value={promoForm.expiresAt} onChange={(e) => setPromoForm({ ...promoForm, expiresAt: e.target.value })} />
+                    <label className="adm-label" style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={promoForm.newUsersOnly}
+                        onChange={(e) =>
+                          setPromoForm({
+                            ...promoForm,
+                            newUsersOnly: e.target.checked,
+                          })
+                        }
+                      />
+                      Только для новых продавцов (до первой завершённой выплаты)
+                    </label>
+                    <label className="adm-label" style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={promoForm.featuredOnHero}
+                        onChange={(e) =>
+                          setPromoForm({
+                            ...promoForm,
+                            featuredOnHero: e.target.checked,
+                          })
+                        }
+                      />
+                      Показывать на главной (блок промокода в герое, можно только один активный)
+                    </label>
                   </div>
                   <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
                     <button className="adm-btn adm-btn--primary" disabled={promoSaving} onClick={async () => {
@@ -1691,6 +1744,8 @@ export default function AdminPage() {
                         discount: Number(promoForm.discount),
                         usageLimit: promoForm.usageLimit ? Number(promoForm.usageLimit) : null,
                         expiresAt: promoForm.expiresAt || null,
+                        newUsersOnly: promoForm.newUsersOnly,
+                        featuredOnHero: promoForm.featuredOnHero,
                       };
                       if (promoModal !== "new") payload.id = promoModal.id;
                       await handleAction("POST", "/api/admin/promo", payload, promoModal === "new" ? "Промокод создан" : "Промокод обновлён", fetchPromos);

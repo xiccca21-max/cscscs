@@ -12,6 +12,7 @@ import { useCurrency } from "@/components/currency-provider";
 import { useTranslations, useLocale } from "next-intl";
 
 import { trackMetaEvent } from "@/lib/analytics/meta-pixel";
+import { PENDING_PROMO_STORAGE_KEY } from "@/lib/promo-pending";
 
 interface InventoryItem {
   id: string;
@@ -255,6 +256,59 @@ export default function SellPage() {
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoApplied, setPromoApplied] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (sessionLoading || !user?.userId || promoApplied) return;
+
+    let pending = "";
+    try {
+      pending = localStorage.getItem(PENDING_PROMO_STORAGE_KEY)?.trim() || "";
+    } catch {
+      return;
+    }
+    if (!pending) return;
+
+    let cancelled = false;
+    const codeNormalized = pending.toUpperCase();
+
+    (async () => {
+      setPromoCode(codeNormalized);
+      setPromoLoading(true);
+      setPromoError(null);
+      try {
+        const res = await fetch("/api/promo/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: pending.trim() }),
+        });
+        const json = await res.json();
+        if (cancelled) return;
+        if (json.success && json.data?.code != null && json.data?.discount != null) {
+          setPromoDiscount(json.data.discount);
+          setPromoApplied(json.data.code);
+          try {
+            localStorage.removeItem(PENDING_PROMO_STORAGE_KEY);
+          } catch {
+            /* ignore */
+          }
+        } else {
+          setPromoError(json.error || "Invalid code");
+          try {
+            localStorage.removeItem(PENDING_PROMO_STORAGE_KEY);
+          } catch {
+            /* ignore */
+          }
+        }
+      } catch {
+        if (!cancelled) setPromoError("Network error");
+      }
+      if (!cancelled) setPromoLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.userId, sessionLoading, promoApplied]);
 
   /* ---- fetch inventory ---- */
   const fetchGame = useCallback(async (game: string) => {
@@ -1428,6 +1482,11 @@ export default function SellPage() {
                       setPromoDiscount(null);
                       setPromoCode("");
                       setPromoError(null);
+                      try {
+                        localStorage.removeItem(PENDING_PROMO_STORAGE_KEY);
+                      } catch {
+                        /* ignore */
+                      }
                     }}>✕</button>
                   ) : (
                     <button className="promo-input__btn" disabled={promoLoading || !promoCode.trim()} onClick={async () => {
@@ -1443,6 +1502,11 @@ export default function SellPage() {
                         if (json.success) {
                           setPromoDiscount(json.data.discount);
                           setPromoApplied(json.data.code);
+                          try {
+                            localStorage.removeItem(PENDING_PROMO_STORAGE_KEY);
+                          } catch {
+                            /* ignore */
+                          }
                         } else {
                           setPromoError(json.error || "Invalid code");
                         }

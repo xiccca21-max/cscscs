@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { useCurrency } from "@/components/currency-provider";
 import { usePublicReviews } from "@/hooks/use-public-reviews";
+import { PENDING_PROMO_STORAGE_KEY } from "@/lib/promo-pending";
 
 const PAYOUT_NAMES = [
   "hokage", "Wa1halla", "РЫБАК", "kukas", "pinkgose",
@@ -153,6 +154,15 @@ export default function HomePage() {
 
   const [homePaymentMethods, setHomePaymentMethods] = useState<PaymentMethodDB[]>([]);
 
+  const [landingPromo, setLandingPromo] = useState<{
+    code: string;
+    discount: number;
+    newUsersOnly: boolean;
+  } | null>(null);
+  const [heroPromoCopyState, setHeroPromoCopyState] = useState<"idle" | "ok" | "err">(
+    "idle",
+  );
+
   useEffect(() => {
     fetch("/api/payment-methods")
       .then((r) => r.json())
@@ -161,6 +171,26 @@ export default function HomePage() {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    fetch("/api/promo/featured")
+      .then((r) => r.json())
+      .then((json: {
+        success?: boolean;
+        data?: { code: string; discount: number; newUsersOnly: boolean } | null;
+      }) => {
+        if (!json.success) return;
+        if (json.data?.code) setLandingPromo(json.data);
+        else setLandingPromo(null);
+      })
+      .catch(() => {
+        setLandingPromo(null);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!landingPromo) setHeroPromoCopyState("idle");
+  }, [landingPromo]);
 
   /** Методы из API; при отсутствии PayPal / Alipay в БД подмешиваем карточки (как на /sell). */
   const payoutMethodsForGrid = useMemo(() => {
@@ -423,6 +453,64 @@ export default function HomePage() {
                 <svg className="hero-btn__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
           </Link>
             </div>
+            {landingPromo && (
+            <div className="hero__promo">
+              <span className="hero__promo-label">{t("heroPromoLabel")}</span>
+              <p className="hero__promo-sub" id="hero-promo-hint-text">{t("heroPromoHint")}</p>
+              <div className="hero__promo-row">
+                <div className="hero__promo-codebox" aria-describedby="hero-promo-hint-text">
+                  <span className="hero__promo-chip">{landingPromo.code}</span>
+                  <button
+                    type="button"
+                    className={`hero-promo-copy${heroPromoCopyState === "ok" ? " hero-promo-copy--ok" : ""}`}
+                    aria-label={
+                      heroPromoCopyState === "ok"
+                        ? t("heroPromoCopied")
+                        : t("heroPromoCopy")
+                    }
+                    title={
+                      heroPromoCopyState === "ok"
+                        ? t("heroPromoCopied")
+                        : t("heroPromoCopy")
+                    }
+                    onClick={async () => {
+                      setHeroPromoCopyState("idle");
+                      try {
+                        await navigator.clipboard.writeText(landingPromo.code);
+                        try {
+                          localStorage.setItem(
+                            PENDING_PROMO_STORAGE_KEY,
+                            landingPromo.code,
+                          );
+                        } catch {
+                          /* ignore */
+                        }
+                        setHeroPromoCopyState("ok");
+                        window.setTimeout(
+                          () => setHeroPromoCopyState("idle"),
+                          2000,
+                        );
+                      } catch {
+                        setHeroPromoCopyState("err");
+                      }
+                    }}
+                  >
+                    {heroPromoCopyState === "ok" ? (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    ) : (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+                    )}
+                  </button>
+                </div>
+              </div>
+              {landingPromo.newUsersOnly && (
+                <p className="hero__promo-msg hero__promo-msg--muted">{t("heroPromoNewUsersNote")}</p>
+              )}
+              {heroPromoCopyState === "err" && (
+                <p className="hero__promo-msg hero__promo-msg--err">{t("heroPromoCopyFailed")}</p>
+              )}
+            </div>
+            )}
           </div>
           <div className="hero__visual">
             <div className="hero__stack">

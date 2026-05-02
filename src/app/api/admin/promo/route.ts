@@ -26,6 +26,8 @@ type PromoBody = {
   code: string;
   discount: number;
   isActive?: boolean;
+  newUsersOnly?: boolean;
+  featuredOnHero?: boolean;
   usageLimit?: number | null;
   expiresAt?: string | null;
 };
@@ -71,6 +73,8 @@ export async function POST(request: NextRequest) {
             code,
             discount: new Prisma.Decimal(discount.toFixed(2)),
             ...(body.isActive !== undefined ? { isActive: body.isActive } : {}),
+            ...(body.newUsersOnly !== undefined ? { newUsersOnly: body.newUsersOnly } : {}),
+            ...(body.featuredOnHero !== undefined ? { featuredOnHero: body.featuredOnHero } : {}),
             ...(body.usageLimit !== undefined ? { usageLimit: body.usageLimit } : {}),
             ...(body.expiresAt !== undefined
               ? { expiresAt: body.expiresAt ? new Date(body.expiresAt) : null }
@@ -82,10 +86,19 @@ export async function POST(request: NextRequest) {
             code,
             discount: new Prisma.Decimal(discount.toFixed(2)),
             isActive: body.isActive ?? true,
+            newUsersOnly: body.newUsersOnly ?? false,
+            featuredOnHero: body.featuredOnHero ?? false,
             usageLimit: body.usageLimit ?? null,
             expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
           },
         });
+
+    if (promo.featuredOnHero) {
+      await db.promoCode.updateMany({
+        where: { id: { not: promo.id } },
+        data: { featuredOnHero: false },
+      });
+    }
 
     await logAudit({
       actorId: session.userId!,

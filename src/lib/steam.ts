@@ -105,27 +105,64 @@ async function fetchViaSteamApis(
   const apiKey = process.env.STEAMAPIS_KEY?.trim();
   if (!apiKey) return { data: null, error: "no_key" };
 
-  const url = `https://api.steamapis.com/steam/inventory/${steamId}/${appId}/2?api_key=${apiKey}`;
-  const t = Date.now();
+  const urls = [
+    `https://api.steamapis.com/v2/steam/users/${steamId}/inventory/${appId}/2`,
+    `https://api.steamapis.com/steam/inventory/${steamId}/${appId}/2?api_key=${encodeURIComponent(apiKey)}`,
+  ];
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
-    const res = await fetch(url, {
-      signal: controller.signal,
-      cache: "no-store",
-    });
-    clearTimeout(timeout);
+  for (const [idx, url] of urls.entries()) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
+      const res = await fetch(url, {
+        signal: controller.signal,
+        cache: "no-store",
+        headers: idx === 0 ? { "x-api-key": apiKey } : undefined,
+      });
+      clearTimeout(timeout);
 
-    if (res.status === 403) return { data: null, error: "inventory_private" };
-    if (!res.ok) return { data: null, error: `api_error_${res.status}` };
+      const body = (await res.json().catch(() => null)) as
+        | Record<string, unknown>
+        | null;
 
-    const data = await res.json();
-    return { data, error: null };
-  } catch (e) {
-    console.error(`[steam] SteamApis error:`, e instanceof Error ? e.message : e);
-    return { data: null, error: "fetch_failed" };
+      if (res.status === 403) return { data: null, error: "inventory_private" };
+      if (!res.ok) {
+        console.error(
+          `[steam] SteamApis HTTP ${res.status} for app ${appId}. body=${JSON.stringify(body).slice(0, 500)}`,
+        );
+        continue;
+      }
+
+      const successRaw = body?.success;
+      const hasExplicitFailure = successRaw === false || successRaw === 0;
+      if (hasExplicitFailure) {
+        console.error(
+          `[steam] SteamApis payload failure for app ${appId}. body=${JSON.stringify(body).slice(0, 500)}`,
+        );
+        return { data: null, error: "fetch_failed" };
+      }
+
+      const payload = ((body?.result as Record<string, unknown> | undefined) ??
+        body) as Record<string, unknown> | null;
+      const assets = payload?.assets;
+      const descriptions = payload?.descriptions;
+      if (!Array.isArray(assets) || !Array.isArray(descriptions)) {
+        console.error(
+          `[steam] SteamApis malformed payload for app ${appId}. body=${JSON.stringify(body).slice(0, 500)}`,
+        );
+        return { data: null, error: "fetch_failed" };
+      }
+
+      return { data: payload, error: null };
+    } catch (e) {
+      console.error(
+        `[steam] SteamApis fetch error for app ${appId}:`,
+        e instanceof Error ? e.message : e,
+      );
+    }
   }
+
+  return { data: null, error: "fetch_failed" };
 }
 
 async function fetchViaSteamDirect(
@@ -189,6 +226,16 @@ async function fetchViaSteamDirect(
 
 type SteamTag = { category: string; localized_tag_name: string };
 
+function toKeyPart(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  return String(value);
+}
+
+function isTradableValue(value: unknown): boolean {
+  if (value === 1 || value === "1" || value === true) return true;
+  return false;
+}
+
 function parseInventoryItems(
   data: Record<string, unknown>,
   game: keyof typeof STEAM_GAME_APP_IDS,
@@ -199,22 +246,26 @@ function parseInventoryItems(
 
   const descriptionsMap = new Map<string, Record<string, unknown>>();
   for (const desc of data.descriptions as Record<string, unknown>[]) {
-    descriptionsMap.set(`${desc.classid}_${desc.instanceid}`, desc);
+    const classId = toKeyPart(desc.classid);
+    const instanceId = toKeyPart(desc.instanceid);
+    descriptionsMap.set(`${classId}_${instanceId}`, desc);
   }
 
-  return (data.assets as Record<string, string>[])
+  const parsed = (data.assets as Record<string, unknown>[])
     .map((asset) => {
-      const desc = descriptionsMap.get(
-        `${asset.classid}_${asset.instanceid}`,
-      ) as Record<string, unknown> | undefined;
+      const classId = toKeyPart(asset.classid);
+      const instanceId = toKeyPart(asset.instanceid);
+      const desc = descriptionsMap.get(`${classId}_${instanceId}`) as
+        | Record<string, unknown>
+        | undefined;
       const iconPath = desc?.icon_url as string | undefined;
       const fullIconUrl = iconPath
         ? `https://steamcommunity-a.akamaihd.net/economy/image/${iconPath}`
         : null;
       return {
-        assetId: asset.assetid,
-        classId: asset.classid,
-        instanceId: asset.instanceid,
+        assetId: toKeyPart(asset.assetid),
+        classId,
+        instanceId,
         name:
           (desc?.market_hash_name as string) ||
           (desc?.name as string) ||
@@ -222,7 +273,7 @@ function parseInventoryItems(
         iconUrl: fullIconUrl,
         phase:
           game === "CS2" ? detectCs2PhaseFromIconUrl(fullIconUrl) : null,
-        tradable: (desc?.tradable as number) === 1,
+        tradable: isTradableValue(desc?.tradable),
         condition: extractCondition(desc?.market_hash_name as string),
         quality: (desc?.tags as SteamTag[] | undefined)?.find(
           (t) => t.category === "Quality",
@@ -230,6 +281,17 @@ function parseInventoryItems(
       };
     })
     .filter((item) => item.tradable);
+
+  if (parsed.length === 0 && (data.assets as unknown[]).length > 0) {
+    const sample = (data.descriptions as Record<string, unknown>[])
+      .slice(0, 10)
+      .map((d) => d.tradable);
+    console.warn(
+      `[steam] Parsed 0 tradable items for ${game}. assets=${(data.assets as unknown[]).length}, descriptions=${(data.descriptions as unknown[]).length}, sample tradable values=${JSON.stringify(sample)}`,
+    );
+  }
+
+  return parsed;
 }
 
 export async function getSteamInventory(

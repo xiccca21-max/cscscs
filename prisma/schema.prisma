@@ -269,13 +269,17 @@ model Review {
 }
 
 model PromoCode {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  discount    Decimal  @db.Decimal(5, 2)
-  isActive    Boolean  @default(true)
-  usageLimit  Int?
-  usageCount  Int      @default(0)
-  expiresAt   DateTime?
+  id             String    @id @default(cuid())
+  code           String    @unique
+  discount       Decimal   @db.Decimal(5, 2)
+  isActive       Boolean   @default(true)
+  /** If true: only sellers with zero paid orders may use this code (validated when applying on sell page). */
+  newUsersOnly   Boolean   @default(false)
+  /** If true: show this promo code on landing hero (at most one; set from admin). */
+  featuredOnHero Boolean   @default(false)
+  usageLimit     Int?
+  usageCount     Int       @default(0)
+  expiresAt      DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

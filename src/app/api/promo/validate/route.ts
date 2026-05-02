@@ -33,7 +33,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (promo.usageLimit !== null && promo.usageCount >= promo.usageLimit) {
+    const limit =
+      promo.usageLimit != null && promo.usageLimit > 0 ? promo.usageLimit : null;
+    if (limit !== null && promo.usageCount >= limit) {
       return NextResponse.json(
         { success: false, error: "Promo code usage limit reached" },
         { status: 410 },

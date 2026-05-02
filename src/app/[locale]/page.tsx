@@ -173,8 +173,8 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/promo/featured")
-      .then((r) => r.json())
+    fetch("/api/promo/featured", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((json: {
         success?: boolean;
         data?: { code: string; discount: number; newUsersOnly: boolean } | null;
